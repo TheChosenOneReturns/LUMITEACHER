@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Story Teacher - Resultados</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;600;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "primary-fixed-dim": "#84cfff",
+                        "on-primary-fixed-variant": "#004c6c",
+                        "primary": "#00658e",
+                        "secondary-fixed": "#ffe173",
+                        "surface-bright": "#f6fafe",
+                        "outline-variant": "#bec8d0",
+                        "on-secondary-container": "#715d00",
+                        "inverse-primary": "#84cfff",
+                        "surface-tint": "#00658e",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-container": "#1c5900",
+                        "surface-container-high": "#e5e8ed",
+                        "surface-container-low": "#f1f4f8",
+                        "on-primary-fixed": "#001e2e",
+                        "on-primary-container": "#005375",
+                        "primary-container": "#6cc8ff",
+                        "secondary-fixed-dim": "#e8c426",
+                        "inverse-surface": "#2d3134",
+                        "tertiary": "#246d00",
+                        "on-background": "#181c1f",
+                        "on-tertiary-fixed": "#062100",
+                        "surface-dim": "#d7dadf",
+                        "on-surface-variant": "#3f484f",
+                        "tertiary-fixed": "#9cf973",
+                        "surface-container": "#ebeef3",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "secondary": "#705d00",
+                        "primary-fixed": "#c7e7ff",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "surface-variant": "#dfe3e7",
+                        "surface": "#f6fafe",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "background": "#f6fafe",
+                        "inverse-on-surface": "#eef1f5",
+                        "outline": "#6f7880",
+                        "tertiary-container": "#79d453",
+                        "secondary-container": "#fdd73b",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed-variant": "#195200",
+                        "on-surface": "#181c1f",
+                        "on-secondary-fixed": "#221b00",
+                        "on-secondary-fixed-variant": "#554500",
+                        "tertiary-fixed-dim": "#81dc5a",
+                        "surface-container-highest": "#dfe3e7"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "md": "24px",
+                        "margin-mobile": "16px",
+                        "xl": "64px",
+                        "xs": "4px",
+                        "margin-desktop": "48px",
+                        "gutter": "24px",
+                        "sm": "12px",
+                        "lg": "40px",
+                        "base": "8px"
+                    },
+                    "fontFamily": {
+                        "display-mobile": ["Nunito Sans"],
+                        "caption": ["Nunito Sans"],
+                        "headline-md": ["Nunito Sans"],
+                        "display-lg": ["Nunito Sans"],
+                        "label-bold": ["Nunito Sans"],
+                        "headline-lg": ["Nunito Sans"],
+                        "body-md": ["Nunito Sans"],
+                        "body-lg": ["Nunito Sans"]
+                    },
+                    "fontSize": {
+                        "display-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "900" }],
+                        "caption": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "800" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "900" }],
+                        "label-bold": ["16px", { "lineHeight": "20px", "fontWeight": "800" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+                        "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "body-lg": ["20px", { "lineHeight": "30px", "fontWeight": "600" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Nunito Sans', sans-serif; }
+        .celebration-bg {
+            background-color: #f6fafe;
+            background-image: radial-gradient(#ffe173 2px, transparent 2px), radial-gradient(#6cc8ff 2px, transparent 2px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+        .bouncy-btn {
+            transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .bouncy-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 0 rgba(0,0,0,0) !important;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background celebration-bg min-h-screen pb-24">
+<!-- Header (Suppressed top-level nav for transactional/success screen, keeping simple header) -->
+<header class="w-full flex justify-center items-center py-sm px-margin-mobile h-20">
+<h1 class="font-headline-md text-headline-md text-primary font-black">Story Teacher</h1>
+</header>
+<main class="max-w-md mx-auto px-margin-mobile flex flex-col items-center gap-md relative">
+<!-- Confetti/Celebration Visual -->
+<div class="relative w-full flex justify-center mb-sm">
+<span class="material-symbols-outlined text-secondary-container text-6xl absolute -top-4 -left-4 rotate-12" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined text-tertiary-container text-5xl absolute top-8 right-2 -rotate-12" style="font-variation-settings: 'FILL' 1;">star</span>
+<div class="bg-surface-container-lowest rounded-full p-4 border-4 border-secondary-container shadow-[0px_6px_0px_0px_rgba(232,196,38,1)] flex items-center justify-center w-32 h-32 z-10">
+<span class="material-symbols-outlined text-secondary text-7xl" style="font-variation-settings: 'FILL' 1;">trophy</span>
+</div>
+</div>
+<div class="text-center w-full">
+<h2 class="font-display-mobile text-display-mobile text-on-surface mb-xs">¡Felicidades!</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Has completado la historia de manera excelente.</p>
+</div>
+<!-- Skills Progress Card -->
+<div class="w-full bg-surface-container-lowest border-2 border-primary-container rounded-xl p-margin-mobile shadow-[0px_8px_0px_0px_rgba(108,200,255,0.2)] flex flex-col gap-sm">
+<h3 class="font-headline-md text-headline-md text-primary">Tus Habilidades</h3>
+<!-- Skill 1 -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-bold text-label-bold text-on-surface">Comprensión</span>
+<span class="font-caption text-caption text-primary">100%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-4 overflow-hidden border-2 border-surface-container-highest relative">
+<div class="bg-gradient-to-r from-tertiary-container to-tertiary h-full rounded-full w-full"></div>
+<div class="absolute top-0 left-0 w-full h-1 bg-white opacity-30"></div>
+</div>
+</div>
+<!-- Skill 2 -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-bold text-label-bold text-on-surface">Inferencias</span>
+<span class="font-caption text-caption text-primary">85%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-4 overflow-hidden border-2 border-surface-container-highest relative">
+<div class="bg-gradient-to-r from-primary-container to-primary h-full rounded-full w-[85%]"></div>
+<div class="absolute top-0 left-0 w-full h-1 bg-white opacity-30"></div>
+</div>
+</div>
+<!-- Skill 3 -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-bold text-label-bold text-on-surface">Vocabulario</span>
+<span class="font-caption text-caption text-primary">90%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-4 overflow-hidden border-2 border-surface-container-highest relative">
+<div class="bg-gradient-to-r from-secondary-container to-secondary-fixed-dim h-full rounded-full w-[90%]"></div>
+<div class="absolute top-0 left-0 w-full h-1 bg-white opacity-30"></div>
+</div>
+</div>
+<!-- Skill 4 -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-bold text-label-bold text-on-surface">Secuencia</span>
+<span class="font-caption text-caption text-primary">95%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-4 overflow-hidden border-2 border-surface-container-highest relative">
+<div class="bg-gradient-to-r from-tertiary-container to-tertiary h-full rounded-full w-[95%]"></div>
+<div class="absolute top-0 left-0 w-full h-1 bg-white opacity-30"></div>
+</div>
+</div>
+<!-- Skill 5 -->
+<div class="flex flex-col gap-xs">
+<div class="flex justify-between items-center">
+<span class="font-label-bold text-label-bold text-on-surface">Causa y efecto</span>
+<span class="font-caption text-caption text-primary">80%</span>
+</div>
+<div class="w-full bg-surface-variant rounded-full h-4 overflow-hidden border-2 border-surface-container-highest relative">
+<div class="bg-gradient-to-r from-primary-container to-primary h-full rounded-full w-[80%]"></div>
+<div class="absolute top-0 left-0 w-full h-1 bg-white opacity-30"></div>
+</div>
+</div>
+</div>
+<!-- Mascot & Speech Bubble -->
+<div class="w-full flex items-end justify-center gap-4 mt-sm">
+<div class="w-24 h-24 shrink-0">
+<img alt="Lumi the owl mascot" class="w-full h-full object-contain drop-shadow-lg" src="https://lh3.googleusercontent.com/aida/AP1WRLtYKk6ODSDxi3vb1wg84Jf8CjYnz1v0EZ0-UBgBP0OhthWYe21ZxhI62O0w05BjykdwPLl7lfGI3783Jku6K-s2fndCqn5tMGHLCQJqFPUg5gXC9NAilp48M3xBQntdK6zMkhpm5oYXQyXjKYAcikTkV-Do3bnTmDuCl-VnlgRdRHjLQsX4r2D26oTt6krnjDeo7M8LQQALTTJNp9tA6qexmRL90oNmuFs6DutfDr1YK6gyBGm15L7jUUiT"/>
+</div>
+<div class="bg-surface-container-lowest border-2 border-outline-variant rounded-2xl rounded-bl-none p-sm shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] relative">
+<p class="font-body-md text-body-md text-on-surface">¡Eres un lector increíble! Tus habilidades están mejorando muy rápido.</p>
+<!-- Speech bubble tail -->
+<div class="absolute -bottom-2 -left-2 w-4 h-4 bg-surface-container-lowest border-b-2 border-l-2 border-outline-variant rotate-45"></div>
+</div>
+</div>
+<!-- Action Buttons -->
+<div class="w-full flex flex-col gap-sm mt-md w-full">
+<button class="bouncy-btn w-full bg-primary text-on-primary font-label-bold text-label-bold py-4 px-6 rounded-xl border-b-4 border-on-primary-fixed-variant shadow-[0px_4px_0px_0px_rgba(0,30,46,0.3)] flex justify-center items-center gap-2">
+<span class="material-symbols-outlined">magic_button</span>
+                ✨ Crear otra aventura
+            </button>
+<button class="bouncy-btn w-full bg-surface-container-lowest text-primary border-2 border-primary font-label-bold text-label-bold py-4 px-6 rounded-xl border-b-4 shadow-[0px_4px_0px_0px_rgba(0,101,142,0.3)] flex justify-center items-center gap-2">
+<span class="material-symbols-outlined">library_books</span>
+                📚 Ver biblioteca
+            </button>
+</div>
+</main>
+</body></html>

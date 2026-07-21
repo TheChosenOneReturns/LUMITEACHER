@@ -1,0 +1,15 @@
+version = 0.1
+
+[default.build.parameters]
+cached = true
+parallel = true
+
+[default.deploy.parameters]
+stack_name = "story-teacher-dev"
+resolve_s3 = true
+capabilities = "CAPABILITY_IAM"
+region = "us-east-1"
+confirm_changeset = true
+fail_on_empty_changeset = false
+parameter_overrides = "StoryGeneratorMode=fixture AllowedOrigin=http://localhost:5173"
+

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Create Story - Story Teacher</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;600;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#e8c426",
+                      "secondary": "#705d00",
+                      "tertiary-fixed": "#9cf973",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-container": "#715d00",
+                      "on-primary-container": "#005375",
+                      "on-background": "#181c1f",
+                      "primary-fixed": "#c7e7ff",
+                      "tertiary": "#246d00",
+                      "outline": "#6f7880",
+                      "on-secondary-fixed": "#221b00",
+                      "surface-variant": "#dfe3e7",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#81dc5a",
+                      "primary-fixed-dim": "#84cfff",
+                      "tertiary-container": "#79d453",
+                      "background": "#f6fafe",
+                      "on-primary-fixed": "#001e2e",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#f1f4f8",
+                      "primary-container": "#6cc8ff",
+                      "on-secondary-fixed-variant": "#554500",
+                      "surface-tint": "#00658e",
+                      "on-tertiary-container": "#1c5900",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#84cfff",
+                      "surface-container": "#ebeef3",
+                      "secondary-fixed": "#ffe173",
+                      "secondary-container": "#fdd73b",
+                      "surface-container-highest": "#dfe3e7",
+                      "on-primary": "#ffffff",
+                      "surface": "#f6fafe",
+                      "surface-dim": "#d7dadf",
+                      "outline-variant": "#bec8d0",
+                      "surface-bright": "#f6fafe",
+                      "on-surface": "#181c1f",
+                      "on-surface-variant": "#3f484f",
+                      "on-tertiary-fixed-variant": "#195200",
+                      "inverse-surface": "#2d3134",
+                      "on-error-container": "#93000a",
+                      "primary": "#00658e",
+                      "on-primary-fixed-variant": "#004c6c",
+                      "error": "#ba1a1a",
+                      "surface-container-high": "#e5e8ed",
+                      "inverse-on-surface": "#eef1f5",
+                      "on-tertiary-fixed": "#062100",
+                      "on-tertiary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px",
+                      "2xl": "1.5rem"
+              },
+              "spacing": {
+                      "base": "8px",
+                      "gutter": "24px",
+                      "margin-desktop": "48px",
+                      "sm": "12px",
+                      "margin-mobile": "16px",
+                      "md": "24px",
+                      "xl": "64px",
+                      "xs": "4px",
+                      "lg": "40px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Nunito Sans"
+                      ],
+                      "headline-lg": [
+                              "Nunito Sans"
+                      ],
+                      "caption": [
+                              "Nunito Sans"
+                      ],
+                      "headline-md": [
+                              "Nunito Sans"
+                      ],
+                      "label-bold": [
+                              "Nunito Sans"
+                      ],
+                      "body-lg": [
+                              "Nunito Sans"
+                      ],
+                      "display-lg": [
+                              "Nunito Sans"
+                      ],
+                      "display-mobile": [
+                              "Nunito Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "caption": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-bold": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "30px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "display-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "900"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+      </script>
+<style>
+          .bg-stars {
+              background-image: radial-gradient(circle at 10px 10px, rgba(255, 255, 255, 0.4) 2px, transparent 0);
+              background-size: 40px 40px;
+          }
+          
+          /* Modern Playful Tactility Animations */
+          .btn-tactile {
+              transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .btn-tactile:active {
+              transform: translateY(4px);
+              box-shadow: 0px 0px 0px 0px currentColor !important;
+          }
+          
+          .card-tactile {
+              transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+          }
+          .card-tactile:hover {
+              transform: translateY(-2px);
+              box-shadow: 0px 10px 0px 0px currentColor;
+          }
+          
+          /* Custom Radio/Checkbox styling for big tiles */
+          .option-tile input:checked + div {
+              border-color: #00658e; /* primary */
+              background-color: #e5e8ed; /* surface-container-high */
+          }
+          .option-tile input:checked + div .check-badge {
+              opacity: 1;
+              transform: scale(1);
+          }
+          .check-badge {
+              opacity: 0;
+              transform: scale(0.5);
+              transition: all 0.2s ease-out;
+          }
+
+          /* Loading Overlay Animation */
+          @keyframes float {
+              0%, 100% { transform: translateY(0); }
+              50% { transform: translateY(-10px); }
+          }
+          @keyframes pulse-glow {
+              0%, 100% { box-shadow: 0 0 20px rgba(253,215,59,0.5); }
+              50% { box-shadow: 0 0 40px rgba(253,215,59,0.8); }
+          }
+          .floating-lumi {
+              animation: float 3s ease-in-out infinite;
+          }
+      </style>
+</head>
+<body class="bg-primary-fixed bg-stars min-h-screen text-on-background font-body-md relative overflow-x-hidden">
+<!-- Top Navigation (Crucial for context, active: My Stories) -->
+<header class="docked full-width top border-b-4 border-secondary-container bg-surface flex justify-between items-center w-full px-margin-desktop py-4 max-w-1280px mx-auto shadow-[0px_4px_0px_0px_rgba(253,215,59,1)] z-30">
+<div class="text-headline-md font-headline-md font-black text-primary">Story Teacher</div>
+<nav class="hidden md:flex gap-md">
+<a class="text-primary font-label-bold border-b-4 border-primary pb-1 hover:scale-105 transition-transform duration-200" href="#">My Stories</a>
+<a class="text-on-surface-variant font-label-bold pb-1 hover:scale-105 transition-transform duration-200" href="#">Library</a>
+<a class="text-on-surface-variant font-label-bold pb-1 hover:scale-105 transition-transform duration-200" href="#">Quests</a>
+</nav>
+<div class="flex items-center gap-sm">
+<button class="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center text-on-secondary-container shadow-[0px_4px_0px_0px_rgba(112,93,0,0.5)] btn-tactile active:shadow-none hover:bg-secondary-fixed transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</button>
+<button class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary-container shadow-[0px_4px_0px_0px_rgba(28,89,0,0.5)] btn-tactile active:shadow-none hover:bg-tertiary-fixed transition-colors">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stars</span>
+</button>
+<div class="w-12 h-12 rounded-full border-2 border-primary overflow-hidden ml-sm cursor-pointer hover:scale-105 transition-transform">
+<img alt="Sofia's profile avatar" class="w-full h-full object-cover" data-alt="A brightly colored, stylized 3D avatar of a young girl with pigtails, smiling enthusiastically, set against a solid pastel background, representing a playful user profile icon." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYastATRiTxD7YR98S_uoa-ddmgMWOy4R3r2M5xW1MUXOXohYj7pPVIM7WwIQHxg8JTFGvFs8uIm2FbJSTZLerZZQmZUJ1g3y2q7AiEBNZAxokyHkBc8V4el9K-nbNily9LqXPAivobxZ71x2zILKhkSip-sQetXbRAtHLOwwINLDSYzzb1IgUz0nxASHuhoznyZ6KtC6PHRnCVtBG49TAClCDUaYD4QbXHDYtqlYXDi4rfT0IEXnN7g"/>
+</div>
+</div>
+</header>
+<!-- Side Navigation (Secondary context shell) -->
+<nav class="hidden lg:flex fixed right-8 top-32 w-64 z-20 flex-col gap-base bg-surface-container-low rounded-xl border-2 border-outline-variant shadow-[4px_4px_0px_0px_rgba(0,101,142,0.2)] p-4">
+<div class="flex items-center gap-sm mb-md pb-sm border-b-2 border-outline-variant">
+<div class="w-12 h-12 rounded-full overflow-hidden bg-primary-container border-2 border-primary">
+<img alt="Lumi the Assistant AI" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8vC80ymDwevu3bu28TdRT06JGl9wVBpfuFH9Es40H79xbk5Z5P9mL3EZl5_erSvxJWnUeOxI8GM9aGAZnsJwQQxhyF16m_DWzik3f4qguiGmzPCethF2-jPcUnf4QnO7wOzaMtq2TRmY5SnRm1C2xMWZWdPF-JbpnB8IxLtCBqyz3RkGRX0sZS1A8ndef8IP8N6OBQu076FwYO8WTIQY9ElmGtB3RyaBiGU1nTdTYMCgHQP4wPXm_A"/>
+</div>
+<div>
+<div class="text-label-bold font-label-bold text-secondary">Lumi</div>
+<div class="text-caption font-caption text-on-surface-variant">Your Story Guide</div>
+</div>
+</div>
+<a class="flex items-center gap-2 text-on-surface-variant p-3 hover:bg-surface-variant rounded-lg font-body-md hover:text-on-primary-fixed-variant transition-colors" href="#">
+<span class="material-symbols-outlined">home</span> Home
+        </a>
+<a class="flex items-center gap-2 bg-primary-container text-on-primary-container rounded-lg p-3 font-label-bold shadow-[0px_4px_0px_0px_rgba(0,76,108,1)]" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_awesome</span> Missions
+        </a>
+<a class="flex items-center gap-2 text-on-surface-variant p-3 hover:bg-surface-variant rounded-lg font-body-md hover:text-on-primary-fixed-variant transition-colors" href="#">
+<span class="material-symbols-outlined">lightbulb</span> Lumi's Tips
+        </a>
+<a class="flex items-center gap-2 text-on-surface-variant p-3 hover:bg-surface-variant rounded-lg font-body-md hover:text-on-primary-fixed-variant transition-colors" href="#">
+<span class="material-symbols-outlined">emoji_events</span> Achievements
+        </a>
+<button class="mt-md w-full bg-secondary text-on-secondary font-label-bold py-3 rounded-lg border-2 border-secondary-fixed-dim shadow-[0px_4px_0px_0px_rgba(85,69,0,1)] btn-tactile hover:bg-secondary-fixed-dim hover:text-on-secondary-fixed transition-colors">
+            Ask Lumi!
+        </button>
+</nav>
+<!-- Main Content Canvas -->
+<main class="max-w-4xl mx-auto px-margin-mobile md:px-margin-desktop py-lg pb-xl lg:mr-80">
+<div class="bg-surface rounded-2xl border-3 border-outline-variant p-md md:p-lg shadow-[0px_8px_0px_0px_rgba(111,120,128,0.2)] text-primary">
+<h1 class="text-display-mobile md:text-display-lg font-display-lg text-primary mb-sm text-center">Let's build a story!</h1>
+<p class="text-body-md font-body-md text-on-surface-variant text-center mb-xl">Tell me what you want to explore today.</p>
+<form class="flex flex-col gap-xl" id="createStoryForm">
+<!-- Step 1: Edad -->
+<section class="bg-surface-container-lowest rounded-xl border-2 border-primary-container p-md shadow-[0px_6px_0px_0px_rgba(108,200,255,0.2)] card-tactile relative text-primary-container">
+<div class="absolute -top-4 -left-4 w-10 h-10 bg-primary text-on-primary rounded-full flex items-center justify-center font-label-bold text-label-bold shadow-md border-2 border-surface">1</div>
+<h2 class="text-headline-md font-headline-md text-primary mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">cake</span> Edad
+                    </h2>
+<div class="grid grid-cols-4 md:grid-cols-7 gap-sm">
+<!-- Generative age buttons 6-12 -->
+<label class="option-tile cursor-pointer relative block">
+<input checked="" class="peer sr-only" name="age" type="radio" value="6"/>
+<div class="w-full aspect-square rounded-xl border-2 border-outline-variant bg-surface-container flex items-center justify-center text-headline-md font-headline-md text-on-surface peer-hover:border-primary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+                                6
+                                <div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="age" type="radio" value="7"/>
+<div class="w-full aspect-square rounded-xl border-2 border-outline-variant bg-surface-container flex items-center justify-center text-headline-md font-headline-md text-on-surface peer-hover:border-primary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+                                7
+                                <div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="age" type="radio" value="8"/>
+<div class="w-full aspect-square rounded-xl border-2 border-outline-variant bg-surface-container flex items-center justify-center text-headline-md font-headline-md text-on-surface peer-hover:border-primary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+                                8
+                                <div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="age" type="radio" value="9"/>
+<div class="w-full aspect-square rounded-xl border-2 border-outline-variant bg-surface-container flex items-center justify-center text-headline-md font-headline-md text-on-surface peer-hover:border-primary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+                                9
+                                <div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="age" type="radio" value="10"/>
+<div class="w-full aspect-square rounded-xl border-2 border-outline-variant bg-surface-container flex items-center justify-center text-headline-md font-headline-md text-on-surface peer-hover:border-primary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+                                10
+                                <div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="age" type="radio" value="11"/>
+<div class="w-full aspect-square rounded-xl border-2 border-outline-variant bg-surface-container flex items-center justify-center text-headline-md font-headline-md text-on-surface peer-hover:border-primary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+                                11
+                                <div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="age" type="radio" value="12"/>
+<div class="w-full aspect-square rounded-xl border-2 border-outline-variant bg-surface-container flex items-center justify-center text-headline-md font-headline-md text-on-surface peer-hover:border-primary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+                                12
+                                <div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+</div>
+</section>
+<!-- Step 2: Tema -->
+<section class="bg-surface-container-lowest rounded-xl border-2 border-tertiary-container p-md shadow-[0px_6px_0px_0px_rgba(121,212,83,0.2)] card-tactile relative text-tertiary-container">
+<div class="absolute -top-4 -left-4 w-10 h-10 bg-tertiary text-on-tertiary rounded-full flex items-center justify-center font-label-bold text-label-bold shadow-md border-2 border-surface">2</div>
+<h2 class="text-headline-md font-headline-md text-tertiary mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">explore</span> Tema
+                    </h2>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-sm">
+<label class="option-tile cursor-pointer relative block h-full">
+<input checked="" class="peer sr-only" name="theme" type="radio" value="space"/>
+<div class="w-full h-full p-4 rounded-xl border-2 border-outline-variant bg-surface-container flex flex-col items-center justify-center gap-2 text-center hover:border-tertiary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="material-symbols-outlined text-display-lg text-primary" style="font-variation-settings: 'FILL' 1;">rocket_launch</span>
+<span class="font-label-bold text-label-bold text-on-surface">Espacio</span>
+<div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block h-full">
+<input class="peer sr-only" name="theme" type="radio" value="magic"/>
+<div class="w-full h-full p-4 rounded-xl border-2 border-outline-variant bg-surface-container flex flex-col items-center justify-center gap-2 text-center hover:border-tertiary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="material-symbols-outlined text-display-lg text-secondary" style="font-variation-settings: 'FILL' 1;">auto_fix_high</span>
+<span class="font-label-bold text-label-bold text-on-surface">Magia</span>
+<div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block h-full">
+<input class="peer sr-only" name="theme" type="radio" value="ocean"/>
+<div class="w-full h-full p-4 rounded-xl border-2 border-outline-variant bg-surface-container flex flex-col items-center justify-center gap-2 text-center hover:border-tertiary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="material-symbols-outlined text-display-lg text-primary-fixed-dim" style="font-variation-settings: 'FILL' 1;">water</span>
+<span class="font-label-bold text-label-bold text-on-surface">Océano</span>
+<div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block h-full">
+<input class="peer sr-only" name="theme" type="radio" value="jungle"/>
+<div class="w-full h-full p-4 rounded-xl border-2 border-outline-variant bg-surface-container flex flex-col items-center justify-center gap-2 text-center hover:border-tertiary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="material-symbols-outlined text-display-lg text-tertiary-fixed-dim" style="font-variation-settings: 'FILL' 1;">forest</span>
+<span class="font-label-bold text-label-bold text-on-surface">Selva</span>
+<div class="check-badge absolute -top-2 -right-2 w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+</div>
+</section>
+<!-- Step 3 & 4 Grid: Dificultad & Longitud -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-xl">
+<!-- Step 3: Dificultad -->
+<section class="bg-surface-container-lowest rounded-xl border-2 border-error-container p-md shadow-[0px_6px_0px_0px_rgba(255,218,214,0.2)] card-tactile relative text-error-container">
+<div class="absolute -top-4 -left-4 w-10 h-10 bg-error text-on-error rounded-full flex items-center justify-center font-label-bold text-label-bold shadow-md border-2 border-surface">3</div>
+<h2 class="text-headline-md font-headline-md text-error mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">speed</span> Dificultad
+                        </h2>
+<div class="flex flex-col gap-sm">
+<label class="option-tile cursor-pointer relative block">
+<input checked="" class="peer sr-only" name="difficulty" type="radio" value="facil"/>
+<div class="w-full p-3 rounded-lg border-2 border-outline-variant bg-surface-container flex items-center gap-3 hover:border-error-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="material-symbols-outlined text-tertiary-fixed-dim" style="font-variation-settings: 'FILL' 1;">sentiment_satisfied</span>
+<span class="font-label-bold text-label-bold text-on-surface">Fácil</span>
+<div class="check-badge ml-auto w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="difficulty" type="radio" value="medio"/>
+<div class="w-full p-3 rounded-lg border-2 border-outline-variant bg-surface-container flex items-center gap-3 hover:border-error-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="material-symbols-outlined text-secondary-fixed-dim" style="font-variation-settings: 'FILL' 1;">sentiment_neutral</span>
+<span class="font-label-bold text-label-bold text-on-surface">Medio</span>
+<div class="check-badge ml-auto w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="difficulty" type="radio" value="pro"/>
+<div class="w-full p-3 rounded-lg border-2 border-outline-variant bg-surface-container flex items-center gap-3 hover:border-error-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="material-symbols-outlined text-error" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span class="font-label-bold text-label-bold text-on-surface">Super Pro</span>
+<div class="check-badge ml-auto w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+</div>
+</section>
+<!-- Step 4: Longitud -->
+<section class="bg-surface-container-lowest rounded-xl border-2 border-secondary-container p-md shadow-[0px_6px_0px_0px_rgba(253,215,59,0.2)] card-tactile relative text-secondary-container">
+<div class="absolute -top-4 -left-4 w-10 h-10 bg-secondary text-on-secondary rounded-full flex items-center justify-center font-label-bold text-label-bold shadow-md border-2 border-surface">4</div>
+<h2 class="text-headline-md font-headline-md text-secondary mb-md flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">menu_book</span> Longitud
+                        </h2>
+<div class="flex flex-col gap-sm">
+<label class="option-tile cursor-pointer relative block">
+<input checked="" class="peer sr-only" name="length" type="radio" value="corta"/>
+<div class="w-full p-3 rounded-lg border-2 border-outline-variant bg-surface-container flex items-center gap-3 hover:border-secondary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="w-4 h-4 bg-tertiary-fixed-dim rounded-sm"></span>
+<span class="font-label-bold text-label-bold text-on-surface">Corta</span>
+<div class="check-badge ml-auto w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="length" type="radio" value="mediana"/>
+<div class="w-full p-3 rounded-lg border-2 border-outline-variant bg-surface-container flex items-center gap-3 hover:border-secondary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="flex gap-1"><span class="w-4 h-4 bg-secondary-fixed-dim rounded-sm"></span><span class="w-4 h-4 bg-secondary-fixed-dim rounded-sm"></span></span>
+<span class="font-label-bold text-label-bold text-on-surface">Mediana</span>
+<div class="check-badge ml-auto w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+<label class="option-tile cursor-pointer relative block">
+<input class="peer sr-only" name="length" type="radio" value="larga"/>
+<div class="w-full p-3 rounded-lg border-2 border-outline-variant bg-surface-container flex items-center gap-3 hover:border-secondary-container transition-colors shadow-[0px_4px_0px_0px_rgba(190,200,208,1)] btn-tactile peer-checked:shadow-none peer-checked:translate-y-1">
+<span class="flex gap-1"><span class="w-4 h-4 bg-error rounded-sm"></span><span class="w-4 h-4 bg-error rounded-sm"></span><span class="w-4 h-4 bg-error rounded-sm"></span></span>
+<span class="font-label-bold text-label-bold text-on-surface">Larga</span>
+<div class="check-badge ml-auto w-6 h-6 bg-secondary text-on-secondary rounded-full flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1; font-size: 16px;">check</span>
+</div>
+</div>
+</label>
+</div>
+</section>
+</div>
+<!-- Step 5: Personaje -->
+<section class="bg-surface-container-lowest rounded-xl border-2 border-outline-variant p-md shadow-[0px_6px_0px_0px_rgba(190,200,208,0.2)] card-tactile relative">
+<div class="absolute -top-4 -left-4 w-10 h-10 bg-on-surface-variant text-surface rounded-full flex items-center justify-center font-label-bold text-label-bold shadow-md border-2 border-surface">5</div>
+<h2 class="text-headline-md font-headline-md text-on-surface mb-sm flex items-center gap-sm">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">face</span> Personaje favorito
+                    </h2>
+<p class="text-caption font-caption text-on-surface-variant mb-md">¿Quién será el héroe de tu aventura?</p>
+<div class="relative">
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-primary text-2xl">person_search</span>
+<input class="w-full h-14 pl-12 pr-4 rounded-xl border-2 border-outline-variant bg-surface text-body-lg font-body-lg text-on-surface placeholder:text-outline focus:border-primary focus:ring-0 focus:scale-[1.02] transition-all shadow-[0px_4px_0px_0px_rgba(190,200,208,1)]" placeholder="Ej: Un perro robot, una ninja gata..." type="text"/>
+</div>
+</section>
+<!-- Submit Action -->
+<div class="flex justify-center mt-xl">
+<button class="bg-secondary-container text-on-secondary-container hover:bg-secondary-fixed text-headline-md font-headline-md font-black py-4 px-8 rounded-2xl border-4 border-secondary shadow-[0px_8px_0px_0px_rgba(112,93,0,1)] btn-tactile flex items-center gap-sm min-h-[72px] min-w-[280px] justify-center transition-all hover:scale-105" id="createBtn" type="submit">
+<span class="material-symbols-outlined text-3xl" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+                        ✨ Crear aventura
+                    </button>
+</div>
+</form>
+</div>
+</main>
+<!-- Loading Overlay (Hidden by default) -->
+<div class="fixed inset-0 bg-primary/90 backdrop-blur-sm z-50 hidden flex-col items-center justify-center" id="loadingOverlay">
+<div class="relative w-64 h-64 floating-lumi mb-lg bg-white rounded-full p-4 border-4 border-secondary-container shadow-2xl flex items-center justify-center" style="animation: pulse-glow 2s infinite, float 3s ease-in-out infinite;">
+<img alt="Lumi opening a magic book" class="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8vC80ymDwevu3bu28TdRT06JGl9wVBpfuFH9Es40H79xbk5Z5P9mL3EZl5_erSvxJWnUeOxI8GM9aGAZnsJwQQxhyF16m_DWzik3f4qguiGmzPCethF2-jPcUnf4QnO7wOzaMtq2TRmY5SnRm1C2xMWZWdPF-JbpnB8IxLtCBqyz3RkGRX0sZS1A8ndef8IP8N6OBQu076FwYO8WTIQY9ElmGtB3RyaBiGU1nTdTYMCgHQP4wPXm_A"/>
+</div>
+<h2 class="text-display-mobile font-display-mobile text-on-primary mb-sm">¡Lumi está escribiendo!</h2>
+<p class="text-body-lg font-body-lg text-primary-fixed text-center max-w-md">Preparando una aventura mágica solo para ti...</p>
+<!-- Oversized tactile progress bar -->
+<div class="w-64 h-8 bg-primary-fixed-dim rounded-full mt-xl border-2 border-primary-fixed overflow-hidden relative shadow-[inset_0px_4px_4px_rgba(0,0,0,0.1)]">
+<div class="absolute inset-y-0 left-0 bg-gradient-to-r from-tertiary-container to-tertiary-fixed w-1/2 rounded-full" style="animation: load-progress 2s ease-in-out infinite alternate;"></div>
+<!-- Glossy highlight -->
+<div class="absolute top-1 left-2 right-2 h-2 bg-white/40 rounded-full"></div>
+</div>
+<style>
+             @keyframes load-progress {
+                 0% { width: 10%; }
+                 100% { width: 90%; }
+             }
+        </style>
+</div>
+<!-- Bottom Navigation for Mobile -->
+<nav class="md:hidden docked full-width bottom-0 bg-surface border-t-2 border-outline-variant flex justify-around items-center h-20 shadow-[0px_-4px_12px_rgba(0,0,0,0.05)] z-40 fixed w-full pb-safe">
+<a class="flex flex-col items-center gap-1 text-primary p-2" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="text-caption font-caption">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">library_books</span>
+<span class="text-caption font-caption">Library</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="text-caption font-caption">Quests</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-on-surface-variant p-2" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-caption font-caption">Profile</span>
+</a>
+</nav>
+<script>
+        document.getElementById('createStoryForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            // Show loading overlay
+            const overlay = document.getElementById('loadingOverlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            
+            // Simulate network request then hide (for demo purposes)
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                // You would normally redirect here
+            }, 3000);
+        });
+    </script>
+</body></html>

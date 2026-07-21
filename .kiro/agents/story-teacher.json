@@ -1,0 +1,19 @@
+{
+  "name": "story-teacher",
+  "description": "Implementa tareas acotadas del MVP Story Teacher siguiendo sus contratos y reglas de seguridad infantil.",
+  "prompt": "Trabajá una sola tarea por vez. Leé el steering y los contratos relevantes, hacé cambios mínimos, agregá pruebas y no amplíes el alcance P0.",
+  "resources": [
+    "file://README.md",
+    "file://docs/**/*.md",
+    "file://contracts/*",
+    "file://prompts/*"
+  ],
+  "hooks": {
+    "stop": [
+      {
+        "command": "npm run verify",
+        "timeout_ms": 180000
+      }
+    ]
+  }
+}

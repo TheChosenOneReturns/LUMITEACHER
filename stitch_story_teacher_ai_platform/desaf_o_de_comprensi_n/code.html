@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Comprehension Quiz - Story Teacher</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "secondary-fixed-dim": "#e8c426",
+                      "secondary": "#705d00",
+                      "tertiary-fixed": "#9cf973",
+                      "surface-container-lowest": "#ffffff",
+                      "on-secondary-container": "#715d00",
+                      "on-primary-container": "#005375",
+                      "on-background": "#181c1f",
+                      "primary-fixed": "#c7e7ff",
+                      "tertiary": "#246d00",
+                      "outline": "#6f7880",
+                      "on-secondary-fixed": "#221b00",
+                      "surface-variant": "#dfe3e7",
+                      "on-secondary": "#ffffff",
+                      "tertiary-fixed-dim": "#81dc5a",
+                      "primary-fixed-dim": "#84cfff",
+                      "tertiary-container": "#79d453",
+                      "background": "#f6fafe",
+                      "on-primary-fixed": "#001e2e",
+                      "error-container": "#ffdad6",
+                      "surface-container-low": "#f1f4f8",
+                      "primary-container": "#6cc8ff",
+                      "on-secondary-fixed-variant": "#554500",
+                      "surface-tint": "#00658e",
+                      "on-tertiary-container": "#1c5900",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#84cfff",
+                      "surface-container": "#ebeef3",
+                      "secondary-fixed": "#ffe173",
+                      "secondary-container": "#fdd73b",
+                      "surface-container-highest": "#dfe3e7",
+                      "on-primary": "#ffffff",
+                      "surface": "#f6fafe",
+                      "surface-dim": "#d7dadf",
+                      "outline-variant": "#bec8d0",
+                      "surface-bright": "#f6fafe",
+                      "on-surface": "#181c1f",
+                      "on-surface-variant": "#3f484f",
+                      "on-tertiary-fixed-variant": "#195200",
+                      "inverse-surface": "#2d3134",
+                      "on-error-container": "#93000a",
+                      "primary": "#00658e",
+                      "on-primary-fixed-variant": "#004c6c",
+                      "error": "#ba1a1a",
+                      "surface-container-high": "#e5e8ed",
+                      "inverse-on-surface": "#eef1f5",
+                      "on-tertiary-fixed": "#062100",
+                      "on-tertiary": "#ffffff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px",
+                      "2xl": "1rem",
+                      "3xl": "1.5rem"
+              },
+              "spacing": {
+                      "base": "8px",
+                      "gutter": "24px",
+                      "margin-desktop": "48px",
+                      "sm": "12px",
+                      "margin-mobile": "16px",
+                      "md": "24px",
+                      "xl": "64px",
+                      "xs": "4px",
+                      "lg": "40px"
+              },
+              "fontFamily": {
+                      "body-md": [
+                              "Nunito Sans"
+                      ],
+                      "headline-lg": [
+                              "Nunito Sans"
+                      ],
+                      "caption": [
+                              "Nunito Sans"
+                      ],
+                      "headline-md": [
+                              "Nunito Sans"
+                      ],
+                      "label-bold": [
+                              "Nunito Sans"
+                      ],
+                      "body-lg": [
+                              "Nunito Sans"
+                      ],
+                      "display-lg": [
+                              "Nunito Sans"
+                      ],
+                      "display-mobile": [
+                              "Nunito Sans"
+                      ]
+              },
+              "fontSize": {
+                      "body-md": [
+                              "18px",
+                              {
+                                      "lineHeight": "28px",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "caption": [
+                              "14px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "24px",
+                              {
+                                      "lineHeight": "32px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "label-bold": [
+                              "16px",
+                              {
+                                      "lineHeight": "20px",
+                                      "fontWeight": "800"
+                              }
+                      ],
+                      "body-lg": [
+                              "20px",
+                              {
+                                      "lineHeight": "30px",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "display-lg": [
+                              "48px",
+                              {
+                                      "lineHeight": "56px",
+                                      "letterSpacing": "-0.02em",
+                                      "fontWeight": "900"
+                              }
+                      ],
+                      "display-mobile": [
+                              "32px",
+                              {
+                                      "lineHeight": "40px",
+                                      "letterSpacing": "-0.01em",
+                                      "fontWeight": "900"
+                              }
+                      ]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        .option-card {
+            transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        .option-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0px 12px 0px 0px rgba(0, 101, 142, 0.3);
+        }
+        .option-card:active {
+            transform: translateY(2px) scale(0.98);
+            box-shadow: 0px 4px 0px 0px rgba(0, 101, 142, 0.3);
+            border-bottom-width: 2px;
+        }
+        
+        .progress-bar-fill {
+            background: linear-gradient(90deg, #9cf973 0%, #246d00 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-bar-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(to bottom, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 9999px 9999px 0 0;
+        }
+        
+        @keyframes walkLumi {
+            0% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-5px) rotate(-5deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(-5px) rotate(5deg); }
+            100% { transform: translateY(0) rotate(0deg); }
+        }
+        .lumi-walking {
+            animation: walkLumi 1s infinite linear;
+        }
+
+        .star-burst {
+            position: absolute;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        @keyframes explode {
+            0% { transform: scale(0); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+
+        .animate-explode {
+            animation: explode 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased min-h-screen flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop">
+<!-- Top AppBar - Suppressed as this is a focused task/journey screen -->
+<main class="w-full max-w-4xl mx-auto flex flex-col gap-lg items-center z-10 relative">
+<!-- Header & Progress -->
+<div class="w-full flex flex-col gap-sm items-center">
+<h1 class="text-headline-md font-headline-md text-primary font-black">Misión en progreso...</h1>
+<div class="w-full max-w-2xl bg-surface-container-high rounded-full h-8 border-2 border-outline-variant relative shadow-inner overflow-visible">
+<div class="progress-bar-fill h-full rounded-full w-3/5 transition-all duration-1000 ease-out" style="width: 60%;"></div>
+<!-- Walking Lumi -->
+<div class="absolute -top-10 left-[60%] -translate-x-1/2 z-20 transition-all duration-1000 ease-out" style="left: 60%;">
+<div class="w-16 h-16 rounded-full border-2 border-primary bg-white shadow-[0_4px_0_0_rgba(0,101,142,1)] flex items-center justify-center overflow-hidden lumi-walking">
+<img alt="Lumi Mascot" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8vC80ymDwevu3bu28TdRT06JGl9wVBpfuFH9Es40H79xbk5Z5P9mL3EZl5_erSvxJWnUeOxI8GM9aGAZnsJwQQxhyF16m_DWzik3f4qguiGmzPCethF2-jPcUnf4QnO7wOzaMtq2TRmY5SnRm1C2xMWZWdPF-JbpnB8IxLtCBqyz3RkGRX0sZS1A8ndef8IP8N6OBQu076FwYO8WTIQY9ElmGtB3RyaBiGU1nTdTYMCgHQP4wPXm_A"/>
+</div>
+</div>
+</div>
+<p class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-wider mt-4">Pregunta 3 de 5</p>
+</div>
+<!-- Question Card -->
+<div class="w-full max-w-3xl bg-surface-container-lowest rounded-3xl border-4 border-primary shadow-[0_8px_0_0_rgba(0,101,142,0.2)] p-lg relative overflow-hidden text-center mt-md">
+<h2 class="text-display-mobile md:text-display-lg font-display-mobile md:font-display-lg text-on-background">¿Por qué el dragón decidió compartir su tesoro?</h2>
+</div>
+<!-- Options Grid -->
+<div class="w-full max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-md mt-md">
+<!-- Option 1 -->
+<button class="option-card bg-surface-container-lowest border-4 border-outline-variant shadow-[0_8px_0_0_rgba(190,200,208,1)] rounded-2xl p-md flex flex-col items-center justify-center gap-sm cursor-pointer group" onclick="handleOptionClick(this, false)">
+<div class="w-24 h-24 bg-error-container rounded-full flex items-center justify-center border-2 border-error mb-2">
+<span class="material-symbols-outlined text-[64px] text-error" style="font-variation-settings: 'FILL' 1;">apps</span>
+</div>
+<span class="text-body-lg font-body-lg text-on-background text-center">Tenía hambre y quería manzanas.</span>
+</button>
+<!-- Option 2 (Correct) -->
+<button class="option-card bg-surface-container-lowest border-4 border-outline-variant shadow-[0_8px_0_0_rgba(190,200,208,1)] rounded-2xl p-md flex flex-col items-center justify-center gap-sm cursor-pointer group relative" onclick="handleOptionClick(this, true)">
+<div class="w-24 h-24 bg-secondary-container rounded-full flex items-center justify-center border-2 border-secondary mb-2">
+<span class="material-symbols-outlined text-[64px] text-secondary" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="text-body-lg font-body-lg text-on-background text-center">Quería hacer nuevos amigos en el pueblo.</span>
+<!-- Star Burst Container -->
+<div class="absolute inset-0 pointer-events-none flex items-center justify-center" id="starBurstContainer"></div>
+</button>
+<!-- Option 3 -->
+<button class="option-card bg-surface-container-lowest border-4 border-outline-variant shadow-[0_8px_0_0_rgba(190,200,208,1)] rounded-2xl p-md flex flex-col items-center justify-center gap-sm cursor-pointer group" onclick="handleOptionClick(this, false)">
+<div class="w-24 h-24 bg-primary-container rounded-full flex items-center justify-center border-2 border-primary mb-2">
+<span class="material-symbols-outlined text-[64px] text-primary" style="font-variation-settings: 'FILL' 1;">favorite</span>
+</div>
+<span class="text-body-lg font-body-lg text-on-background text-center">Se enamoró de la princesa.</span>
+</button>
+<!-- Option 4 -->
+<button class="option-card bg-surface-container-lowest border-4 border-outline-variant shadow-[0_8px_0_0_rgba(190,200,208,1)] rounded-2xl p-md flex flex-col items-center justify-center gap-sm cursor-pointer group" onclick="handleOptionClick(this, false)">
+<div class="w-24 h-24 bg-surface-container-high rounded-full flex items-center justify-center border-2 border-outline mb-2">
+<span class="material-symbols-outlined text-[64px] text-outline" style="font-variation-settings: 'FILL' 1;">cloud</span>
+</div>
+<span class="text-body-lg font-body-lg text-on-background text-center">Quería volar más ligero sin peso.</span>
+</button>
+</div>
+<!-- Feedback Overlay (Hidden by default) -->
+<div class="fixed inset-0 bg-on-background/50 z-50 hidden flex-col items-center justify-end md:justify-center p-4 backdrop-blur-sm transition-opacity duration-300 opacity-0" id="feedbackOverlay">
+<!-- Incorrect Feedback Card -->
+<div class="bg-surface-container-lowest border-4 border-primary shadow-[0_12px_0_0_rgba(0,101,142,1)] rounded-3xl p-lg max-w-2xl w-full flex flex-col md:flex-row items-center gap-lg hidden transform translate-y-full transition-transform duration-500" id="incorrectFeedback">
+<div class="w-32 h-32 shrink-0 rounded-full border-4 border-secondary bg-secondary-fixed shadow-[0_4px_0_0_rgba(112,93,0,1)] flex items-center justify-center overflow-hidden">
+<img alt="Lumi Mascot" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8vC80ymDwevu3bu28TdRT06JGl9wVBpfuFH9Es40H79xbk5Z5P9mL3EZl5_erSvxJWnUeOxI8GM9aGAZnsJwQQxhyF16m_DWzik3f4qguiGmzPCethF2-jPcUnf4QnO7wOzaMtq2TRmY5SnRm1C2xMWZWdPF-JbpnB8IxLtCBqyz3RkGRX0sZS1A8ndef8IP8N6OBQu076FwYO8WTIQY9ElmGtB3RyaBiGU1nTdTYMCgHQP4wPXm_A"/>
+</div>
+<div class="flex flex-col gap-sm">
+<div class="flex items-center gap-2 text-secondary">
+<span class="material-symbols-outlined text-headline-md" style="font-variation-settings: 'FILL' 1;">lightbulb</span>
+<h3 class="text-headline-md font-headline-md font-black">¡Casi!</h3>
+</div>
+<p class="text-body-lg font-body-lg text-on-surface">¡No te preocupes! El dragón era muy generoso y se dio cuenta que el verdadero tesoro era la amistad.</p>
+<button class="mt-4 bg-primary text-on-primary font-label-bold text-label-bold py-4 px-8 rounded-full shadow-[0_6px_0_0_rgba(0,76,108,1)] border-2 border-on-primary-fixed-variant hover:translate-y-1 hover:shadow-[0_2px_0_0_rgba(0,76,108,1)] transition-all active:translate-y-2 active:shadow-none w-full md:w-auto" onclick="hideFeedback()">
+                        Intentar de nuevo
+                    </button>
+</div>
+</div>
+<!-- Correct Feedback Card (Simplified for now, as star burst handles visual) -->
+<div class="bg-tertiary-container border-4 border-tertiary shadow-[0_12px_0_0_rgba(36,109,0,1)] rounded-3xl p-lg max-w-2xl w-full flex flex-col items-center gap-sm hidden transform scale-50 opacity-0 transition-all duration-500" id="correctFeedback">
+<h3 class="text-display-mobile font-display-mobile text-on-tertiary-container font-black">¡Excelente!</h3>
+<p class="text-body-lg font-body-lg text-on-tertiary-container text-center">¡Esa es la respuesta correcta!</p>
+<button class="mt-4 bg-tertiary text-on-tertiary font-label-bold text-label-bold py-4 px-8 rounded-full shadow-[0_6px_0_0_rgba(28,89,0,1)] border-2 border-on-tertiary-fixed-variant hover:translate-y-1 hover:shadow-[0_2px_0_0_rgba(28,89,0,1)] transition-all active:translate-y-2 active:shadow-none w-full md:w-auto">
+                        Siguiente Pregunta
+                </button>
+</div>
+</div>
+</main>
+<script>
+        function handleOptionClick(element, isCorrect) {
+            // Remove previous selections
+            document.querySelectorAll('.option-card').forEach(card => {
+                card.classList.remove('border-primary', 'border-error', 'border-secondary-container');
+                card.classList.add('border-outline-variant');
+                // Remove checkmark if exists
+                const check = card.querySelector('.checkmark-badge');
+                if(check) check.remove();
+            });
+
+            element.classList.remove('border-outline-variant');
+            
+            if (isCorrect) {
+                element.classList.add('border-secondary-container');
+                
+                // Add Checkmark
+                const checkBadge = document.createElement('div');
+                checkBadge.className = 'checkmark-badge absolute -top-4 -right-4 w-12 h-12 bg-tertiary-container border-2 border-tertiary rounded-full shadow-[0_4px_0_0_rgba(36,109,0,1)] flex items-center justify-center z-10';
+                checkBadge.innerHTML = '<span class="material-symbols-outlined text-tertiary font-bold">check</span>';
+                element.appendChild(checkBadge);
+
+                // Star Explosion
+                createStarExplosion(element);
+
+                // Show Correct Feedback after short delay
+                setTimeout(() => {
+                    showFeedback('correct');
+                }, 800);
+
+            } else {
+                element.classList.add('border-error');
+                
+                // Shake animation
+                element.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(-10px)' },
+                    { transform: 'translateX(10px)' },
+                    { transform: 'translateX(0)' }
+                ], { duration: 400, easing: 'ease-in-out' });
+                
+                setTimeout(() => {
+                    showFeedback('incorrect');
+                }, 600);
+            }
+        }
+
+        function createStarExplosion(container) {
+            const burstContainer = container.querySelector('#starBurstContainer');
+            if(!burstContainer) return;
+            
+            for(let i=0; i<8; i++) {
+                const star = document.createElement('span');
+                star.className = 'material-symbols-outlined text-secondary star-burst animate-explode absolute';
+                star.style.fontVariationSettings = "'FILL' 1";
+                star.innerHTML = 'star';
+                
+                // Randomize position and rotation
+                const angle = (i / 8) * 360;
+                const distance = 80 + Math.random() * 40;
+                const x = Math.cos(angle * Math.PI / 180) * distance;
+                const y = Math.sin(angle * Math.PI / 180) * distance;
+                
+                star.style.left = `calc(50% + ${x}px)`;
+                star.style.top = `calc(50% + ${y}px)`;
+                star.style.transform = `rotate(${Math.random() * 360}deg)`;
+                
+                burstContainer.appendChild(star);
+                
+                // Clean up
+                setTimeout(() => star.remove(), 800);
+            }
+        }
+
+        function showFeedback(type) {
+            const overlay = document.getElementById('feedbackOverlay');
+            const incorrectCard = document.getElementById('incorrectFeedback');
+            const correctCard = document.getElementById('correctFeedback');
+            
+            overlay.classList.remove('hidden');
+            // Small delay to allow display:block to apply before animating opacity
+            setTimeout(() => {
+                overlay.classList.remove('opacity-0');
+                
+                if(type === 'incorrect') {
+                    incorrectCard.classList.remove('hidden');
+                    setTimeout(() => incorrectCard.classList.remove('translate-y-full'), 50);
+                } else {
+                    correctCard.classList.remove('hidden');
+                    setTimeout(() => {
+                        correctCard.classList.remove('scale-50', 'opacity-0');
+                        correctCard.classList.add('scale-100', 'opacity-100');
+                    }, 50);
+                }
+            }, 10);
+        }
+
+        function hideFeedback() {
+            const overlay = document.getElementById('feedbackOverlay');
+            const incorrectCard = document.getElementById('incorrectFeedback');
+            const correctCard = document.getElementById('correctFeedback');
+            
+            incorrectCard.classList.add('translate-y-full');
+            correctCard.classList.remove('scale-100', 'opacity-100');
+            correctCard.classList.add('scale-50', 'opacity-0');
+            
+            overlay.classList.add('opacity-0');
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                incorrectCard.classList.add('hidden');
+                correctCard.classList.add('hidden');
+                
+                // Reset incorrect options visually
+                document.querySelectorAll('.option-card.border-error').forEach(card => {
+                    card.classList.remove('border-error');
+                    card.classList.add('border-outline-variant');
+                });
+            }, 300);
+        }
+    </script>
+</body></html>

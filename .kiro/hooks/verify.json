@@ -1,0 +1,16 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "story-teacher-verify-on-stop",
+      "description": "Valida tipos, pruebas y builds al terminar cada tarea de Kiro.",
+      "trigger": "Stop",
+      "action": {
+        "type": "command",
+        "command": "npm run verify"
+      },
+      "timeout": 180,
+      "enabled": true
+    }
+  ]
+}

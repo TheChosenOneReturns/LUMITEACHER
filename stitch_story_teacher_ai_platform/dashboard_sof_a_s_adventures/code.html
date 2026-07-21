@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Story Teacher - Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@500;600;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary-fixed-dim": "#e8c426",
+                    "secondary": "#705d00",
+                    "tertiary-fixed": "#9cf973",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-container": "#715d00",
+                    "on-primary-container": "#005375",
+                    "on-background": "#181c1f",
+                    "primary-fixed": "#c7e7ff",
+                    "tertiary": "#246d00",
+                    "outline": "#6f7880",
+                    "on-secondary-fixed": "#221b00",
+                    "surface-variant": "#dfe3e7",
+                    "on-secondary": "#ffffff",
+                    "tertiary-fixed-dim": "#81dc5a",
+                    "primary-fixed-dim": "#84cfff",
+                    "tertiary-container": "#79d453",
+                    "background": "#f6fafe",
+                    "on-primary-fixed": "#001e2e",
+                    "error-container": "#ffdad6",
+                    "surface-container-low": "#f1f4f8",
+                    "primary-container": "#6cc8ff",
+                    "on-secondary-fixed-variant": "#554500",
+                    "surface-tint": "#00658e",
+                    "on-tertiary-container": "#1c5900",
+                    "on-error": "#ffffff",
+                    "inverse-primary": "#84cfff",
+                    "surface-container": "#ebeef3",
+                    "secondary-fixed": "#ffe173",
+                    "secondary-container": "#fdd73b",
+                    "surface-container-highest": "#dfe3e7",
+                    "on-primary": "#ffffff",
+                    "surface": "#f6fafe",
+                    "surface-dim": "#d7dadf",
+                    "outline-variant": "#bec8d0",
+                    "surface-bright": "#f6fafe",
+                    "on-surface": "#181c1f",
+                    "on-surface-variant": "#3f484f",
+                    "on-tertiary-fixed-variant": "#195200",
+                    "inverse-surface": "#2d3134",
+                    "on-error-container": "#93000a",
+                    "primary": "#00658e",
+                    "on-primary-fixed-variant": "#004c6c",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#e5e8ed",
+                    "inverse-on-surface": "#eef1f5",
+                    "on-tertiary-fixed": "#062100",
+                    "on-tertiary": "#ffffff"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px",
+                    "2xl": "1rem",
+                    "3xl": "1.5rem"
+            },
+            "spacing": {
+                    "base": "8px",
+                    "gutter": "24px",
+                    "margin-desktop": "48px",
+                    "sm": "12px",
+                    "margin-mobile": "16px",
+                    "md": "24px",
+                    "xl": "64px",
+                    "xs": "4px",
+                    "lg": "40px",
+                    "2xl": "96px"
+            },
+            "fontFamily": {
+                    "body-md": ["Nunito Sans"],
+                    "headline-lg": ["Nunito Sans"],
+                    "caption": ["Nunito Sans"],
+                    "headline-md": ["Nunito Sans"],
+                    "label-bold": ["Nunito Sans"],
+                    "body-lg": ["Nunito Sans"],
+                    "display-lg": ["Nunito Sans"],
+                    "display-mobile": ["Nunito Sans"]
+            },
+            "fontSize": {
+                    "body-md": ["18px", {"lineHeight": "28px", "fontWeight": "500"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "800"}],
+                    "caption": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "800"}],
+                    "label-bold": ["16px", {"lineHeight": "20px", "fontWeight": "800"}],
+                    "body-lg": ["20px", {"lineHeight": "30px", "fontWeight": "600"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                    "display-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "900"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        body { font-family: 'Nunito Sans', sans-serif; }
+        .bouncy-card { transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+        .bouncy-card:hover { transform: scale(1.03) translateY(-4px); }
+        .bouncy-card:active { transform: scale(0.98) translateY(2px); }
+        .push-button { transition: all 0.1s ease; border-bottom-width: 4px; }
+        .push-button:active { transform: translateY(4px); border-bottom-width: 0px; margin-bottom: 4px; }
+    </style>
+</head>
+<body class="bg-background text-on-background min-h-screen flex flex-col selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-inverse-surface border-b-4 border-secondary-container dark:border-secondary shadow-[0px_4px_0px_0px_rgba(253,215,59,1)] sticky top-0 z-50 w-full">
+<div class="flex justify-between items-center w-full px-margin-desktop py-4 max-w-[1280px] mx-auto">
+<!-- Brand -->
+<div class="flex items-center gap-sm">
+<div class="w-10 h-10 rounded-full bg-primary-container border-2 border-primary flex items-center justify-center shadow-[0px_3px_0px_0px_rgba(0,101,142,1)]">
+<span class="material-symbols-outlined text-primary font-bold" data-icon="menu_book">menu_book</span>
+</div>
+<span class="text-headline-md font-headline-md font-black text-primary dark:text-primary-fixed-dim tracking-tight">Story Teacher</span>
+</div>
+<!-- Navigation Links -->
+<nav class="hidden md:flex gap-gutter items-center">
+<a class="text-on-surface-variant font-label-bold pb-1 hover:text-primary transition-colors" href="#">My Stories</a>
+<a class="text-primary font-label-bold border-b-4 border-primary pb-1" href="#">Library</a>
+<a class="text-on-surface-variant font-label-bold pb-1 hover:text-primary transition-colors" href="#">Quests</a>
+</nav>
+<!-- Trailing Actions & Profile -->
+<div class="flex items-center gap-md">
+<div class="flex gap-2 items-center bg-surface-container-high rounded-full px-4 py-1 border-2 border-outline-variant shadow-[0px_2px_0px_0px_rgba(190,200,208,1)]">
+<div class="flex items-center gap-1 text-secondary font-label-bold">
+<span class="material-symbols-outlined text-secondary-container" data-icon="local_fire_department" data-weight="fill" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+<span>5</span>
+</div>
+<div class="w-px h-4 bg-outline-variant mx-1"></div>
+<div class="flex items-center gap-1 text-secondary font-label-bold">
+<span class="material-symbols-outlined text-secondary-container" data-icon="stars" data-weight="fill" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span>120</span>
+</div>
+</div>
+<button class="w-12 h-12 rounded-full border-2 border-primary overflow-hidden shadow-[0px_3px_0px_0px_rgba(0,101,142,1)] hover:scale-105 transition-transform duration-200 active:translate-y-1 active:shadow-none">
+<img alt="Sofia's profile avatar" class="w-full h-full object-cover" data-alt="A brightly colored, 3D animated style avatar of a young girl with brown hair in pigtails, wearing a yellow explorer outfit. Soft, vibrant lighting, highly detailed, Pixar style. Solid light blue background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDr70iHzCOhGOTQCeMD3pDzlI2LgRuMmWQ1UFuhRBBSBGXkd5dOiYw1ka5DUe8nyK7M3cw89HugxPR2OdlX30YnKmjLAe_4OovmpT6oabriwrQGX5Vo5FPMEz-8HBsYP5DMDEGr23h3e74ciy6gBLS3tgtSToucENnWmSAzYUFfSq2Q8v3ZjGMGVkvQ4tC8Tc7pNpDfeiZXH2lRyqskgwXTg4dcF_tcOXlhVwsg022pLEKW1gt6tp--qg"/>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<div class="flex-grow flex w-full max-w-[1280px] mx-auto px-margin-desktop py-lg gap-gutter relative">
+<!-- Canvas (Dashboard) -->
+<main class="flex-grow flex flex-col gap-lg">
+<!-- Greeting Section -->
+<section class="flex flex-col gap-sm">
+<h1 class="text-display-lg font-display-lg text-on-surface tracking-tight">¡Hola Sofía!</h1>
+<p class="text-headline-md font-headline-md text-on-surface-variant">¿Qué aventura quieres vivir hoy?</p>
+</section>
+<!-- Categories Grid (Bento Style) -->
+<section class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-md pb-2xl">
+<!-- Card 1: Dragones -->
+<button class="bouncy-card relative overflow-hidden rounded-3xl border-4 border-[#5E2750] bg-[#C1A3D1] min-h-[240px] flex flex-col justify-end p-md text-left group shadow-[0px_8px_0px_0px_rgba(94,39,80,1)]">
+<div class="absolute inset-0 bg-gradient-to-t from-[#5E2750]/60 to-transparent z-10"></div>
+<div class="absolute -top-10 -right-10 w-48 h-48 group-hover:scale-110 transition-transform duration-300">
+<img class="w-full h-full object-contain drop-shadow-2xl" data-alt="A massive, cute 3D cartoon baby dragon in bright green and violet colors, looking friendly and curious, rendered in a bouncy, tactile claymation style. Bright, soft lighting against a plain background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8htYO_oK56s_auCCuvFYj3GBaJgWwiwxgCCbWX4oxLpI2Hy7aq8mPHzEqJSV9Pe37G9tADN3RzxRyDJ8zjHSc6zlc3CxnWbVgbgKsG4QCB35fMBf7NYGeVl3-7aMzZLg5e_lEf7YLgE8HPkPNvESfN3mlFm4ODCYK_FSxNU7I3F9WlNHOp0K6Z-Q6g8hmNhJmXipiofvPCVpZsUwv1dZSluiBo7qSOrDc-iPsycs4o8nCRNM0resqVQ"/>
+</div>
+<h3 class="text-headline-md font-headline-md text-white z-20 relative font-black tracking-wide">Dragones</h3>
+</button>
+<!-- Card 2: Espacio -->
+<button class="bouncy-card relative overflow-hidden rounded-3xl border-4 border-[#0D2A63] bg-[#8AB4F8] min-h-[240px] flex flex-col justify-end p-md text-left group shadow-[0px_8px_0px_0px_rgba(13,42,99,1)] lg:col-span-2">
+<div class="absolute inset-0 bg-gradient-to-t from-[#0D2A63]/60 to-transparent z-10"></div>
+<div class="absolute top-0 right-0 w-64 h-64 group-hover:scale-110 transition-transform duration-300 transform translate-x-10 -translate-y-10">
+<img class="w-full h-full object-contain drop-shadow-2xl" data-alt="A vibrant, 3D cartoon rocket ship taking off with a trail of fluffy smoke and stars, deep blue and bright sky blue colors. Tactile, toy-like aesthetic with soft, rounded edges. Clean background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCuha8tNIhavb8Epv6RGdVL7aO4gp-5CSVAn4RVafCUxm0QXz5sbA5nmGzKJIiFgDNRzcUwDjLCdRE2AbECVp4dFXI4CWrrQlxFxlXHjRBGJMZ0Jp_Q1ZNZV_zPI8DsbC35Um-uOBLkDI1OGqoBG7eJK4BY3ApegTzHtAnTasjex62o8ew1G2f7q_qcVIXlDYpRRQJ9XDZ7yGy6Ni2E_2Y2szKyVoIpmDfAW5y1hxTGWPt-P5abz81MqQ"/>
+</div>
+<h3 class="text-headline-md font-headline-md text-white z-20 relative font-black tracking-wide">Espacio</h3>
+</button>
+<!-- Card 3: Dinosaurios -->
+<button class="bouncy-card relative overflow-hidden rounded-3xl border-4 border-[#3D5A2B] bg-[#A3C87A] min-h-[240px] flex flex-col justify-end p-md text-left group shadow-[0px_8px_0px_0px_rgba(61,90,43,1)]">
+<div class="absolute inset-0 bg-gradient-to-t from-[#3D5A2B]/60 to-transparent z-10"></div>
+<div class="absolute -top-5 -right-5 w-40 h-40 group-hover:scale-110 transition-transform duration-300 transform -rotate-12">
+<img class="w-full h-full object-contain drop-shadow-2xl" data-alt="A friendly, chunky 3D T-Rex toy in bright green and earthy brown, smiling with big eyes. Tactile, smooth plastic texture. Bright, cheerful lighting on a simple background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmdHP11KWl8TGb7lFqCYGq6z4uG-nXKELo1VnELfrHaEZvFK9O7XHHmsSeQOY_c31m5Nv4kloPZQTQ5Df7ZorkEeObA_WKPl7qL0gZhZ-BM8S7eR5HrMpk5uI3jwRz0txLjZGsnoomBdy6ypRNt1-BikrOPi7o-SZMNpZJO-2PFtPa7xIcVU952a6OzjxfcDljaKdfIMOjKWh7N62Gr4lyXKJ2oXUmNVn98Jay-3MjOsqkZ-ClJadpAg"/>
+</div>
+<h3 class="text-headline-md font-headline-md text-white z-20 relative font-black tracking-wide">Dinosaurios</h3>
+</button>
+<!-- Card 4: Sirenas -->
+<button class="bouncy-card relative overflow-hidden rounded-3xl border-4 border-[#006064] bg-[#80DEEA] min-h-[240px] flex flex-col justify-end p-md text-left group shadow-[0px_8px_0px_0px_rgba(0,96,100,1)] lg:col-span-2">
+<div class="absolute inset-0 bg-gradient-to-t from-[#006064]/60 to-transparent z-10"></div>
+<div class="absolute top-4 right-4 w-56 h-56 group-hover:scale-110 transition-transform duration-300">
+<img class="w-full h-full object-contain drop-shadow-2xl" data-alt="A beautiful, cute 3D cartoon mermaid with a pink tail and teal hair, sitting on a stylized shell. Vibrant colors, soft, squishy shapes, glowing underwater lighting effect. Simple background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAx4azx24-O3mBCayo3jYOeoDQr7pGKY4uXr22628jtdKSwn3OJxL_4qM8bToHlRXd0Tb4lOaloHRkDL7h7Cn9TECjFf2IfPlXnH_31XjCmscfXBBIXMORfWGkh4k1MaDsdZ5tYnMLEWGazs3wh1qkPIwRqSMHyVdmoF2vGfZTfRyq1eZyMTmcB_20DKdfn0Bt79y_f8DkRNkJdtBnnog9twkLwR4HImQTAJDWnhyRL7ff6bOACMeU1rg"/>
+</div>
+<h3 class="text-headline-md font-headline-md text-white z-20 relative font-black tracking-wide">Sirenas</h3>
+</button>
+<!-- Card 5: Piratas -->
+<button class="bouncy-card relative overflow-hidden rounded-3xl border-4 border-[#D84315] bg-[#FFAB91] min-h-[240px] flex flex-col justify-end p-md text-left group shadow-[0px_8px_0px_0px_rgba(216,67,21,1)]">
+<div class="absolute inset-0 bg-gradient-to-t from-[#D84315]/60 to-transparent z-10"></div>
+<div class="absolute -top-4 -right-4 w-40 h-40 group-hover:scale-110 transition-transform duration-300 rotate-12">
+<img class="w-full h-full object-contain drop-shadow-2xl" data-alt="A whimsical 3D cartoon pirate ship with orange sails and yellow accents, sailing on a small blue wave. Chunky, toy-like design, bright studio lighting. Clean background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDoa4EQjCWWWDRIuAI5hCoYyhrLPKLET42_IlBCaUTTzsy8X7wJosNmp3755z8KV5Q2v9C5fTz_OFlUPGxBJJjmvvLqgLPcmS85hUzGkQUh3JLaauulK-3YxC6gAAyYCEYB0fIPVChq4USnF5H1a78_pWYSHwqThZyj9I8hi8ek94wb9XzPjXKcJdCdCRVwg3uLX8jWwx51Ed4bTMc5yiCS837C42TubRkVgLBCLzOpYIbn1cX_t9PJYw"/>
+</div>
+<h3 class="text-headline-md font-headline-md text-white z-20 relative font-black tracking-wide">Piratas</h3>
+</button>
+<!-- Card 6: Unicornios -->
+<button class="bouncy-card relative overflow-hidden rounded-3xl border-4 border-[#880E4F] bg-[#F48FB1] min-h-[240px] flex flex-col justify-end p-md text-left group shadow-[0px_8px_0px_0px_rgba(136,14,79,1)]">
+<div class="absolute inset-0 bg-gradient-to-t from-[#880E4F]/60 to-transparent z-10"></div>
+<div class="absolute -top-8 -right-8 w-44 h-44 group-hover:scale-110 transition-transform duration-300">
+<img class="w-full h-full object-contain drop-shadow-2xl" data-alt="A magical, chubby 3D unicorn in pink and violet, with a sparkling horn and rainbow mane. Soft, plush-like texture, bright, enchanting lighting. Simple pastel background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAntpTOEt9_jRIMCw_-ZZdW99spdW3uG0MaDoMhxrwz4NErczevloIB2WLibQwUU4qynMgvsZkBkhp-YDomZb9teKhD3u75cQ_qQnBV1C8GuS5tsbBTDUuWDAWNLzfnw0K8ahuqWVwVJtyLLHAh0YCIy4GcZqcmgzyXIFc1bR4GqnXixiRqCmfZ5G4PCuf46biZVWSGLSLqHAUmllw0ax3QNcLEap3l--uC3uWtayxKrfP2pwLxPIeLnw"/>
+</div>
+<h3 class="text-headline-md font-headline-md text-white z-20 relative font-black tracking-wide">Unicornios</h3>
+</button>
+</section>
+</main>
+<!-- SideNavBar (Lumi Guide) -->
+<aside class="hidden xl:flex flex-col w-64 shrink-0 fixed right-8 top-32 z-40 gap-base bg-surface-container-low dark:bg-surface-container-highest rounded-xl border-2 border-outline-variant shadow-[4px_4px_0px_0px_rgba(0,101,142,0.2)] p-4">
+<!-- Mascot Header -->
+<div class="flex flex-col items-center text-center pb-4 mb-2 border-b-2 border-outline-variant border-dashed">
+<div class="w-24 h-24 mb-3 relative">
+<!-- Using provided image placeholder as requested -->
+<img alt="Lumi the Assistant AI" class="w-full h-full object-cover rounded-full border-4 border-surface drop-shadow-md" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8vC80ymDwevu3bu28TdRT06JGl9wVBpfuFH9Es40H79xbk5Z5P9mL3EZl5_erSvxJWnUeOxI8GM9aGAZnsJwQQxhyF16m_DWzik3f4qguiGmzPCethF2-jPcUnf4QnO7wOzaMtq2TRmY5SnRm1C2xMWZWdPF-JbpnB8IxLtCBqyz3RkGRX0sZS1A8ndef8IP8N6OBQu076FwYO8WTIQY9ElmGtB3RyaBiGU1nTdTYMCgHQP4wPXm_A"/>
+<div class="absolute -bottom-2 -right-2 bg-tertiary-container text-on-tertiary-container text-xs font-bold px-2 py-1 rounded-full border-2 border-surface border-tertiary rotate-12">Hi!</div>
+</div>
+<h2 class="text-headline-sm font-headline-md text-primary dark:text-primary-fixed font-black">Lumi</h2>
+<p class="text-body-sm font-body-md text-on-surface-variant">Your Story Guide</p>
+<div class="mt-4 bg-primary-fixed-dim/30 border-2 border-primary-container p-3 rounded-2xl rounded-tl-none relative shadow-sm">
+<p class="text-sm font-body-md text-on-primary-fixed font-semibold leading-snug">
+                        "¡Hola Sofía! Vamos a descubrir un mundo nuevo."
+                    </p>
+</div>
+</div>
+<!-- Navigation Tabs -->
+<nav class="flex flex-col gap-2">
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg p-3 font-label-bold shadow-[0px_4px_0px_0px_rgba(0,76,108,1)] active:translate-y-1 active:shadow-none transition-all border-2 border-transparent" href="#">
+<span class="material-symbols-outlined" data-icon="home" data-weight="fill" style="font-variation-settings: 'FILL' 1;">home</span>
+<span>Home</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant p-3 hover:bg-surface-variant hover:text-on-surface rounded-lg font-label-bold transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+<span>Missions</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant p-3 hover:bg-surface-variant hover:text-on-surface rounded-lg font-label-bold transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="lightbulb">lightbulb</span>
+<span>Lumi's Tips</span>
+</a>
+<a class="flex items-center gap-3 text-on-surface-variant p-3 hover:bg-surface-variant hover:text-on-surface rounded-lg font-label-bold transition-colors" href="#">
+<span class="material-symbols-outlined" data-icon="emoji_events">emoji_events</span>
+<span>Achievements</span>
+</a>
+</nav>
+<!-- CTA -->
+<div class="mt-auto pt-4">
+<button class="push-button w-full bg-secondary-container text-on-secondary-container border-2 border-secondary rounded-xl py-3 px-4 font-label-bold text-center border-secondary shadow-[0px_4px_0px_0px_rgba(112,93,0,1)] hover:bg-secondary-fixed flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" data-icon="chat_bubble_outline">chat_bubble_outline</span>
+                    Ask Lumi!
+                </button>
+</div>
+</aside>
+</div>
+</body></html>

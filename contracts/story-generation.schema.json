@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://story-teacher.example/schemas/story-generation-v1.json",
+  "title": "Story Teacher generation response v1",
+  "description": "Contrato interno completo devuelto por el modelo. correctAnswer y explanation no deben exponerse antes de corregir el intento.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["title", "story", "questions"],
+  "properties": {
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 120
+    },
+    "story": {
+      "type": "string",
+      "minLength": 1
+    },
+    "questions": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "$ref": "#/$defs/question"
+      }
+    }
+  },
+  "$defs": {
+    "question": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "statement",
+        "options",
+        "correctAnswer",
+        "skill",
+        "explanation"
+      ],
+      "properties": {
+        "statement": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "options": {
+          "type": "array",
+          "minItems": 4,
+          "maxItems": 4,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 220
+          }
+        },
+        "correctAnswer": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 3
+        },
+        "skill": {
+          "type": "string",
+          "enum": [
+            "literal",
+            "inference",
+            "vocabulary",
+            "sequence",
+            "cause_effect"
+          ]
+        },
+        "explanation": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 400
+        }
+      }
+    }
+  }
+}
+

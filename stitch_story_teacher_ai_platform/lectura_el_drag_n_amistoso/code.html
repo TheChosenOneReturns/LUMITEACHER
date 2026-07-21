@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Story Teacher - Reading Screen</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "secondary-fixed-dim": "#e8c426",
+                        "secondary": "#705d00",
+                        "tertiary-fixed": "#9cf973",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#715d00",
+                        "on-primary-container": "#005375",
+                        "on-background": "#181c1f",
+                        "primary-fixed": "#c7e7ff",
+                        "tertiary": "#246d00",
+                        "outline": "#6f7880",
+                        "on-secondary-fixed": "#221b00",
+                        "surface-variant": "#dfe3e7",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#81dc5a",
+                        "primary-fixed-dim": "#84cfff",
+                        "tertiary-container": "#79d453",
+                        "background": "#f6fafe",
+                        "on-primary-fixed": "#001e2e",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f1f4f8",
+                        "primary-container": "#6cc8ff",
+                        "on-secondary-fixed-variant": "#554500",
+                        "surface-tint": "#00658e",
+                        "on-tertiary-container": "#1c5900",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#84cfff",
+                        "surface-container": "#ebeef3",
+                        "secondary-fixed": "#ffe173",
+                        "secondary-container": "#fdd73b",
+                        "surface-container-highest": "#dfe3e7",
+                        "on-primary": "#ffffff",
+                        "surface": "#f6fafe",
+                        "surface-dim": "#d7dadf",
+                        "outline-variant": "#bec8d0",
+                        "surface-bright": "#f6fafe",
+                        "on-surface": "#181c1f",
+                        "on-surface-variant": "#3f484f",
+                        "on-tertiary-fixed-variant": "#195200",
+                        "inverse-surface": "#2d3134",
+                        "on-error-container": "#93000a",
+                        "primary": "#00658e",
+                        "on-primary-fixed-variant": "#004c6c",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e5e8ed",
+                        "inverse-on-surface": "#eef1f5",
+                        "on-tertiary-fixed": "#062100",
+                        "on-tertiary": "#ffffff"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "base": "8px",
+                        "gutter": "24px",
+                        "margin-desktop": "48px",
+                        "sm": "12px",
+                        "margin-mobile": "16px",
+                        "md": "24px",
+                        "xl": "64px",
+                        "xs": "4px",
+                        "lg": "40px"
+                    },
+                    fontFamily: {
+                        "body-md": ["Nunito Sans"],
+                        "headline-lg": ["Nunito Sans"],
+                        "caption": ["Nunito Sans"],
+                        "headline-md": ["Nunito Sans"],
+                        "label-bold": ["Nunito Sans"],
+                        "body-lg": ["Nunito Sans"],
+                        "display-lg": ["Nunito Sans"],
+                        "display-mobile": ["Nunito Sans"]
+                    },
+                    fontSize: {
+                        "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+                        "caption": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "800" }],
+                        "label-bold": ["16px", { "lineHeight": "20px", "fontWeight": "800" }],
+                        "body-lg": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "900" }],
+                        "display-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "900" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .paper-texture {
+            background-color: #fdfaf6;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100' height='100' filter='url(%23noise)' opacity='0.05'/%3E%3C/svg%3E");
+        }
+        
+        .book-shadow {
+            box-shadow: 0 20px 40px -10px rgba(0, 101, 142, 0.15), 0 0 0 4px #00658e;
+        }
+
+        .btn-press {
+            transition: all 0.15s ease;
+        }
+        .btn-press:active {
+            transform: translateY(4px);
+            box-shadow: none !important;
+        }
+        
+        .page-fold {
+            background: linear-gradient(to right, rgba(0,0,0,0.05) 0%, rgba(255,255,255,0) 20%, rgba(255,255,255,0) 80%, rgba(0,0,0,0.02) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen flex flex-col font-body-md text-on-surface overflow-x-hidden">
+<!-- Top Navigation (Shell logic: Top-level destination) -->
+<header class="docked full-width top border-b-4 border-secondary-container bg-surface flex justify-between items-center w-full px-margin-desktop py-4 max-w-1280px mx-auto shadow-[0px_4px_0px_0px_rgba(253,215,59,1)] z-50">
+<div class="flex items-center gap-md">
+<h1 class="text-headline-md font-headline-md font-black text-primary">Story Teacher</h1>
+<nav class="hidden md:flex gap-sm">
+<!-- Highlight 'My Stories' based on active state logic -->
+<a class="text-primary font-label-bold border-b-4 border-primary pb-1 hover:scale-105 transition-transform duration-200" href="#">My Stories</a>
+<a class="text-on-surface-variant font-label-bold pb-1 hover:scale-105 transition-transform duration-200" href="#">Library</a>
+<a class="text-on-surface-variant font-label-bold pb-1 hover:scale-105 transition-transform duration-200" href="#">Quests</a>
+</nav>
+</div>
+<div class="flex items-center gap-sm">
+<button class="p-2 text-primary hover:scale-105 transition-transform active:translate-y-1 active:shadow-none duration-100 rounded-full bg-surface-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</button>
+<button class="p-2 text-primary hover:scale-105 transition-transform active:translate-y-1 active:shadow-none duration-100 rounded-full bg-surface-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">stars</span>
+</button>
+<img alt="Sofia's profile avatar" class="w-12 h-12 rounded-full border-2 border-primary object-cover" data-alt="A 3D cartoon avatar of a cheerful young girl named Sofia with bright eyes, messy brown hair tied in pigtails, wearing a colorful striped sweater. The background is a solid soft pastel yellow. The style is 3D animation, highly detailed, vibrant colors, soft lighting, cheerful mood." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA78mvyOX-g8uduT2o4w728XpkEaLkAjXmgPH66AX1UGZpFAgcu7ExvOqFu7EtqnAfQtnd1Lyo8joLqWUrT9CvG6_kKjZPgzixQpGG0NddzgXKKYFSC7rqGwyu3N2MZVm1sqvgYPUsVN27xKaa5MQ8eRH1qX2HS9VWmtqswYnYCO3XG4hnAq2QBHASg-pzraCr_hy2mYCwGi5R3Ai8ctf9WKiOhtvIZBd1dsjr5qQrI1IowHcAsN3-n1A"/>
+</div>
+</header>
+<!-- Side Navigation (Web) / Bottom Nav (Mobile handled via responsive hide) -->
+<aside class="hidden md:flex fixed right-8 top-32 w-64 z-40 flex-col gap-base bg-surface-container-low rounded-xl border-2 border-outline-variant shadow-[4px_4px_0px_0px_rgba(0,101,142,0.2)] p-4">
+<div class="flex items-center gap-sm mb-4 pb-4 border-b-2 border-outline-variant">
+<img alt="Lumi the Assistant AI" class="w-16 h-16 rounded-full border-2 border-secondary object-cover bg-white" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8vC80ymDwevu3bu28TdRT06JGl9wVBpfuFH9Es40H79xbk5Z5P9mL3EZl5_erSvxJWnUeOxI8GM9aGAZnsJwQQxhyF16m_DWzik3f4qguiGmzPCethF2-jPcUnf4QnO7wOzaMtq2TRmY5SnRm1C2xMWZWdPF-JbpnB8IxLtCBqyz3RkGRX0sZS1A8ndef8IP8N6OBQu076FwYO8WTIQY9ElmGtB3RyaBiGU1nTdTYMCgHQP4wPXm_A"/>
+<div>
+<h2 class="text-label-bold font-label-bold text-primary">Lumi</h2>
+<p class="text-caption font-caption text-on-surface-variant">Your Story Guide</p>
+</div>
+</div>
+<nav class="flex flex-col gap-2">
+<!-- 'Home' generic, but we are reading a story, so maybe 'Missions' is better if part of a quest, but let's stick to Home as base -->
+<a class="flex items-center gap-2 text-on-surface-variant p-3 hover:bg-surface-variant rounded-lg hover:bg-primary-fixed-dim hover:text-on-primary-fixed-variant transition-colors active:translate-y-1 active:shadow-none" href="#">
+<span class="material-symbols-outlined">home</span>
+<span class="font-body-md text-body-md">Home</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant p-3 hover:bg-surface-variant rounded-lg hover:bg-primary-fixed-dim hover:text-on-primary-fixed-variant transition-colors active:translate-y-1 active:shadow-none" href="#">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="font-body-md text-body-md">Missions</span>
+</a>
+<a class="flex items-center gap-2 bg-primary-container text-on-primary-container rounded-lg p-3 font-label-bold shadow-[0px_4px_0px_0px_rgba(0,76,108,1)] active:translate-y-1 active:shadow-none transition-all" href="#">
+<span class="material-symbols-outlined">lightbulb</span>
+<span class="font-label-bold text-label-bold">Lumi's Tips</span>
+</a>
+<a class="flex items-center gap-2 text-on-surface-variant p-3 hover:bg-surface-variant rounded-lg hover:bg-primary-fixed-dim hover:text-on-primary-fixed-variant transition-colors active:translate-y-1 active:shadow-none" href="#">
+<span class="material-symbols-outlined">emoji_events</span>
+<span class="font-body-md text-body-md">Achievements</span>
+</a>
+</nav>
+<button class="mt-4 w-full bg-secondary text-on-secondary font-label-bold py-3 rounded-lg border-2 border-secondary-fixed shadow-[0px_4px_0px_0px_#554500] btn-press">
+            Ask Lumi!
+        </button>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col items-center justify-center p-margin-mobile md:p-margin-desktop w-full max-w-7xl mx-auto md:pr-80 relative z-10 pt-8 pb-32">
+<!-- The Book -->
+<div class="w-full max-w-4xl relative">
+<!-- Bookmarks (Navigation) -->
+<div class="absolute -left-4 md:-left-8 top-1/2 -translate-y-1/2 z-0">
+<button class="bg-primary text-on-primary rounded-l-xl py-8 px-2 md:px-4 border-2 border-r-0 border-primary-fixed-variant shadow-[0px_4px_0px_0px_#004c6c] btn-press flex items-center hover:bg-primary-fixed-variant transition-colors group">
+<span class="material-symbols-outlined group-hover:-translate-x-1 transition-transform">arrow_back_ios</span>
+<span class="sr-only">Anterior</span>
+</button>
+</div>
+<div class="absolute -right-4 md:-right-8 top-1/2 -translate-y-1/2 z-0">
+<button class="bg-primary text-on-primary rounded-r-xl py-8 px-2 md:px-4 border-2 border-l-0 border-primary-fixed-variant shadow-[0px_4px_0px_0px_#004c6c] btn-press flex items-center hover:bg-primary-fixed-variant transition-colors group">
+<span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward_ios</span>
+<span class="sr-only">Siguiente</span>
+</button>
+</div>
+<!-- Book Container -->
+<div class="book-shadow rounded-xl overflow-hidden bg-outline flex flex-col md:flex-row relative z-10">
+<!-- Left Page (Illustration) -->
+<div class="flex-1 paper-texture page-fold border-b md:border-b-0 md:border-r border-outline-variant p-6 md:p-10 flex flex-col items-center justify-center min-h-[400px]">
+<div class="w-full h-full rounded-lg border-4 border-white shadow-lg overflow-hidden relative rotate-[-2deg] bg-surface-container">
+<img class="w-full h-full object-cover absolute inset-0" data-alt="A vibrant, colorful 2D illustration for a children's storybook featuring a friendly, chunky green dragon with small wings sitting in a magical, glowing forest. The forest has oversized glowing mushrooms and twinkling fireflies. The lighting is soft and magical, creating a sense of wonder. Playful, bouncy cartoon aesthetic, highly detailed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6Yw43kNko6DUKKnHKPhe4ymSN-T3RzT5ImfJyNLaDzni-ZLlnXU1Tdgu-Ic-PPrn0PiroN_hQ_RcdQcq9qge05gd_DdyKFoWcJI9B8gKfahKvTrfZawNGj2nz7ka5Mjr9Ki05DUDH1e-bTZ0qO5nv-5-4OukhUPmy7FAu2gidwjzQvTGXzVVGlhJk2IM3-VYfG3zdixB97ToaCkFZV2K-ZvZYj72BIcK_Les04DGZul9DWTB94bPKHg"/>
+</div>
+</div>
+<!-- Right Page (Text) -->
+<div class="flex-1 paper-texture page-fold p-6 md:p-10 flex flex-col gap-6 relative">
+<!-- Page Number -->
+<div class="absolute top-4 right-6 text-outline font-label-bold text-label-bold">4</div>
+<h2 class="text-headline-lg font-headline-lg text-on-surface mt-4 text-center leading-tight">
+                        El Bosque de los Secretos
+                    </h2>
+<div class="text-body-lg font-body-lg text-on-surface-variant space-y-4 leading-relaxed">
+<p>
+                            Había una vez, en un valle rodeado de montañas de algodón, un pequeño dragón llamado Spark. A diferencia de otros dragones que escupían fuego, Spark soplaba burbujas de colores brillantes.
+                        </p>
+<p>
+                            Un día, mientras perseguía una mariposa azul gigante, se adentró en el Bosque Susurrante. Los árboles allí eran tan altos que tocaban las nubes, y sus hojas brillaban como estrellas esmeraldas.
+                        </p>
+</div>
+<div class="mt-auto flex justify-end">
+<span class="material-symbols-outlined text-secondary opacity-50" style="font-size: 32px;">auto_stories</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Footer Button & Mascot -->
+<div class="mt-xl flex flex-col items-center w-full max-w-xl relative">
+<button class="bg-tertiary-container text-on-tertiary-container text-headline-md font-headline-md py-4 px-12 rounded-xl border-4 border-tertiary shadow-[0px_8px_0px_0px_#246d00] flex items-center justify-center gap-3 btn-press hover:bg-tertiary-fixed-dim transition-colors w-full md:w-auto min-h-[72px]">
+<span class="material-symbols-outlined" style="font-size: 32px; font-variation-settings: 'FILL' 1;">play_arrow</span>
+                Comenzar desafío
+            </button>
+<!-- Lumi Mascot Cheer -->
+<div class="absolute -right-4 md:-right-32 -bottom-12 flex flex-col items-end animate-bounce">
+<div class="bg-surface rounded-2xl rounded-br-none p-4 border-2 border-secondary-container shadow-md mb-2 max-w-[200px] relative">
+<p class="text-body-md font-body-md text-on-surface font-bold text-center">¡Qué gran historia! ¿Estás lista para el reto?</p>
+<div class="absolute -bottom-2 right-4 w-4 h-4 bg-surface border-b-2 border-r-2 border-secondary-container transform rotate-45"></div>
+</div>
+<img alt="Lumi Mascot" class="w-24 h-24 drop-shadow-xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8vC80ymDwevu3bu28TdRT06JGl9wVBpfuFH9Es40H79xbk5Z5P9mL3EZl5_erSvxJWnUeOxI8GM9aGAZnsJwQQxhyF16m_DWzik3f4qguiGmzPCethF2-jPcUnf4QnO7wOzaMtq2TRmY5SnRm1C2xMWZWdPF-JbpnB8IxLtCBqyz3RkGRX0sZS1A8ndef8IP8N6OBQu076FwYO8WTIQY9ElmGtB3RyaBiGU1nTdTYMCgHQP4wPXm_A"/>
+</div>
+</div>
+</main>
+<!-- Footer -->
+<footer class="docked full-width bottom-0 rounded-t-full bg-[url('cloud-pattern.png')] bg-repeat-x border-t-4 border-white bg-primary-container w-full pt-16 pb-8 px-margin-desktop flex flex-col items-center justify-center gap-md z-30 mt-auto">
+<h2 class="text-headline-md font-headline-md text-on-primary-container">Story Teacher</h2>
+<div class="flex flex-wrap justify-center gap-6">
+<a class="text-on-primary-container opacity-80 text-label-bold font-label-bold hover:text-secondary hover:underline transition-all hover:scale-110" href="#">Parent Portal</a>
+<a class="text-on-primary-container opacity-80 text-label-bold font-label-bold hover:text-secondary hover:underline transition-all hover:scale-110" href="#">Privacy Stars</a>
+<a class="text-on-primary-container opacity-80 text-label-bold font-label-bold hover:text-secondary hover:underline transition-all hover:scale-110" href="#">Help</a>
+<a class="text-on-primary-container opacity-80 text-label-bold font-label-bold hover:text-secondary hover:underline transition-all hover:scale-110" href="#">Terms of Wonder</a>
+</div>
+<p class="text-body-md font-body-md text-on-primary-container opacity-70 mt-4">© 2024 Story Teacher - The Magical Learning Land</p>
+</footer>
+</body></html>

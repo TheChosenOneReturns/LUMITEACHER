@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Story Teacher - Adventure Tales</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "primary-fixed-dim": "#84cfff",
+                      "on-primary-fixed-variant": "#004c6c",
+                      "primary": "#00658e",
+                      "secondary-fixed": "#ffe173",
+                      "surface-bright": "#f6fafe",
+                      "outline-variant": "#bec8d0",
+                      "on-secondary-container": "#715d00",
+                      "inverse-primary": "#84cfff",
+                      "surface-tint": "#00658e",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-container": "#1c5900",
+                      "surface-container-high": "#e5e8ed",
+                      "surface-container-low": "#f1f4f8",
+                      "on-primary-fixed": "#001e2e",
+                      "on-primary-container": "#005375",
+                      "primary-container": "#6cc8ff",
+                      "secondary-fixed-dim": "#e8c426",
+                      "inverse-surface": "#2d3134",
+                      "tertiary": "#246d00",
+                      "on-background": "#181c1f",
+                      "on-tertiary-fixed": "#062100",
+                      "surface-dim": "#d7dadf",
+                      "on-surface-variant": "#3f484f",
+                      "tertiary-fixed": "#9cf973",
+                      "surface-container": "#ebeef3",
+                      "surface-container-lowest": "#ffffff",
+                      "error": "#ba1a1a",
+                      "secondary": "#705d00",
+                      "primary-fixed": "#c7e7ff",
+                      "on-tertiary": "#ffffff",
+                      "on-error": "#ffffff",
+                      "surface-variant": "#dfe3e7",
+                      "surface": "#f6fafe",
+                      "on-secondary": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "background": "#f6fafe",
+                      "inverse-on-surface": "#eef1f5",
+                      "outline": "#6f7880",
+                      "tertiary-container": "#79d453",
+                      "secondary-container": "#fdd73b",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed-variant": "#195200",
+                      "on-surface": "#181c1f",
+                      "on-secondary-fixed": "#221b00",
+                      "on-secondary-fixed-variant": "#554500",
+                      "tertiary-fixed-dim": "#81dc5a",
+                      "surface-container-highest": "#dfe3e7"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "md": "24px",
+                      "margin-mobile": "16px",
+                      "xl": "64px",
+                      "xs": "4px",
+                      "margin-desktop": "48px",
+                      "gutter": "24px",
+                      "sm": "12px",
+                      "lg": "40px",
+                      "base": "8px"
+              },
+              "fontFamily": {
+                      "display-mobile": ["Nunito Sans"],
+                      "caption": ["Nunito Sans"],
+                      "headline-md": ["Nunito Sans"],
+                      "display-lg": ["Nunito Sans"],
+                      "label-bold": ["Nunito Sans"],
+                      "headline-lg": ["Nunito Sans"],
+                      "body-md": ["Nunito Sans"],
+                      "body-lg": ["Nunito Sans"]
+              },
+              "fontSize": {
+                      "display-mobile": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "900"}],
+                      "caption": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "800"}],
+                      "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "900"}],
+                      "label-bold": ["16px", {"lineHeight": "20px", "fontWeight": "800"}],
+                      "headline-lg": ["32px", {"lineHeight": "40px", "fontWeight": "800"}],
+                      "body-md": ["18px", {"lineHeight": "28px", "fontWeight": "500"}],
+                      "body-lg": ["20px", {"lineHeight": "30px", "fontWeight": "600"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Nunito Sans', sans-serif; }
+        
+        /* Floating animations */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes float-slow {
+            0% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-15px) translateX(5px); }
+            100% { transform: translateY(0px) translateX(0px); }
+        }
+        @keyframes float-fast {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-8px) scale(1.05); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+        @keyframes pulse-star {
+            0% { opacity: 0.5; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+            100% { opacity: 0.5; transform: scale(0.8); }
+        }
+        
+        .animate-float { animation: float 4s ease-in-out infinite; }
+        .animate-float-slow { animation: float-slow 6s ease-in-out infinite; }
+        .animate-float-fast { animation: float-fast 3s ease-in-out infinite; }
+        .animate-pulse-star { animation: pulse-star 2s ease-in-out infinite; }
+        
+        /* Tactile Button Styles */
+        .btn-tactile {
+            border-bottom: 4px solid;
+            transition: all 0.1s ease-in-out;
+        }
+        .btn-tactile:active {
+            transform: translateY(4px);
+            border-bottom-width: 0px;
+            margin-bottom: 4px;
+        }
+        .btn-primary {
+            background-color: #00658e; /* primary */
+            color: white;
+            border-bottom-color: #004c6c; /* on-primary-fixed-variant */
+            box-shadow: 0px 8px 0px 0px rgba(0, 76, 108, 0.4);
+        }
+        .btn-primary:active {
+            box-shadow: 0px 4px 0px 0px rgba(0, 76, 108, 0.4);
+        }
+        .btn-secondary {
+            background-color: #fdd73b; /* secondary-container */
+            color: #715d00; /* on-secondary-container */
+            border-bottom-color: #e8c426; /* secondary-fixed-dim */
+            box-shadow: 0px 8px 0px 0px rgba(232, 196, 38, 0.4);
+        }
+        .btn-secondary:active {
+            box-shadow: 0px 4px 0px 0px rgba(232, 196, 38, 0.4);
+        }
+        
+        /* Magical Background Gradient */
+        .bg-magical {
+            background: linear-gradient(180deg, #c7e7ff 0%, #f6fafe 100%);
+        }
+    </style>
+</head>
+<body class="bg-magical text-on-background min-h-screen pb-24 relative overflow-x-hidden">
+<!-- Decorative Elements (Clouds & Stars) -->
+<div class="absolute top-10 left-[-20px] opacity-70 animate-float-slow w-32 h-16 bg-white rounded-full blur-xl z-0"></div>
+<div class="absolute top-40 right-[-30px] opacity-60 animate-float w-40 h-20 bg-white rounded-full blur-xl z-0"></div>
+<span class="material-symbols-outlined absolute top-20 left-10 text-secondary-fixed animate-pulse-star z-0" style="font-variation-settings: 'FILL' 1;">star</span>
+<span class="material-symbols-outlined absolute top-16 right-16 text-secondary-fixed animate-pulse-star z-0" style="font-variation-settings: 'FILL' 1; animation-delay: 0.5s;">star</span>
+<span class="material-symbols-outlined absolute top-60 left-16 text-secondary-fixed animate-pulse-star z-0" style="font-variation-settings: 'FILL' 1; animation-delay: 1s;">star</span>
+<span class="material-symbols-outlined absolute top-48 right-8 text-secondary-fixed animate-pulse-star z-0" style="font-variation-settings: 'FILL' 1; animation-delay: 1.5s;">star</span>
+<!-- TopAppBar -->
+<header class="bg-surface dark:bg-surface-dim font-headline-md-mobile text-headline-md-mobile docked full-width top-0 border-b-4 border-primary-container dark:border-on-primary-fixed-variant shadow-[0px_4px_0px_0px_rgba(0,101,142,0.2)] flex justify-between items-center px-margin-mobile h-20 w-full relative z-10">
+<div class="flex items-center gap-sm">
+<div class="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-container shadow-sm bg-surface-container-lowest">
+<img alt="Lumi Avatar" class="w-full h-full object-cover" data-alt="A detailed, vibrant 2D illustration of Lumi, a friendly owl mascot wearing large round glasses and a cozy striped scarf. The owl is styled like a Saturday morning cartoon character, expressing a sense of wonder and safety. The background is a clean, bright circle. The lighting is soft and cheerful." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfzu1aES1wW9eh09DdHgHB-7ESkzaotORAGivjKcn2pR2_Uu4bDvXydmD1OHLZGfMFjuh5GG6rzkmfTGzUJHPC07mcbKo_trJ2qNUvnvOWpArZaH6bqfwy0hBJAsC7ZCE2zs4ydMlSBv7Nz04BOaff-mnh-KBWU6FZrhrKlLNMtleyTrexUwxpmevBzQoKR3pLN6vDVqx-wjXrYDmL7P1dnibAfMSg48zW8y9ts1asrIE4tHN4r_lFXg"/>
+</div>
+<span class="font-headline-md-mobile text-headline-md-mobile text-primary font-black tracking-tight">Story Teacher</span>
+</div>
+<div class="flex items-center bg-secondary-container px-sm py-xs rounded-full border-2 border-secondary-fixed-dim shadow-sm">
+<span class="font-label-bold text-label-bold text-on-secondary-container mr-1">128</span>
+<span class="material-symbols-outlined text-secondary-fixed-dim" style="font-variation-settings: 'FILL' 1; font-size: 18px;">star</span>
+</div>
+</header>
+<!-- Main Content -->
+<main class="px-margin-mobile pt-lg flex flex-col items-center relative z-10">
+<!-- Hero Section -->
+<div class="w-full max-w-[400px] flex flex-col items-center text-center">
+<!-- Magical Open Book Image -->
+<div class="w-full relative animate-float-slow mb-md mt-sm drop-shadow-[0px_16px_16px_rgba(0,101,142,0.15)]">
+<img alt="Magical Open Book" class="w-full h-auto object-contain z-10 relative" src="https://lh3.googleusercontent.com/aida/AP1WRLtI-oJ8r4XPY51sK95H3NYwRfxaxj3Mh9vpHjlmJmgWsXZ16LkY0gmwtxvxpuERntz6s3BU5L6BVQuBc-jllGMaYm2mLEOkkjyRteVM8TYrCYxkDfmChDQWCQnJq6IIdIx7WEZxAh_lmprRM54iLoeJmPN8TEgqSxci44UA-zMrG6ZPVrW3_e7uD8cPK4kexEAbzzB5oQI8WTu84yBnZQngpHNFrofW4m955W1-MtJbLydq75-AFVE7lzNl"/>
+<!-- Sparkle highlights behind image -->
+<div class="absolute inset-0 bg-primary-container opacity-20 blur-2xl rounded-full z-0"></div>
+</div>
+<!-- Playful Title -->
+<h1 class="font-display-mobile text-display-mobile text-primary font-black mb-sm drop-shadow-sm px-2">
+                ¡Cada historia es una nueva aventura!
+            </h1>
+<p class="font-body-md text-body-md text-on-surface-variant mb-lg px-4">
+                Únete a Lumi y descubre mundos increíbles que puedes crear tú mismo.
+            </p>
+<!-- Call to Actions -->
+<div class="w-full flex flex-col gap-sm">
+<button class="btn-tactile btn-primary w-full h-14 rounded-xl font-headline-md text-headline-md flex items-center justify-center gap-2 hover:scale-[1.02]">
+                    ✨ Crear mi historia
+                </button>
+<button class="btn-tactile btn-secondary w-full h-14 rounded-xl font-headline-md text-headline-md flex items-center justify-center gap-2 hover:scale-[1.02]">
+                    📚 Explorar historias
+                </button>
+</div>
+</div>
+<!-- Decorative ground element -->
+<div class="absolute bottom-0 left-0 right-0 h-32 bg-tertiary-container/30 blur-2xl rounded-[100%] z-0 transform translate-y-16"></div>
+</main>
+<!-- BottomNavBar -->
+<nav class="bg-surface-container-lowest dark:bg-inverse-surface font-label-bold text-label-bold docked full-width bottom-0 rounded-t-xl border-t-4 border-primary-container dark:border-on-primary-fixed-variant shadow-[0px_-4px_0px_0px_rgba(0,101,142,0.1)] fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-4 pt-2">
+<!-- Home / Explore (Active based on landing page intent) -->
+<div class="flex flex-col items-center justify-center bg-secondary-container dark:bg-secondary text-on-secondary-container dark:text-on-secondary rounded-xl px-4 py-1 translate-y-[-4px] shadow-[0px_4px_0px_0px_rgba(113,93,0,1)] active:translate-y-0 transition-all duration-100 cursor-pointer">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">auto_stories</span>
+<span>Stories</span>
+</div>
+<!-- Library (Inactive) -->
+<div class="flex flex-col items-center justify-center text-outline dark:text-outline-variant px-4 py-2 hover:bg-surface-variant dark:hover:bg-on-surface-variant active:translate-y-0 transition-all duration-100 rounded-xl cursor-pointer">
+<span class="material-symbols-outlined">local_library</span>
+<span>Library</span>
+</div>
+<!-- Quests (Inactive) -->
+<div class="flex flex-col items-center justify-center text-outline dark:text-outline-variant px-4 py-2 hover:bg-surface-variant dark:hover:bg-on-surface-variant active:translate-y-0 transition-all duration-100 rounded-xl cursor-pointer">
+<span class="material-symbols-outlined">military_tech</span>
+<span>Quests</span>
+</div>
+<!-- Profile (Inactive) -->
+<div class="flex flex-col items-center justify-center text-outline dark:text-outline-variant px-4 py-2 hover:bg-surface-variant dark:hover:bg-on-surface-variant active:translate-y-0 transition-all duration-100 rounded-xl cursor-pointer">
+<span class="material-symbols-outlined">person</span>
+<span>Profile</span>
+</div>
+</nav>
+</body></html>

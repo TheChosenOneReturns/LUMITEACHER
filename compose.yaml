@@ -1,0 +1,19 @@
+services:
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: story-teacher-dynamodb
+    command: >-
+      -jar DynamoDBLocal.jar -sharedDb -dbPath /home/dynamodblocal/data
+    user: root
+    ports:
+      - "8000:8000"
+    volumes:
+      - story-teacher-dynamodb-data:/home/dynamodblocal/data
+    networks:
+      - story-teacher-network
+networks:
+  story-teacher-network:
+    name: story-teacher-network
+
+volumes:
+  story-teacher-dynamodb-data:

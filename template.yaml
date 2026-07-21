@@ -1,0 +1,244 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: Story Teacher - MVP educativo serverless
+
+Parameters:
+  AllowedOrigin:
+    Type: String
+    Default: http://localhost:5173
+  StoryGeneratorMode:
+    Type: String
+    Default: fixture
+    AllowedValues: [fixture, bedrock]
+  BedrockModelId:
+    Type: String
+    Default: us.amazon.nova-2-lite-v1:0
+  BedrockGuardrailId:
+    Type: String
+    Default: ""
+  BedrockGuardrailVersion:
+    Type: String
+    Default: DRAFT
+
+Globals:
+  Function:
+    Runtime: nodejs22.x
+    Architectures: [x86_64]
+    MemorySize: 768
+    Timeout: 29
+    Tracing: Active
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref StoryTeacherTable
+        STORY_GENERATOR_MODE: !Ref StoryGeneratorMode
+        BEDROCK_MODEL_ID: !Ref BedrockModelId
+        BEDROCK_GUARDRAIL_ID: !Ref BedrockGuardrailId
+        BEDROCK_GUARDRAIL_VERSION: !Ref BedrockGuardrailVersion
+        ALLOWED_DEMO_USER_ID: demo-sofia
+        ALLOWED_ORIGIN: !Ref AllowedOrigin
+  HttpApi:
+    CorsConfiguration:
+      AllowOrigins:
+        - !Ref AllowedOrigin
+      AllowHeaders:
+        - Content-Type
+        - X-Demo-User-Id
+        - Idempotency-Key
+      AllowMethods:
+        - GET
+        - POST
+        - OPTIONS
+      MaxAge: 600
+
+Resources:
+  StoryTeacherApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      StageName: $default
+
+  HealthFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/health.handler
+      Events:
+        Health:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /health
+            Method: GET
+    Metadata: &EsbuildMetadata
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        EntryPoints:
+          - backend/src/handlers/health.ts
+
+  CreateStoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/createStory.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StoryTeacherTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:TransactWriteItems
+              Resource: !GetAtt StoryTeacherTable.Arn
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:ApplyGuardrail
+              Resource: "*"
+      Events:
+        CreateStory:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /stories
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        EntryPoints:
+          - backend/src/handlers/createStory.ts
+
+  ListStoriesFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/listStories.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref StoryTeacherTable
+      Events:
+        ListStories:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /stories
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        EntryPoints:
+          - backend/src/handlers/listStories.ts
+
+  GetStoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/getStory.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref StoryTeacherTable
+      Events:
+        GetStory:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /stories/{storyId}
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        EntryPoints:
+          - backend/src/handlers/getStory.ts
+
+  SubmitAttemptFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/submitAttempt.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StoryTeacherTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - dynamodb:TransactWriteItems
+              Resource: !GetAtt StoryTeacherTable.Arn
+      Events:
+        SubmitAttempt:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /stories/{storyId}/attempts
+            Method: POST
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        EntryPoints:
+          - backend/src/handlers/submitAttempt.ts
+
+  StoryTeacherTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PROVISIONED
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false
+      SSESpecification:
+        SSEEnabled: true
+      Tags:
+        - Key: Project
+          Value: StoryTeacher
+        - Key: Environment
+          Value: hackathon
+
+Outputs:
+  ApiUrl:
+    Description: URL pública del HTTP API
+    Value: !Sub https://${StoryTeacherApi}.execute-api.${AWS::Region}.${AWS::URLSuffix}
+  TableName:
+    Description: Tabla DynamoDB
+    Value: !Ref StoryTeacherTable

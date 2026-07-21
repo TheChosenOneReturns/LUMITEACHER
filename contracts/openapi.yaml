@@ -1,0 +1,383 @@
+openapi: 3.0.3
+info:
+  title: Story Teacher API
+  version: 1.0.0
+  description: >-
+    API del MVP. X-Demo-User-Id simula un perfil y no constituye
+    autenticación. Las respuestas correctas se mantienen en el backend hasta
+    que se envía un intento.
+servers:
+  - url: https://{apiId}.execute-api.us-east-1.amazonaws.com
+    variables:
+      apiId:
+        default: replace-me
+tags:
+  - name: System
+  - name: Stories
+  - name: Attempts
+paths:
+  /health:
+    get:
+      tags: [System]
+      operationId: getHealth
+      summary: Comprueba la API sin invocar Bedrock
+      responses:
+        '200':
+          description: Servicio disponible
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [status]
+                properties:
+                  status:
+                    type: string
+                    enum: [ok]
+  /stories:
+    post:
+      tags: [Stories]
+      operationId: createStory
+      summary: Genera, valida y guarda un cuento
+      parameters:
+        - $ref: '#/components/parameters/DemoUserId'
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GenerateStoryRequest'
+      responses:
+        '201':
+          description: Cuento creado; no incluye clave ni explicaciones
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoryPublic'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '422':
+          $ref: '#/components/responses/ContentBlocked'
+        '502':
+          $ref: '#/components/responses/GenerationFailed'
+        '504':
+          $ref: '#/components/responses/GenerationTimeout'
+    get:
+      tags: [Stories]
+      operationId: listStories
+      summary: Lista los cuentos del perfil demo
+      parameters:
+        - $ref: '#/components/parameters/DemoUserId'
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        '200':
+          description: Lista del más reciente al más antiguo
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [items]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/StorySummary'
+  /stories/{storyId}:
+    get:
+      tags: [Stories]
+      operationId: getStory
+      summary: Obtiene un cuento sin clave de corrección
+      parameters:
+        - $ref: '#/components/parameters/DemoUserId'
+        - $ref: '#/components/parameters/StoryId'
+      responses:
+        '200':
+          description: Cuento público
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StoryPublic'
+        '404':
+          $ref: '#/components/responses/StoryNotFound'
+  /stories/{storyId}/attempts:
+    post:
+      tags: [Attempts]
+      operationId: submitAttempt
+      summary: Corrige y guarda las cinco respuestas
+      parameters:
+        - $ref: '#/components/parameters/DemoUserId'
+        - $ref: '#/components/parameters/StoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAttemptRequest'
+      responses:
+        '201':
+          description: Intento corregido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AttemptResult'
+        '400':
+          $ref: '#/components/responses/ValidationError'
+        '404':
+          $ref: '#/components/responses/StoryNotFound'
+        '409':
+          description: El attemptId ya existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  parameters:
+    DemoUserId:
+      name: X-Demo-User-Id
+      in: header
+      required: true
+      description: Perfil simulado; sólo se acepta demo-sofia en el MVP
+      schema:
+        type: string
+        enum: [demo-sofia]
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      required: true
+      schema:
+        type: string
+        minLength: 16
+        maxLength: 64
+    StoryId:
+      name: storyId
+      in: path
+      required: true
+      schema:
+        type: string
+        minLength: 10
+        maxLength: 40
+  schemas:
+    Difficulty:
+      type: string
+      enum: [facil, media, desafio]
+    Skill:
+      type: string
+      enum: [literal, inference, vocabulary, sequence, cause_effect]
+    StoryInput:
+      type: object
+      additionalProperties: false
+      required: [age, theme, difficulty, educationalObjective, maxWords]
+      properties:
+        age:
+          type: integer
+          minimum: 6
+          maximum: 12
+        theme:
+          type: string
+          minLength: 2
+          maxLength: 60
+        difficulty:
+          $ref: '#/components/schemas/Difficulty'
+        educationalObjective:
+          type: string
+          minLength: 5
+          maxLength: 160
+        maxWords:
+          type: integer
+          enum: [150, 300, 500]
+        mainCharacter:
+          type: string
+          nullable: true
+          maxLength: 60
+    GenerateStoryRequest:
+      $ref: '#/components/schemas/StoryInput'
+    QuestionPublic:
+      type: object
+      additionalProperties: false
+      required: [questionId, statement, options, skill]
+      properties:
+        questionId:
+          type: string
+          example: q1
+        statement:
+          type: string
+        options:
+          type: array
+          minItems: 4
+          maxItems: 4
+          items:
+            type: string
+        skill:
+          $ref: '#/components/schemas/Skill'
+    StoryPublic:
+      type: object
+      additionalProperties: false
+      required: [storyId, createdAt, input, title, story, questions]
+      properties:
+        storyId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        input:
+          $ref: '#/components/schemas/StoryInput'
+        title:
+          type: string
+        story:
+          type: string
+        questions:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/QuestionPublic'
+    StorySummary:
+      type: object
+      additionalProperties: false
+      required: [storyId, createdAt, title, theme, age]
+      properties:
+        storyId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        title:
+          type: string
+        theme:
+          type: string
+        age:
+          type: integer
+    SubmitAttemptRequest:
+      type: object
+      additionalProperties: false
+      required: [attemptId, answers]
+      properties:
+        attemptId:
+          type: string
+          minLength: 10
+          maxLength: 40
+        answers:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            type: integer
+            minimum: 0
+            maximum: 3
+    QuestionResult:
+      type: object
+      additionalProperties: false
+      required:
+        - questionId
+        - selectedAnswer
+        - correctAnswer
+        - isCorrect
+        - skill
+        - explanation
+      properties:
+        questionId:
+          type: string
+        selectedAnswer:
+          type: integer
+          minimum: 0
+          maximum: 3
+        correctAnswer:
+          type: integer
+          minimum: 0
+          maximum: 3
+        isCorrect:
+          type: boolean
+        skill:
+          $ref: '#/components/schemas/Skill'
+        explanation:
+          type: string
+    AttemptResult:
+      type: object
+      additionalProperties: false
+      required:
+        - attemptId
+        - storyId
+        - createdAt
+        - correctCount
+        - scorePercent
+        - results
+      properties:
+        attemptId:
+          type: string
+        storyId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        correctCount:
+          type: integer
+          minimum: 0
+          maximum: 5
+        scorePercent:
+          type: integer
+          enum: [0, 20, 40, 60, 80, 100]
+        results:
+          type: array
+          minItems: 5
+          maxItems: 5
+          items:
+            $ref: '#/components/schemas/QuestionResult'
+    ErrorDetail:
+      type: object
+      additionalProperties: false
+      required: [code, message, requestId]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        requestId:
+          type: string
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [error]
+      properties:
+        error:
+          $ref: '#/components/schemas/ErrorDetail'
+  responses:
+    ValidationError:
+      description: Entrada inválida
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    ContentBlocked:
+      description: Entrada o salida bloqueada por seguridad
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    GenerationFailed:
+      description: Salida inválida después del reintento
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    GenerationTimeout:
+      description: La generación superó el límite de tiempo
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    StoryNotFound:
+      description: Cuento inexistente para el perfil
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+

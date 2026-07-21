@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resultados - Story Teacher</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;500;600;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-fixed-dim": "#e8c426",
+                        "secondary": "#705d00",
+                        "tertiary-fixed": "#9cf973",
+                        "surface-container-lowest": "#ffffff",
+                        "on-secondary-container": "#715d00",
+                        "on-primary-container": "#005375",
+                        "on-background": "#181c1f",
+                        "primary-fixed": "#c7e7ff",
+                        "tertiary": "#246d00",
+                        "outline": "#6f7880",
+                        "on-secondary-fixed": "#221b00",
+                        "surface-variant": "#dfe3e7",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed-dim": "#81dc5a",
+                        "primary-fixed-dim": "#84cfff",
+                        "tertiary-container": "#79d453",
+                        "background": "#f6fafe",
+                        "on-primary-fixed": "#001e2e",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f1f4f8",
+                        "primary-container": "#6cc8ff",
+                        "on-secondary-fixed-variant": "#554500",
+                        "surface-tint": "#00658e",
+                        "on-tertiary-container": "#1c5900",
+                        "on-error": "#ffffff",
+                        "inverse-primary": "#84cfff",
+                        "surface-container": "#ebeef3",
+                        "secondary-fixed": "#ffe173",
+                        "secondary-container": "#fdd73b",
+                        "surface-container-highest": "#dfe3e7",
+                        "on-primary": "#ffffff",
+                        "surface": "#f6fafe",
+                        "surface-dim": "#d7dadf",
+                        "outline-variant": "#bec8d0",
+                        "surface-bright": "#f6fafe",
+                        "on-surface": "#181c1f",
+                        "on-surface-variant": "#3f484f",
+                        "on-tertiary-fixed-variant": "#195200",
+                        "inverse-surface": "#2d3134",
+                        "on-error-container": "#93000a",
+                        "primary": "#00658e",
+                        "on-primary-fixed-variant": "#004c6c",
+                        "error": "#ba1a1a",
+                        "surface-container-high": "#e5e8ed",
+                        "inverse-on-surface": "#eef1f5",
+                        "on-tertiary-fixed": "#062100",
+                        "on-tertiary": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "gutter": "24px",
+                        "margin-desktop": "48px",
+                        "sm": "12px",
+                        "margin-mobile": "16px",
+                        "md": "24px",
+                        "xl": "64px",
+                        "xs": "4px",
+                        "lg": "40px"
+                    },
+                    "fontFamily": {
+                        "body-md": ["Nunito Sans"],
+                        "headline-lg": ["Nunito Sans"],
+                        "caption": ["Nunito Sans"],
+                        "headline-md": ["Nunito Sans"],
+                        "label-bold": ["Nunito Sans"],
+                        "body-lg": ["Nunito Sans"],
+                        "display-lg": ["Nunito Sans"],
+                        "display-mobile": ["Nunito Sans"]
+                    },
+                    "fontSize": {
+                        "body-md": ["18px", { "lineHeight": "28px", "fontWeight": "500" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "800" }],
+                        "caption": ["14px", { "lineHeight": "20px", "fontWeight": "600" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "800" }],
+                        "label-bold": ["16px", { "lineHeight": "20px", "fontWeight": "800" }],
+                        "body-lg": ["20px", { "lineHeight": "30px", "fontWeight": "600" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "900" }],
+                        "display-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "900" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .tactile-shadow-blue { box-shadow: 0px 8px 0px 0px rgba(0, 101, 142, 0.2); }
+        .tactile-btn-green { box-shadow: 0px 4px 0px 0px #246d00; }
+        .tactile-btn-blue { box-shadow: 0px 4px 0px 0px #004c6c; }
+        
+        .progress-shine {
+            background: linear-gradient(to bottom, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 100%);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col items-center">
+<main class="w-full max-w-1280px mx-auto px-margin-mobile md:px-margin-desktop py-xl flex-grow flex flex-col items-center justify-center gap-lg">
+<!-- Header -->
+<div class="text-center animate-bounce" style="animation-duration: 2s;">
+<h1 class="font-display-mobile md:font-display-lg text-display-mobile md:text-display-lg text-primary drop-shadow-[0_4px_0_rgba(108,200,255,0.5)]">¡Increíble trabajo, Sofía!</h1>
+</div>
+<!-- Centerpiece Trophy -->
+<div class="relative w-64 h-64 md:w-80 md:h-80 hover:scale-105 transition-transform duration-300">
+<div class="absolute inset-0 bg-secondary-container rounded-full opacity-30 animate-pulse blur-2xl"></div>
+<img class="w-full h-full object-contain relative z-10" data-alt="A highly detailed 3D rendering of a shiny gold trophy cup and a large gold medal with a red ribbon, rendered in a bright, colorful, playful cartoon style suitable for a children's educational app. The objects are glossy and tactile, sitting against a clean, light background with a subtle bouncy drop shadow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC8DgvlLK_omueUxBDbM2HuKkVNAH3ouKMl4-aJ74CLJf7OvToPaRY0-Jb9sdhhcte3NbvN30d1l6S93iaJBrf3XUCgzTt1325LI9rB4uG8qx3yvAx4E4Kz-ADENlz6qyzEM7IlVrS2FP7gcyEuaEZMJUOQI82tEqmV6GEpdFqUFHY7s8GBCImqo1oHT5Y-9lNjSinJQKYa_eJ9nvObcPwMPKKw-crJDKBlvjgN2auPAVi-5Q3JYUSKXg"/>
+</div>
+<!-- Stats Strip -->
+<div class="flex flex-col md:flex-row gap-md items-center justify-center">
+<div class="bg-surface rounded-full border-2 border-primary-container px-6 py-3 flex items-center gap-3 tactile-shadow-blue">
+<span class="material-symbols-outlined text-primary font-bold text-3xl">sports_score</span>
+<span class="font-headline-md text-headline-md text-primary">Puntaje: 100/100</span>
+</div>
+<div class="bg-surface rounded-full border-2 border-secondary-container px-6 py-3 flex items-center gap-3 shadow-[0px_8px_0px_0px_rgba(253,215,59,0.3)]">
+<span class="font-label-bold text-label-bold text-secondary">Estrellas ganadas:</span>
+<span class="text-2xl tracking-widest drop-shadow-md">⭐⭐⭐⭐⭐</span>
+</div>
+</div>
+<!-- Layout Grid for Skills and Mascot -->
+<div class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-lg mt-md">
+<!-- Skill Bars Card -->
+<div class="bg-surface rounded-3xl border-2 border-primary-fixed tactile-shadow-blue p-8 flex flex-col gap-6 w-full">
+<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-tertiary">analytics</span> Tus Habilidades
+                </h2>
+<div class="flex flex-col gap-4">
+<!-- Comprensión -->
+<div>
+<div class="flex justify-between font-label-bold text-label-bold mb-1">
+<span class="flex items-center gap-1"><span class="text-xl">📖</span> Comprensión</span>
+<span class="text-tertiary-container font-black">100%</span>
+</div>
+<div class="h-8 bg-surface-container-high rounded-full overflow-hidden border-2 border-outline-variant/30 relative">
+<div class="h-full bg-gradient-to-r from-tertiary-fixed-dim to-tertiary-container w-[100%] rounded-full relative">
+<div class="absolute top-0 left-0 right-0 h-1/2 progress-shine rounded-t-full"></div>
+</div>
+</div>
+</div>
+<!-- Inferencias -->
+<div>
+<div class="flex justify-between font-label-bold text-label-bold mb-1">
+<span class="flex items-center gap-1"><span class="text-xl">🧠</span> Inferencias</span>
+<span class="text-primary font-black">80%</span>
+</div>
+<div class="h-8 bg-surface-container-high rounded-full overflow-hidden border-2 border-outline-variant/30 relative">
+<div class="h-full bg-gradient-to-r from-primary-fixed-dim to-primary-container w-[80%] rounded-full relative">
+<div class="absolute top-0 left-0 right-0 h-1/2 progress-shine rounded-t-full"></div>
+</div>
+</div>
+</div>
+<!-- Vocabulario -->
+<div>
+<div class="flex justify-between font-label-bold text-label-bold mb-1">
+<span class="flex items-center gap-1"><span class="text-xl">🔤</span> Vocabulario</span>
+<span class="text-secondary font-black">90%</span>
+</div>
+<div class="h-8 bg-surface-container-high rounded-full overflow-hidden border-2 border-outline-variant/30 relative">
+<div class="h-full bg-gradient-to-r from-secondary-fixed-dim to-secondary-container w-[90%] rounded-full relative">
+<div class="absolute top-0 left-0 right-0 h-1/2 progress-shine rounded-t-full"></div>
+</div>
+</div>
+</div>
+<!-- Secuencia -->
+<div>
+<div class="flex justify-between font-label-bold text-label-bold mb-1">
+<span class="flex items-center gap-1"><span class="text-xl">🧩</span> Secuencia</span>
+<span class="text-tertiary-container font-black">100%</span>
+</div>
+<div class="h-8 bg-surface-container-high rounded-full overflow-hidden border-2 border-outline-variant/30 relative">
+<div class="h-full bg-gradient-to-r from-tertiary-fixed-dim to-tertiary-container w-[100%] rounded-full relative">
+<div class="absolute top-0 left-0 right-0 h-1/2 progress-shine rounded-t-full"></div>
+</div>
+</div>
+</div>
+<!-- Causa y efecto -->
+<div>
+<div class="flex justify-between font-label-bold text-label-bold mb-1">
+<span class="flex items-center gap-1"><span class="text-xl">💡</span> Causa y efecto</span>
+<span class="text-primary font-black">85%</span>
+</div>
+<div class="h-8 bg-surface-container-high rounded-full overflow-hidden border-2 border-outline-variant/30 relative">
+<div class="h-full bg-gradient-to-r from-primary-fixed-dim to-primary-container w-[85%] rounded-full relative">
+<div class="absolute top-0 left-0 right-0 h-1/2 progress-shine rounded-t-full"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Mascot & Actions -->
+<div class="flex flex-col gap-md justify-between">
+<!-- Mascot Speech Bubble -->
+<div class="flex flex-col sm:flex-row items-center gap-4 bg-surface rounded-3xl border-2 border-secondary-container p-6 shadow-[0px_8px_0px_0px_rgba(253,215,59,0.2)]">
+<img class="w-32 h-32 object-contain rounded-full border-4 border-surface bg-surface-container" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAq8vC80ymDwevu3bu28TdRT06JGl9wVBpfuFH9Es40H79xbk5Z5P9mL3EZl5_erSvxJWnUeOxI8GM9aGAZnsJwQQxhyF16m_DWzik3f4qguiGmzPCethF2-jPcUnf4QnO7wOzaMtq2TRmY5SnRm1C2xMWZWdPF-JbpnB8IxLtCBqyz3RkGRX0sZS1A8ndef8IP8N6OBQu076FwYO8WTIQY9ElmGtB3RyaBiGU1nTdTYMCgHQP4wPXm_A"/>
+<div class="relative bg-white rounded-2xl p-4 border-2 border-outline-variant w-full">
+<div class="absolute -left-3 top-1/2 -translate-y-1/2 w-4 h-4 bg-white border-b-2 border-l-2 border-outline-variant rotate-45 hidden sm:block"></div>
+<p class="font-body-lg text-body-lg text-on-surface">"¡Eres una maestra de las historias! ¡Sigue así!"</p>
+</div>
+</div>
+<!-- CTAs -->
+<div class="flex flex-col gap-4 mt-auto">
+<button class="w-full min-h-[64px] bg-tertiary-container text-on-tertiary-container border-2 border-tertiary border-b-4 rounded-xl font-headline-md text-headline-md flex items-center justify-center gap-2 hover:bg-tertiary-fixed transition-colors active:border-b-0 active:translate-y-1 tactile-btn-green">
+<span>✨</span> Crear otra aventura
+                    </button>
+<button class="w-full min-h-[56px] bg-surface text-primary border-2 border-primary border-b-4 rounded-xl font-label-bold text-label-bold flex items-center justify-center gap-2 hover:bg-primary-fixed transition-colors active:border-b-0 active:translate-y-1 tactile-btn-blue">
+<span>📚</span> Ver biblioteca
+                    </button>
+</div>
+</div>
+</div>
+</main>
+<!-- Footer Component from JSON -->
+<footer class="w-full pt-16 pb-8 px-margin-desktop flex flex-col items-center justify-center gap-md bg-primary-container dark:bg-primary-fixed-dim docked full-width bottom-0 rounded-t-full border-t-4 border-white" style="background-image: url('data:image/svg+xml,%3Csvg width=\'100\' height=\'20\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M0 20 Q 25 0, 50 20 T 100 20\' fill=\'none\' stroke=\'white\' stroke-width=\'4\' opacity=\'0.2\'/%3E%3C/svg%3E'); background-repeat: repeat-x;">
+<div class="flex flex-wrap justify-center gap-gutter">
+<a class="font-label-bold text-label-bold text-on-primary-container opacity-80 hover:text-secondary hover:underline transition-all hover:scale-110" href="#">Parent Portal</a>
+<a class="font-label-bold text-label-bold text-on-primary-container opacity-80 hover:text-secondary hover:underline transition-all hover:scale-110" href="#">Privacy Stars</a>
+<a class="font-label-bold text-label-bold text-on-primary-container opacity-80 hover:text-secondary hover:underline transition-all hover:scale-110" href="#">Help</a>
+<a class="font-label-bold text-label-bold text-on-primary-container opacity-80 hover:text-secondary hover:underline transition-all hover:scale-110" href="#">Terms of Wonder</a>
+</div>
+<div class="text-headline-md font-headline-md text-on-primary-container mt-sm">
+            © 2024 Story Teacher - The Magical Learning Land
+        </div>
+</footer>
+</body></html>

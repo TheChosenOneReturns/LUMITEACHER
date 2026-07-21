@@ -1,0 +1,67 @@
+{
+  "title": "Luna y el faro de estrellas",
+  "story": "En la estación Celeste, Luna, una gata astronauta de ocho años, cuidaba un faro que guiaba a los pequeños robots exploradores. Una mañana notó que su luz era tenue y apenas alcanzaba la primera nube. Luna revisó el panel y descubrió que la energía funcionaba bien. Entonces abrió la puerta del faro y encontró cuatro espejos cubiertos de polvo. Intentó mover el más grande, pero era demasiado pesado. En vez de rendirse, llamó a Nilo, su amigo robot. Juntos limpiaron los espejos con paños suaves. Después, Luna sostuvo una brújula de luz mientras Nilo giraba cada espejo. Al principio, un reflejo apuntó al techo. Los dos observaron el recorrido del rayo y decidieron probar un ángulo diferente. Cuando alinearon el último espejo, la luz llegó al cristal de la cima. El faro volvió a brillar y los robots exploradores encontraron el camino a la estación. Luna sonrió. Había descubierto que pedir ayuda no hacía más pequeña su idea: permitía que dos ideas trabajaran juntas.",
+  "questions": [
+    {
+      "statement": "¿Qué encontró Luna dentro del faro?",
+      "options": [
+        "Una caja de mapas",
+        "Cuatro espejos con polvo",
+        "Un robot dormido",
+        "Una ventana rota"
+      ],
+      "correctAnswer": 1,
+      "skill": "literal",
+      "explanation": "El cuento dice directamente que Luna encontró cuatro espejos cubiertos de polvo."
+    },
+    {
+      "statement": "¿Por qué fue útil que Luna llamara a Nilo?",
+      "options": [
+        "Porque Nilo conocía un atajo fuera de la estación",
+        "Porque Luna quería dejar de cuidar el faro",
+        "Porque podían limpiar y alinear los espejos trabajando juntos",
+        "Porque Nilo podía fabricar un faro nuevo"
+      ],
+      "correctAnswer": 2,
+      "skill": "inference",
+      "explanation": "Luna no podía mover el espejo sola y, al colaborar, ambos lograron limpiar y alinear el sistema."
+    },
+    {
+      "statement": "En el cuento, ¿qué significa que la luz era “tenue”?",
+      "options": [
+        "Que brillaba con poca intensidad",
+        "Que cambiaba de color rápidamente",
+        "Que hacía mucho ruido",
+        "Que estaba muy caliente"
+      ],
+      "correctAnswer": 0,
+      "skill": "vocabulary",
+      "explanation": "La luz apenas llegaba a la primera nube, por eso “tenue” significa que brillaba con poca intensidad."
+    },
+    {
+      "statement": "¿Cuál es el orden correcto de estos acontecimientos?",
+      "options": [
+        "El faro brilló, Luna vio el polvo, Nilo llegó y limpiaron",
+        "Nilo llegó, el faro brilló, Luna vio la luz tenue y limpiaron",
+        "Luna vio la luz tenue, encontró los espejos, llamó a Nilo y los alinearon",
+        "Luna llamó a Nilo, los robots se perdieron, encontraron espejos y cerraron el faro"
+      ],
+      "correctAnswer": 2,
+      "skill": "sequence",
+      "explanation": "Primero Luna notó la luz tenue, luego encontró los espejos, pidió ayuda y finalmente los alinearon."
+    },
+    {
+      "statement": "¿Qué hizo que el faro volviera a brillar?",
+      "options": [
+        "Los robots regresaron a la estación",
+        "Luna cambió la brújula por un mapa",
+        "Nilo apagó el panel de energía",
+        "Luna y Nilo alinearon los espejos para que la luz llegara al cristal"
+      ],
+      "correctAnswer": 3,
+      "skill": "cause_effect",
+      "explanation": "Al alinear el último espejo, la luz alcanzó el cristal de la cima y el faro volvió a brillar."
+    }
+  ]
+}
+
