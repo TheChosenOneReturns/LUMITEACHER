@@ -7,9 +7,9 @@ export function NotFoundPage() {
       <Lumi message="Parece que este camino no estaba en el mapa." />
       <h1>Página no encontrada</h1>
       <Link className="button button--primary" to="/inicio">
-        Volver al inicio
+        <ArrowLeftIcon size={21} weight="bold" /> Volver al inicio
       </Link>
     </section>
   );
 }
-
+import { ArrowLeftIcon } from "../components/icons";

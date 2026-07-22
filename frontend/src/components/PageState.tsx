@@ -1,9 +1,16 @@
+import { ArrowClockwiseIcon, CloudSlashIcon } from "./icons";
+import { motion } from "motion/react";
 import { Lumi } from "./Lumi";
 
 export function LoadingState({ message = "Cargando…" }: { message?: string }) {
   return (
     <section className="page-state" aria-live="polite" aria-busy="true">
-      <div className="spinner" aria-hidden="true" />
+      <motion.div
+        className="spinner"
+        aria-hidden="true"
+        animate={{ rotate: 360 }}
+        transition={{ duration: 1.15, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
+      />
       <Lumi message={message} />
     </section>
   );
@@ -18,17 +25,22 @@ export function ErrorState({
 }) {
   return (
     <section className="page-state" role="alert">
-      <div className="state-icon" aria-hidden="true">
-        ☁️
-      </div>
+      <motion.div
+        className="state-icon"
+        aria-hidden="true"
+        initial={{ scale: 0.7, rotate: -12 }}
+        animate={{ scale: 1, rotate: 0 }}
+        transition={{ type: "spring", stiffness: 220, damping: 17 }}
+      >
+        <CloudSlashIcon size={58} weight="duotone" />
+      </motion.div>
       <h1>La aventura hizo una pausa</h1>
       <p>{message}</p>
       {onRetry ? (
         <button className="button button--primary" onClick={onRetry}>
-          Intentar nuevamente
+          <ArrowClockwiseIcon size={21} weight="bold" /> Intentar nuevamente
         </button>
       ) : null}
     </section>
   );
 }
-
