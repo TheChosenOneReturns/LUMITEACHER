@@ -1,19 +1,12 @@
 import { skillLabels, type Skill } from "@story-teacher/shared";
-
-const icons: Record<Skill, string> = {
-  literal: "📖",
-  inference: "🧠",
-  vocabulary: "🔤",
-  sequence: "🧩",
-  cause_effect: "💡",
-};
+import { skillIcons } from "./VisualIcons";
 
 export function SkillBadge({ skill }: { skill: Skill }) {
+  const Icon = skillIcons[skill];
   return (
     <span className="skill-badge">
-      <span aria-hidden="true">{icons[skill]}</span>
+      <Icon size={19} weight="duotone" aria-hidden="true" />
       {skillLabels[skill]}
     </span>
   );
 }
-
