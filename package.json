@@ -26,7 +26,7 @@
   },
   "devDependencies": {
     "concurrently": "^9.2.1",
-    "esbuild": "^0.25.8"
+    "esbuild": "^0.28.1"
   },
   "optionalDependencies": {
     "lightningcss-win32-x64-msvc": "1.32.0"

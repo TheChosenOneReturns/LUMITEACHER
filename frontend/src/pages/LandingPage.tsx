@@ -9,7 +9,7 @@ import {
   StarFourIcon,
 } from "../components/icons";
 import { motion } from "motion/react";
-import { Link } from "react-router-dom";
+import TransitionLink from "../components/motion/TransitionLink";
 import { useAuth } from "../auth/AuthContext";
 import { FloatingShape, riseItem, staggerContainer } from "../components/MotionPrimitives";
 import heroImage from "../../../stitch_story_teacher_ai_platform/a_giant_magical_open_book_for_a_kids_app_landing_page._from_the_pages_friendly/screen.png";
@@ -37,15 +37,15 @@ export function LandingPage() {
           </motion.p>
           <motion.div className="button-row" variants={riseItem}>
             <motion.div whileHover={{ y: -4, scale: 1.02 }} whileTap={{ y: 3, scale: 0.98 }}>
-              <Link className="button button--yellow" to={createPath}>
+              <TransitionLink href={createPath} className="button button--yellow">
                 <MagicWandIcon size={23} weight="duotone" /> Crear mi historia
                 <ArrowRightIcon size={21} weight="bold" />
-              </Link>
+              </TransitionLink>
             </motion.div>
             <motion.div whileHover={{ y: -4 }} whileTap={{ y: 3 }}>
-              <Link className="button button--outline" to={libraryPath}>
+              <TransitionLink href={libraryPath} className="button button--outline">
                 <BookOpenTextIcon size={22} weight="duotone" /> Explorar historias
-              </Link>
+              </TransitionLink>
             </motion.div>
           </motion.div>
           <motion.div className="landing-proof" variants={riseItem}>

@@ -8,13 +8,14 @@ import {
 } from "../components/icons";
 import { motion } from "motion/react";
 import { useState, type FormEvent } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import {
   demoProfile,
   useAuth,
   type AvatarId,
   type DemoProfile,
 } from "../auth/AuthContext";
+import { useTransition } from "../components/motion/TransitionContext";
 import { FloatingShape, riseItem, staggerContainer } from "../components/MotionPrimitives";
 import { ProfileAvatar } from "../components/VisualIcons";
 import heroImage from "../../../stitch_story_teacher_ai_platform/a_giant_magical_open_book_for_a_kids_app_landing_page._from_the_pages_friendly/screen.png";
@@ -31,7 +32,7 @@ function safeNext(value: string | null): string {
 
 export function LoginPage() {
   const { login, profile } = useAuth();
-  const navigate = useNavigate();
+  const { startTransition } = useTransition();
   const [searchParams] = useSearchParams();
   const [name, setName] = useState(profile?.name ?? "");
   const [favoriteTheme, setFavoriteTheme] = useState(profile?.favoriteTheme ?? "Espacio");
@@ -52,12 +53,12 @@ export function LoginPage() {
       avatarId,
     };
     login(nextProfile);
-    navigate(safeNext(searchParams.get("next")), { replace: true });
+    startTransition(safeNext(searchParams.get("next")));
   }
 
   function enterAsSofia() {
     login(demoProfile);
-    navigate(safeNext(searchParams.get("next")), { replace: true });
+    startTransition(safeNext(searchParams.get("next")));
   }
 
   return (
