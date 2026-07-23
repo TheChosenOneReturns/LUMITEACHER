@@ -1,5 +1,5 @@
-import type { PlatformCatalog, RewardState, UserProfile } from "@story-teacher/shared";
-import { motion } from "motion/react";
+import type { Congratulation, PlatformCatalog, RewardState, UserProfile } from "@story-teacher/shared";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "../api/client";
@@ -12,12 +12,14 @@ import {
   GiftIcon,
   GraduationCapIcon,
   LockKeyOpenIcon,
+  MedalIcon,
   ShieldCheckIcon,
   SignOutIcon,
   SparkleIcon,
   StarFourIcon,
   TrophyIcon,
 } from "../components/icons";
+import { catalogArtStyle } from "../catalog/visualAssets";
 
 const themes = ["Espacio", "Fantasía", "Océano", "Selva", "Inventos"];
 
@@ -27,6 +29,7 @@ export function ProfilePage() {
   const [draft, setDraft] = useState<UserProfile>(profile!);
   const [rewards, setRewards] = useState<RewardState | null>(null);
   const [catalog, setCatalog] = useState<PlatformCatalog | null>(null);
+  const [postcards, setPostcards] = useState<Congratulation[]>([]);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [characterKind, setCharacterKind] = useState<"all" | "animal" | "kid">("all");
@@ -42,8 +45,8 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (!isStudent) return;
-    void Promise.all([api.getRewards(), api.getCatalog()])
-      .then(([nextRewards, nextCatalog]) => { setRewards(nextRewards); setCatalog(nextCatalog); })
+    void Promise.all([api.getRewards(), api.getCatalog(), api.listCongratulations()])
+      .then(([nextRewards, nextCatalog, nextPostcards]) => { setRewards(nextRewards); setCatalog(nextCatalog); setPostcards(nextPostcards); })
       .catch(() => setError("No pudimos abrir todas tus recompensas."));
   }, [isStudent]);
 
@@ -124,10 +127,29 @@ export function ProfilePage() {
                 return <button key={outfit.id} type="button" disabled={!unlocked} className={selected ? "is-selected" : ""} onClick={() => void selectOutfit(selected ? null : outfit.id)}><span className={`outfit-swatch outfit-swatch--${outfit.id}`}><GiftIcon weight={unlocked ? "fill" : "duotone"}/></span><span><strong>{outfit.label}</strong><small>{unlocked ? (selected ? "En uso" : "Usar este look") : `${outfit.threshold} estrellas`}</small></span>{unlocked ? <LockKeyOpenIcon weight="duotone" /> : <StarFourIcon weight="fill" />}</button>;
               })}
             </div>
+
+            <section className="reward-panel postcards">
+              <div className="panel-title"><GiftIcon size={28} weight="duotone" /><div><span className="eyebrow">Mensajes que acompañan</span><h2>Mis postales</h2></div></div>
+              <AnimatePresence>
+                {postcards.length ? <div className="postcard-grid">{postcards.map((postcard, index) => <motion.article key={postcard.congratulationId} className={`postcard postcard--${index % 3 + 1}`} initial={{ opacity: 0, rotate: -3, y: 14 }} animate={{ opacity: 1, rotate: index % 2 ? 2 : -1, y: 0 }}><span className="postcard__art" style={catalogArtStyle(postcard.assetId)} /><div><SparkleIcon weight="fill"/><p>"{postcard.message}"</p><small>{postcard.fromDisplayName}</small></div></motion.article>)}</div> : <p className="empty-copy">Tus felicitaciones aparecerán acá cuando un adulto te envíe una postal.</p>}
+              </AnimatePresence>
+            </section>
           </> : null}
           <button className="logout-button" type="button" onClick={exit}><SignOutIcon weight="bold" /> Cerrar este perfil</button>
         </motion.aside>
       </div>
+
+      {isStudent && catalog ? (
+        <section className="reward-panel">
+          <div className="panel-title"><MedalIcon size={28} weight="duotone" /><div><span className="eyebrow">Colección</span><h2>Insignias</h2></div></div>
+          <div className="badge-cabinet">
+            {catalog.badges.map((badge) => {
+              const unlocked = rewards?.unlockedBadgeIds.includes(badge.id) ?? false;
+              return <div key={badge.id} className={unlocked ? "is-unlocked" : "is-locked"}><span><MedalIcon weight={unlocked ? "fill" : "duotone"} /></span><strong>{badge.label}</strong><small>{badge.description}</small></div>;
+            })}
+          </div>
+        </section>
+      ) : null}
     </div>
   );
 }

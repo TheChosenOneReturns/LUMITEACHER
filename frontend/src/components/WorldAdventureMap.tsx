@@ -1,14 +1,37 @@
 import type { PlatformCatalog, RewardState } from "@story-teacher/shared";
 import { motion, useReducedMotion } from "motion/react";
+import { useEffect, useRef } from "react";
 import { CardsThreeIcon, CheckCircleIcon, GiftIcon, MapTrifoldIcon, SparkleIcon, StarFourIcon } from "./icons";
 import { CharacterAvatar } from "./CharacterAvatar";
 import { StoryThemeIcon } from "./VisualIcons";
 
 export function WorldAdventureMap({ catalog, rewards }: { catalog: PlatformCatalog; rewards: RewardState }) {
   const reduceMotion = useReducedMotion();
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  // Find the index of the last world with any progress (fallback to 0)
+  const lastActiveIndex = (() => {
+    let last = 0;
+    for (let index = 0; index < catalog.worlds.length; index++) {
+      const world = catalog.worlds[index];
+      if (world && (rewards.worldMasteryCounts[world.id] ?? 0) > 0) last = index;
+    }
+    return last;
+  })();
+
+  useEffect(() => {
+    const container = gridRef.current;
+    if (!container) return;
+    const target = container.children[lastActiveIndex] as HTMLElement | undefined;
+    if (!target) return;
+    // Scroll so the active world is centered in the viewport
+    const offset = target.offsetLeft - container.offsetLeft - (container.clientWidth - target.clientWidth) / 2;
+    container.scrollTo({ left: Math.max(0, offset), behavior: reduceMotion ? "instant" : "smooth" });
+  }, [lastActiveIndex, reduceMotion]);
+
   return <section className="reward-panel adventure-atlas">
     <div className="atlas-heading"><div className="panel-title"><MapTrifoldIcon size={30} weight="duotone"/><div><span className="eyebrow">6 mundos · 24 hitos</span><h2>Atlas de aventuras</h2></div></div><p>Cada cuento con 60% o más hace avanzar su mundo. Después del cuarto hito, las nuevas lecturas recargan cartas.</p></div>
-    <div className="world-grid">
+    <div className="world-grid" ref={gridRef}>
       {catalog.worlds.map((world, worldIndex) => {
         const count = rewards.worldMasteryCounts[world.id] ?? 0;
         const progress = Math.min(4, count);
