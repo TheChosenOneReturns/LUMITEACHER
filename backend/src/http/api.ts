@@ -19,7 +19,7 @@ export function json(statusCode: number, body: unknown): ApiResponse {
       "access-control-allow-origin": config.allowedOrigin,
       "access-control-allow-headers":
         "Content-Type,X-Demo-User-Id,Idempotency-Key",
-      "access-control-allow-methods": "GET,POST,OPTIONS",
+      "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
       vary: "Origin",
     },
     body: JSON.stringify(body),
@@ -31,8 +31,8 @@ export function getRequestId(event: ApiEvent): string {
 }
 
 export function requireDemoUser(event: ApiEvent): string {
-  const userId = header(event, "x-demo-user-id");
-  if (!userId || userId !== getConfig().allowedDemoUserId) {
+  const userId = header(event, "x-demo-user-id")?.trim();
+  if (!userId || !/^[a-z0-9][a-z0-9-]{2,63}$/u.test(userId)) {
     throw new ApplicationError(
       "VALIDATION_ERROR",
       400,
@@ -133,4 +133,3 @@ function normalizeError(error: unknown): ApplicationError {
     error,
   );
 }
-

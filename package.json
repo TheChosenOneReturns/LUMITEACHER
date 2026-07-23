@@ -9,11 +9,15 @@
   ],
   "scripts": {
     "dev": "concurrently --kill-others --names API,WEB --prefix-colors blue,green \"npm run dev -w @story-teacher/backend\" \"npm run dev -w @story-teacher/frontend\"",
-    "local": "npm run db:up && npm run db:init && npm run dev",
+    "local": "npm run db:up && npm run db:init && npm run db:seed && npm run dev",
+    "local:fresh": "npm run db:up && npm run db:reset -w @story-teacher/backend && npm run db:init && npm run db:seed && npm run dev",
     "api:sam": "sam local start-api --docker-network story-teacher-network --env-vars env.local.json",
     "db:up": "docker compose up -d dynamodb",
     "db:down": "docker compose down",
     "db:init": "npm run db:init -w @story-teacher/backend",
+    "db:seed": "npm run db:seed -w @story-teacher/backend",
+    "ai:test": "npm run test -w @story-teacher/backend -- src/generators/fixtureStoryGenerator.test.ts",
+    "test:e2e": "npm run db:up && npm run db:reset -w @story-teacher/backend && npm run db:init && npm run db:seed && playwright test",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
@@ -25,6 +29,7 @@
     "node": ">=22"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "concurrently": "^9.2.1",
     "esbuild": "^0.28.1"
   },

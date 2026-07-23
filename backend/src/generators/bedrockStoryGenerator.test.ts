@@ -16,7 +16,6 @@ const config: AppConfig = {
   modelId: "us.amazon.nova-2-lite-v1:0",
   guardrailId: "guardrail-test",
   guardrailVersion: "DRAFT",
-  allowedDemoUserId: "demo-sofia",
   allowedOrigin: "http://localhost:5173",
   promptVersion: "story-v1",
 };

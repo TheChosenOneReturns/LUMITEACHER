@@ -7,7 +7,7 @@ import {
   SparkleIcon,
   StarFourIcon,
 } from "../components/icons";
-import type { StoryPublic } from "@story-teacher/shared";
+import { platformCatalog, type AttemptResult, type StoryPublic } from "@story-teacher/shared";
 import { motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -17,11 +17,12 @@ import { Lumi } from "../components/Lumi";
 import { ErrorState, LoadingState } from "../components/PageState";
 import { SkillBadge } from "../components/SkillBadge";
 import { loadAttemptResult } from "../state/attemptStorage";
+import { loadJourney } from "../story/interactiveStory";
 
 export function ResultsPage() {
   const { storyId = "", attemptId = "" } = useParams();
   const { profile } = useAuth();
-  const [result] = useState(() => loadAttemptResult(attemptId));
+  const [result, setResult] = useState<AttemptResult | null>(() => loadAttemptResult(attemptId));
   const [story, setStory] = useState<StoryPublic | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -34,11 +35,21 @@ export function ResultsPage() {
     }
   }, [storyId]);
 
-  useEffect(() => { if (result) void loadStory(); }, [loadStory, result]);
+  useEffect(() => {
+    let active = true;
+    if (result) {
+      void loadStory();
+      return () => { active = false; };
+    }
+    void api.getAttempt(attemptId)
+      .then((stored) => { if (active) setResult(stored); })
+      .catch((loadError) => { if (active) setError(loadError instanceof ApiClientError ? loadError.message : "No pudimos recuperar el resultado."); });
+    return () => { active = false; };
+  }, [attemptId, loadStory, result]);
 
-  if (!result) return <ErrorState message="Este resultado ya no está en esta sesión. Podés abrir la historia y hacer el desafío nuevamente." />;
   if (error) return <ErrorState message={error} onRetry={loadStory} />;
-  if (!story) return <LoadingState message="Preparando tu resultado…" />;
+  if (!result || !story) return <LoadingState message="Preparando tu resultado…" />;
+  const journey = loadJourney(storyId);
 
   const message = result.correctCount === 5
     ? "Excelente lectura. Encontraste todas las pistas."
@@ -58,7 +69,7 @@ export function ResultsPage() {
         </div>
         <motion.span className="pill" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}><CheckCircleIcon weight="fill" /> Desafío completado</motion.span>
         <motion.h1 initial={{ opacity: 0, scale: 0.82 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 180, damping: 16, delay: 0.1 }}>
-          Increíble trabajo, {profile!.name}
+          Increíble trabajo, {profile!.displayName}
         </motion.h1>
         <p>{message}</p>
         <motion.div className="score-orb" aria-label={`${result.correctCount} de 5 correctas`} initial={{ scale: 0, rotate: -40 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 170, damping: 13, delay: 0.24 }}>
@@ -66,6 +77,14 @@ export function ResultsPage() {
           <div><strong>{result.correctCount}/5</strong><small>{result.scorePercent}%</small></div>
         </motion.div>
       </section>
+
+      {result.rewardGrant ? <motion.section className="reward-unlock" initial={{ opacity: 0, y: 18, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }}>
+        <StarFourIcon size={38} weight="fill" />
+        <div><span className="eyebrow">{result.rewardGrant.starsEarned ? "Recompensa del cuento" : "Nuevo dominio alcanzado"}</span><h2>{result.rewardGrant.starsEarned ? `Ganaste ${result.rewardGrant.starsEarned} estrellas` : "¡Tu esfuerzo hizo avanzar el mapa!"}</h2><p>{result.rewardGrant.mapAdvanced ? `Llegaste al hito ${result.rewardGrant.worldStep} de ${platformCatalog.worlds.find((world) => world.id === result.rewardGrant?.worldId)?.label ?? "tu mundo"}.` : result.scorePercent < 60 ? "Alcanzá 60% en un próximo intento para avanzar el mundo." : "Este mundo ya está completo: sumaste una nueva carga."}{result.rewardGrant.cardCopiesGranted.length ? " Tu mochila recibió una carta de poder." : ""}{result.rewardGrant.newlyUnlockedAvatarIds.length ? " También apareció un nuevo personaje." : ""}</p></div>
+        <Link className="button button--yellow" to="/recompensas">Ver recompensas</Link>
+      </motion.section> : null}
+
+      {journey ? <motion.section className="result-journey" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}><div><span className="eyebrow">El camino que creaste</span><h2>{journey.endingTitle}</h2><p>{journey.endingText}</p></div><ol>{journey.decisions.map((decision) => <li key={decision.choiceId}><CheckCircleIcon weight="fill" /><span><strong>{decision.choiceLabel}</strong><small>{decision.consequence}</small></span></li>)}</ol></motion.section> : null}
 
       <motion.section className="skills-result" initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
         <div className="section-heading">

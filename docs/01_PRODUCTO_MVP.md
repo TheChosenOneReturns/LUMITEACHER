@@ -36,13 +36,12 @@ Si un estudiante puede elegir el tema y protagonista de una historia apropiada p
 
 - Configura el objetivo educativo o ayuda al estudiante a elegirlo.
 - Quiere comprobar que las preguntas cubren habilidades distintas.
-- En el MVP observa la actividad junto al estudiante; no dispone de un portal separado.
+- Dispone de un portal separado para cursos, misiones, seguimiento por habilidad y postales.
 
-### Perfil de demostración
+### Perfiles de demostración
 
-- ID: `demo-sofia`.
-- Nombre visible: Sofía.
-- Edad inicial sugerida: 8.
+- Estudiantes: Sofía, Mateo y Valentina.
+- Adulto: Lucía, con etiqueta visual Profesor/a o Familia.
 - No se guarda nombre completo, correo, fecha de nacimiento ni información escolar real.
 
 ## 5. Propuesta de valor
@@ -75,6 +74,8 @@ El diferenciador demostrable es la conexión entre personalización y evaluació
 - Envío del intento y corrección en backend.
 - Resultado total, feedback y resultado por habilidad.
 - Persistencia en DynamoDB.
+- Cursos, membresías, invitaciones por enlace/QR y misiones.
+- Dashboard adulto, ficha de progreso, postales moderadas y recompensas.
 - Manejo de carga, error, contenido bloqueado y reintento.
 - Diseño responsive básico para 375 px y desktop.
 - Despliegue reproducible con AWS SAM y frontend público.
@@ -82,7 +83,8 @@ El diferenciador demostrable es la conexión entre personalización y evaluació
 ### Conviene tener (P1)
 
 - Filtros de biblioteca por tema.
-- Lectura en voz alta usando Web Speech API del navegador, si funciona sin afectar P0.
+- Lectura en voz alta usando Web Speech API del navegador, con selección de voces en español o inglés, pausa y detención.
+- Historias interactivas con dos decisiones, cuatro finales seguros e historial del recorrido integrado al quiz.
 - Un cuento de ejemplo precargado.
 - Animaciones discretas y celebración accesible.
 - Botón para repetir el cuestionario.
@@ -90,13 +92,12 @@ El diferenciador demostrable es la conexión entre personalización y evaluació
 ### Fuera del MVP (P2/post-hackathon)
 
 - Login real, Amazon Cognito y cuentas múltiples.
-- Portal de docentes/padres.
 - Chat libre con Lumi.
-- Generación de imágenes por historia.
-- Rachas, monedas, ranking o economía de recompensas.
+- Generación de imágenes por historia en tiempo de ejecución.
+- Monedas, ranking o economía intercambiable.
 - Recomendaciones adaptativas avanzadas.
 - Edición colaborativa, compartir públicamente o moderación humana.
-- Analítica educativa longitudinal.
+- Analítica educativa longitudinal fuera de los intentos guardados.
 - Aplicación móvil nativa.
 
 ## 8. Configuración de una historia
@@ -107,7 +108,7 @@ El diferenciador demostrable es la conexión entre personalización y evaluació
 | `theme` | texto/preset | 2–60 caracteres | `Exploración espacial` |
 | `difficulty` | enum | `facil`, `media`, `desafio` | `media` |
 | `educationalObjective` | texto | 5–160 caracteres | `Reconocer la importancia de cooperar` |
-| `maxWords` | entero/preset | 150, 300 o 500 | `300` |
+| `maxWords` | entero/preset | 150, 300, 500, 800 o 1200 | `800` |
 | `mainCharacter` | texto opcional | máximo 60 caracteres | `Luna, una gata astronauta` |
 
 Mapeo visible de extensión:
@@ -240,4 +241,3 @@ Y puede abrir cualquiera por su identificador
 - No se generan imágenes.
 - No hay chat libre con Lumi.
 - El producto y navegación visible quedan íntegramente en español.
-

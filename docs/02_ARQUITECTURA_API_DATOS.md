@@ -170,7 +170,7 @@ La fuente completa es [openapi.yaml](../contracts/openapi.yaml). Resumen:
 | `GET` | `/stories/{storyId}` | obtener cuento sin clave de respuestas |
 | `POST` | `/stories/{storyId}/attempts` | corregir cinco respuestas y guardar intento |
 
-Todos los endpoints de datos reciben `X-Demo-User-Id: demo-sofia`. El backend sólo acepta el ID demo configurado. Esto evita que la simulación se confunda con autenticación, aunque no aporta seguridad real.
+Todos los endpoints privados reciben `X-Demo-User-Id` con el identificador de un perfil sembrado. El backend resuelve ese perfil en DynamoDB y verifica rol, propiedad y membresía para cada operación. Sigue siendo una simulación y no aporta seguridad de producción.
 
 ## 6. Separación de datos públicos y privados
 
@@ -229,7 +229,6 @@ BEDROCK_MODEL_ID
 BEDROCK_GUARDRAIL_ID
 BEDROCK_GUARDRAIL_VERSION
 PROMPT_VERSION=story-v1
-ALLOWED_DEMO_USER_ID=demo-sofia
 ALLOWED_ORIGIN
 LOG_LEVEL=INFO
 ```
@@ -301,4 +300,3 @@ Retención de logs: 7 días para el hackathon.
 ## 13. Riesgo de tiempo de respuesta
 
 API Gateway HTTP API mantiene una ventana de integración limitada. La generación se implementa sincrónica para mantener el MVP simple y debe probarse temprano con el máximo de 500 palabras. Si p95 supera 25 segundos, el recorte preferido es limitar “Larga” a 400 palabras antes que agregar SQS, jobs y polling en el día 4.
-

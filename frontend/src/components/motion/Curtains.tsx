@@ -11,7 +11,7 @@ const variants: Variants = {
         scaleX: 1,
         x: 0,
         transition: {
-            duration: 1,
+            duration: 0.58,
         }
     },
     covered: {
@@ -22,7 +22,7 @@ const variants: Variants = {
         scaleX: 1,
         x: "100%",
         transition: {
-            duration: 1,
+            duration: 0.58,
         }
     },
     hidden: {
@@ -53,7 +53,7 @@ const Curtains = ({ state, onComplete }: CurtainsProps) => {
                 onComplete?.(definition as CurtainState)
             }}
 
-            className="bg-sky-400 fixed inset-0 origin-left z-[60]">
+            className="curtain-layer fixed inset-0 origin-left z-[60]">
 
         </motion.div>
     )

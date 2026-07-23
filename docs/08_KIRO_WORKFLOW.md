@@ -86,8 +86,7 @@ tres minutos.
 - Preparar el despliegue `fixture` y verificar CORS con el dominio de Amplify.
 - Revisar el adaptador Bedrock con trazas seguras y sin registrar cuentos.
 
-No delegar todavía autenticación real, generación de imágenes, chat libre,
-portal de padres, monedas o logros: están fuera del MVP de cinco días.
+No delegar todavía autenticación real, generación de imágenes por cuento en tiempo de ejecución, chat libre, correos, monedas o ranking. El portal adulto, los assets originales y los logros deterministas sí pertenecen al alcance actual; consultar `docs/09_CURSOS_RECOMPENSAS_LOCAL.md`.
 
 ## Referencias oficiales
 

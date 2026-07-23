@@ -11,7 +11,6 @@ const config: AppConfig = {
   region: "us-east-1",
   generatorMode: "fixture",
   modelId: "fixture",
-  allowedDemoUserId: "demo-sofia",
   allowedOrigin: "http://localhost:5173",
   promptVersion: "story-v1",
 };
@@ -24,6 +23,7 @@ const input: GenerateStoryInput = {
   maxWords: 300,
   mainCharacter: "Luna, una gata astronauta",
 };
+const fixtureAnswerKey = [0, 1, 2, 3, 1];
 
 function createService() {
   const repository = new InMemoryStoryRepository();
@@ -80,7 +80,7 @@ describe("StoryService", () => {
     );
     const result = await service.submitAttempt("demo-sofia", story.storyId, {
       attemptId: "01TESTATTEMPT00000000000000",
-      answers: [1, 2, 0, 2, 3],
+      answers: fixtureAnswerKey,
     });
 
     expect(result.correctCount).toBe(5);
@@ -105,7 +105,7 @@ describe("StoryService", () => {
         input,
         `idempotency-${correctAnswers}`,
       );
-      const answerKey = [1, 2, 0, 2, 3];
+      const answerKey = fixtureAnswerKey;
       const answers = answerKey.map((answer, index) =>
         index < correctAnswers ? answer : (answer + 1) % 4,
       );

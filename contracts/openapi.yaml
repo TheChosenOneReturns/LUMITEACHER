@@ -1,383 +1,298 @@
 openapi: 3.0.3
 info:
   title: Story Teacher API
-  version: 1.0.0
-  description: >-
-    API del MVP. X-Demo-User-Id simula un perfil y no constituye
-    autenticación. Las respuestas correctas se mantienen en el backend hasta
-    que se envía un intento.
+  version: 2.0.0
+  description: API local del hackathon. X-Demo-User-Id simula identidad; no es autenticación real.
 servers:
-  - url: https://{apiId}.execute-api.us-east-1.amazonaws.com
-    variables:
-      apiId:
-        default: replace-me
+  - url: http://127.0.0.1:3000
 tags:
   - name: System
+  - name: Identity
   - name: Stories
-  - name: Attempts
+  - name: Courses
+  - name: Progress
+  - name: Rewards
 paths:
   /health:
     get:
       tags: [System]
-      operationId: getHealth
-      summary: Comprueba la API sin invocar Bedrock
-      responses:
-        '200':
-          description: Servicio disponible
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required: [status]
-                properties:
-                  status:
-                    type: string
-                    enum: [ok]
-  /stories:
+      summary: Comprueba la API sin invocar IA
+      responses: { '200': { description: Disponible } }
+  /demo/profiles:
+    get:
+      tags: [Identity]
+      summary: Lista perfiles sembrados
+      responses: { '200': { description: Perfiles demo } }
     post:
-      tags: [Stories]
-      operationId: createStory
-      summary: Genera, valida y guarda un cuento
-      parameters:
-        - $ref: '#/components/parameters/DemoUserId'
-        - $ref: '#/components/parameters/IdempotencyKey'
+      tags: [Identity]
+      summary: Crea un perfil infantil local personalizable
       requestBody:
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/GenerateStoryRequest'
-      responses:
-        '201':
-          description: Cuento creado; no incluye clave ni explicaciones
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StoryPublic'
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '422':
-          $ref: '#/components/responses/ContentBlocked'
-        '502':
-          $ref: '#/components/responses/GenerationFailed'
-        '504':
-          $ref: '#/components/responses/GenerationTimeout'
+        content: { application/json: { schema: {$ref: '#/components/schemas/CreateDemoProfile'} } }
+      responses: { '201': { description: Perfil creado y disponible para iniciar sesión } }
+  /catalog:
+    get:
+      tags: [System]
+      summary: Catálogo canónico de temas, cartas, insignias, accesorios y postales
+      responses: { '200': { description: Catálogo } }
+  /me:
+    get:
+      tags: [Identity]
+      parameters: [{$ref: '#/components/parameters/DemoUserId'}]
+      responses: { '200': { description: Perfil actual } }
+    patch:
+      tags: [Identity]
+      parameters: [{$ref: '#/components/parameters/DemoUserId'}]
+      requestBody:
+        required: true
+        content: { application/json: { schema: {$ref: '#/components/schemas/ProfilePatch'} } }
+      responses: { '200': { description: Perfil actualizado } }
+  /stories:
     get:
       tags: [Stories]
-      operationId: listStories
-      summary: Lista los cuentos del perfil demo
+      parameters: [{$ref: '#/components/parameters/DemoUserId'}]
+      responses: { '200': { description: Historias accesibles por autoría o curso } }
+    post:
+      tags: [Stories]
       parameters:
-        - $ref: '#/components/parameters/DemoUserId'
-        - name: limit
-          in: query
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 50
-            default: 20
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+      requestBody:
+        required: true
+        content: { application/json: { schema: {$ref: '#/components/schemas/GenerateStoryRequest'} } }
       responses:
-        '200':
-          description: Lista del más reciente al más antiguo
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: false
-                required: [items]
-                properties:
-                  items:
-                    type: array
-                    items:
-                      $ref: '#/components/schemas/StorySummary'
+        '201': { description: Historia pública sin clave de respuestas }
+        '400': {$ref: '#/components/responses/ValidationError'}
+        '422': {$ref: '#/components/responses/ContentBlocked'}
   /stories/{storyId}:
     get:
       tags: [Stories]
-      operationId: getStory
-      summary: Obtiene un cuento sin clave de corrección
       parameters:
-        - $ref: '#/components/parameters/DemoUserId'
-        - $ref: '#/components/parameters/StoryId'
-      responses:
-        '200':
-          description: Cuento público
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/StoryPublic'
-        '404':
-          $ref: '#/components/responses/StoryNotFound'
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/StoryId'}
+      responses: { '200': { description: Historia pública }, '404': {$ref: '#/components/responses/NotFound'} }
   /stories/{storyId}/attempts:
     post:
-      tags: [Attempts]
-      operationId: submitAttempt
-      summary: Corrige y guarda las cinco respuestas
+      tags: [Progress]
       parameters:
-        - $ref: '#/components/parameters/DemoUserId'
-        - $ref: '#/components/parameters/StoryId'
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/StoryId'}
       requestBody:
         required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/SubmitAttemptRequest'
+        content: { application/json: { schema: {$ref: '#/components/schemas/SubmitAttempt'} } }
+      responses: { '201': { description: Corrección y recompensa del primer intento }, '409': { description: Intento duplicado } }
+  /attempts/{attemptId}:
+    get:
+      tags: [Progress]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {name: attemptId, in: path, required: true, schema: {type: string}}
+      responses: { '200': { description: Resultado persistido } }
+  /courses:
+    get:
+      tags: [Courses]
+      parameters: [{$ref: '#/components/parameters/DemoUserId'}]
+      responses: { '200': { description: Cursos propios o membresías } }
+    post:
+      tags: [Courses]
+      parameters: [{$ref: '#/components/parameters/DemoUserId'}]
+      requestBody:
+        required: true
+        content: { application/json: { schema: {$ref: '#/components/schemas/CourseInput'} } }
+      responses: { '201': { description: Curso creado }, '403': {$ref: '#/components/responses/Forbidden'} }
+  /courses/{courseId}:
+    get:
+      tags: [Courses]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+      responses: { '200': { description: Curso } }
+  /courses/{courseId}/invite:
+    post:
+      tags: [Courses]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+      responses: { '201': { description: Invitación reutilizable durante siete días } }
+  /courses/{courseId}/invite/revoke:
+    post:
+      tags: [Courses]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+      responses: { '204': { description: Invitación revocada } }
+  /invites/{token}:
+    get:
+      tags: [Courses]
+      parameters: [{name: token, in: path, required: true, schema: {type: string}}]
+      responses: { '200': { description: Vista pública de invitación } }
+  /invites/{token}/join:
+    post:
+      tags: [Courses]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {name: token, in: path, required: true, schema: {type: string}}
+      responses: { '200': { description: Unión idempotente; sólo estudiantes } }
+  /courses/{courseId}/missions:
+    get:
+      tags: [Courses]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+      responses: { '200': { description: Misiones del curso } }
+    post:
+      tags: [Courses]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/IdempotencyKey'}
+        - {$ref: '#/components/parameters/CourseId'}
+      requestBody:
+        required: true
+        content: { application/json: { schema: {$ref: '#/components/schemas/StoryInput'} } }
+      responses: { '201': { description: Cuento generado y asignado como misión } }
+  /courses/{courseId}/activity-events:
+    post:
+      tags: [Progress]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+      responses: { '201': { description: Apertura o inicio registrados idempotentemente } }
+  /courses/{courseId}/dashboard:
+    get:
+      tags: [Progress]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+      responses: { '200': { description: Métricas del intento más reciente y feed } }
+  /courses/{courseId}/students/{studentId}/progress:
+    get:
+      tags: [Progress]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+        - {name: studentId, in: path, required: true, schema: {type: string}}
+      responses: { '200': { description: Historial completo, respuestas, habilidades y recompensas } }
+  /courses/{courseId}/students/{studentId}/congratulations:
+    post:
+      tags: [Rewards]
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+        - {name: studentId, in: path, required: true, schema: {type: string}}
+      responses: { '201': { description: Postal moderada y almacenada }, '422': {$ref: '#/components/responses/ContentBlocked'} }
+  /me/congratulations:
+    get:
+      tags: [Rewards]
+      parameters: [{$ref: '#/components/parameters/DemoUserId'}]
+      responses: { '200': { description: Postales recibidas } }
+  /me/rewards:
+    get:
+      tags: [Rewards]
+      parameters: [{$ref: '#/components/parameters/DemoUserId'}]
+      responses: { '200': { description: Estrellas, mapa, cartas, insignias y accesorios } }
+  /me/rewards/accessory:
+    patch:
+      tags: [Rewards]
+      parameters: [{$ref: '#/components/parameters/DemoUserId'}]
+      responses: { '200': { description: Accesorio desbloqueado seleccionado } }
+  /me/rewards/cards/{cardId}/consume:
+    post:
+      tags: [Rewards]
+      summary: Consume una carga de carta para una sesión de minijuego
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {name: cardId, in: path, required: true, schema: {type: string}}
+      requestBody:
+        required: true
+        content: {application/json: {schema: {$ref: '#/components/schemas/ConsumeCardRequest'}}}
       responses:
-        '201':
-          description: Intento corregido
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AttemptResult'
-        '400':
-          $ref: '#/components/responses/ValidationError'
-        '404':
-          $ref: '#/components/responses/StoryNotFound'
-        '409':
-          description: El attemptId ya existe
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+        '200': {description: Consumo atómico confirmado o repetición idempotente}
+        '400': {$ref: '#/components/responses/ValidationError'}
+        '403': {$ref: '#/components/responses/Forbidden'}
 components:
   parameters:
     DemoUserId:
       name: X-Demo-User-Id
       in: header
       required: true
-      description: Perfil simulado; sólo se acepta demo-sofia en el MVP
-      schema:
-        type: string
-        enum: [demo-sofia]
+      description: Identificador de cualquiera de los perfiles demo sembrados.
+      schema: {type: string, pattern: '^[a-z0-9][a-z0-9-]{2,63}$'}
     IdempotencyKey:
       name: Idempotency-Key
       in: header
       required: true
-      schema:
-        type: string
-        minLength: 16
-        maxLength: 64
-    StoryId:
-      name: storyId
-      in: path
-      required: true
-      schema:
-        type: string
-        minLength: 10
-        maxLength: 40
+      schema: {type: string, minLength: 16, maxLength: 64}
+    StoryId: {name: storyId, in: path, required: true, schema: {type: string}}
+    CourseId: {name: courseId, in: path, required: true, schema: {type: string}}
   schemas:
-    Difficulty:
-      type: string
-      enum: [facil, media, desafio]
-    Skill:
-      type: string
-      enum: [literal, inference, vocabulary, sequence, cause_effect]
     StoryInput:
       type: object
       additionalProperties: false
       required: [age, theme, difficulty, educationalObjective, maxWords]
       properties:
-        age:
-          type: integer
-          minimum: 6
-          maximum: 12
-        theme:
-          type: string
-          minLength: 2
-          maxLength: 60
-        difficulty:
-          $ref: '#/components/schemas/Difficulty'
-        educationalObjective:
-          type: string
-          minLength: 5
-          maxLength: 160
-        maxWords:
-          type: integer
-          enum: [150, 300, 500]
-        mainCharacter:
-          type: string
-          nullable: true
-          maxLength: 60
+        age: {type: integer, minimum: 6, maximum: 12}
+        theme: {type: string, minLength: 2, maxLength: 60}
+        difficulty: {type: string, enum: [facil, media, desafio]}
+        educationalObjective: {type: string, minLength: 5, maxLength: 160}
+        maxWords: {type: integer, enum: [150, 300, 500, 800, 1200]}
+        mainCharacter: {type: string, nullable: true, maxLength: 60}
+        storyMode: {type: string, enum: [classic, interactive], default: interactive}
+        language: {type: string, enum: [es, en], default: es}
     GenerateStoryRequest:
-      $ref: '#/components/schemas/StoryInput'
-    QuestionPublic:
-      type: object
-      additionalProperties: false
-      required: [questionId, statement, options, skill]
-      properties:
-        questionId:
-          type: string
-          example: q1
-        statement:
-          type: string
-        options:
-          type: array
-          minItems: 4
-          maxItems: 4
-          items:
-            type: string
-        skill:
-          $ref: '#/components/schemas/Skill'
-    StoryPublic:
-      type: object
-      additionalProperties: false
-      required: [storyId, createdAt, input, title, story, questions]
-      properties:
-        storyId:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        input:
-          $ref: '#/components/schemas/StoryInput'
-        title:
-          type: string
-        story:
-          type: string
-        questions:
-          type: array
-          minItems: 5
-          maxItems: 5
-          items:
-            $ref: '#/components/schemas/QuestionPublic'
-    StorySummary:
-      type: object
-      additionalProperties: false
-      required: [storyId, createdAt, title, theme, age]
-      properties:
-        storyId:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        title:
-          type: string
-        theme:
-          type: string
-        age:
-          type: integer
-    SubmitAttemptRequest:
+      allOf:
+        - {$ref: '#/components/schemas/StoryInput'}
+        - type: object
+          properties: {courseId: {type: string, nullable: true}}
+    SubmitAttempt:
       type: object
       additionalProperties: false
       required: [attemptId, answers]
       properties:
-        attemptId:
-          type: string
-          minLength: 10
-          maxLength: 40
-        answers:
-          type: array
-          minItems: 5
-          maxItems: 5
-          items:
-            type: integer
-            minimum: 0
-            maximum: 3
-    QuestionResult:
+        attemptId: {type: string, minLength: 10, maxLength: 64}
+        answers: {type: array, minItems: 5, maxItems: 5, items: {type: integer, minimum: 0, maximum: 3}}
+        checkpointStars: {type: integer, minimum: 0, maximum: 4, description: Estrellas obtenidas en las dos paradas de comprensión del recorrido interactivo.}
+    CourseInput:
       type: object
       additionalProperties: false
-      required:
-        - questionId
-        - selectedAnswer
-        - correctAnswer
-        - isCorrect
-        - skill
-        - explanation
+      required: [name, description]
       properties:
-        questionId:
-          type: string
-        selectedAnswer:
-          type: integer
-          minimum: 0
-          maximum: 3
-        correctAnswer:
-          type: integer
-          minimum: 0
-          maximum: 3
-        isCorrect:
-          type: boolean
-        skill:
-          $ref: '#/components/schemas/Skill'
-        explanation:
-          type: string
-    AttemptResult:
+        name: {type: string, minLength: 2, maxLength: 80}
+        description: {type: string, maxLength: 240}
+    ProfilePatch:
       type: object
       additionalProperties: false
-      required:
-        - attemptId
-        - storyId
-        - createdAt
-        - correctCount
-        - scorePercent
-        - results
       properties:
-        attemptId:
-          type: string
-        storyId:
-          type: string
-        createdAt:
-          type: string
-          format: date-time
-        correctCount:
-          type: integer
-          minimum: 0
-          maximum: 5
-        scorePercent:
-          type: integer
-          enum: [0, 20, 40, 60, 80, 100]
-        results:
-          type: array
-          minItems: 5
-          maxItems: 5
-          items:
-            $ref: '#/components/schemas/QuestionResult'
-    ErrorDetail:
+        displayName: {type: string, minLength: 2, maxLength: 40}
+        avatarId: {type: string}
+        age: {type: integer, minimum: 6, maximum: 12}
+        favoriteTheme: {type: string}
+        adultLabel: {type: string, enum: [Profesor/a, Familia]}
+    CreateDemoProfile:
       type: object
       additionalProperties: false
-      required: [code, message, requestId]
+      required: [displayName, age, avatarId, favoriteTheme]
       properties:
-        code:
-          type: string
-        message:
-          type: string
-        requestId:
-          type: string
+        displayName: {type: string, minLength: 2, maxLength: 24}
+        age: {type: integer, minimum: 6, maximum: 12}
+        avatarId: {type: string, minLength: 2, maxLength: 40}
+        favoriteTheme: {type: string, minLength: 2, maxLength: 60}
+    ConsumeCardRequest:
+      type: object
+      additionalProperties: false
+      required: [gameId, sessionId]
+      properties:
+        gameId: {type: string, enum: [clue-detective, memory, sequence, decision-maze, emotion-theater, word-forge, evidence-board, cause-machine, perspective-prism, story-map]}
+        sessionId: {type: string, minLength: 8, maxLength: 80}
     ErrorResponse:
       type: object
-      additionalProperties: false
       required: [error]
       properties:
         error:
-          $ref: '#/components/schemas/ErrorDetail'
+          type: object
+          required: [code, message, requestId]
+          properties: {code: {type: string}, message: {type: string}, requestId: {type: string}}
   responses:
-    ValidationError:
-      description: Entrada inválida
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    ContentBlocked:
-      description: Entrada o salida bloqueada por seguridad
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    GenerationFailed:
-      description: Salida inválida después del reintento
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    GenerationTimeout:
-      description: La generación superó el límite de tiempo
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-    StoryNotFound:
-      description: Cuento inexistente para el perfil
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/ErrorResponse'
-
+    ValidationError: {description: Entrada inválida, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
+    ContentBlocked: {description: Contenido bloqueado y no almacenado, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
+    Forbidden: {description: Rol, propiedad o membresía insuficiente, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}
+    NotFound: {description: Recurso inexistente o no accesible, content: {application/json: {schema: {$ref: '#/components/schemas/ErrorResponse'}}}}

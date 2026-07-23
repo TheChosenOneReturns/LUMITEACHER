@@ -2,17 +2,20 @@ import {
   ArrowLeftIcon,
   ArrowRightIcon,
   CheckIcon,
+  PathIcon,
   PaperPlaneTiltIcon,
   SparkleIcon,
+  TreeStructureIcon,
 } from "../components/icons";
 import type { StoryPublic } from "@story-teacher/shared";
 import { AnimatePresence, motion } from "motion/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { api, ApiClientError } from "../api/client";
 import { ErrorState, LoadingState } from "../components/PageState";
 import { SkillBadge } from "../components/SkillBadge";
 import { saveAttemptResult } from "../state/attemptStorage";
+import { loadJourney } from "../story/interactiveStory";
 
 const optionLetters = ["A", "B", "C", "D"];
 
@@ -24,6 +27,9 @@ export function QuizPage() {
   const [answers, setAnswers] = useState<(number | null)[]>(Array.from({ length: 5 }, () => null));
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const journey = loadJourney(storyId);
+  const [showJourneyIntro, setShowJourneyIntro] = useState(() => Boolean(journey));
+  const recordedStoryId = useRef<string | null>(null);
 
   const loadStory = useCallback(async () => {
     setError(null);
@@ -35,9 +41,30 @@ export function QuizPage() {
   }, [storyId]);
 
   useEffect(() => { void loadStory(); }, [loadStory]);
+  useEffect(() => {
+    if (!story?.courseId || recordedStoryId.current === story.storyId) return;
+    recordedStoryId.current = story.storyId;
+    void api.recordActivity(story.courseId, { storyId: story.storyId, ...(story.missionId ? { missionId: story.missionId } : {}), type: "quiz_started" }).catch(() => undefined);
+  }, [story]);
 
   if (error && !story) return <ErrorState message={error} onRetry={loadStory} />;
   if (!story) return <LoadingState message="Preparando cinco preguntas…" />;
+
+  if (journey && showJourneyIntro) {
+    return (
+      <div className="journey-quiz-intro page-width page-section">
+        <motion.section initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
+          <span className="pill"><TreeStructureIcon /> Tu historia, tu desafío</span>
+          <h1>Las decisiones también dejan pistas</h1>
+          <p>Recordá el camino que construiste. Las cinco preguntas evalúan comprensión, inferencia, vocabulario, secuencia y causa.</p>
+          {journey.checkpointStars ? <div className="journey-checkpoint-stars"><SparkleIcon weight="fill" /><strong>{journey.checkpointStars} estrellas de lectura listas para sumar</strong><span>Se acreditan una sola vez al terminar este desafío.</span></div> : null}
+          <div className="journey-quiz-intro__path">{journey.decisions.map((decision, index) => <motion.article key={decision.choiceId} initial={{ opacity: 0, x: -16 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * .12 }}><span>{index + 1}</span><div><small>{decision.sceneTitle}</small><strong>{decision.choiceLabel}</strong><p>{decision.consequence}</p></div>{index < journey.decisions.length - 1 ? <PathIcon /> : <CheckIcon weight="bold" />}</motion.article>)}</div>
+          <div className="journey-quiz-intro__ending"><SparkleIcon weight="fill" /><div><span>El final que descubriste</span><h2>{journey.endingTitle}</h2><p>{journey.endingText}</p></div></div>
+          <motion.button className="button button--yellow" type="button" onClick={() => setShowJourneyIntro(false)} whileHover={{ y: -4 }} whileTap={{ y: 2 }}>Comenzar las cinco preguntas <ArrowRightIcon /></motion.button>
+        </motion.section>
+      </div>
+    );
+  }
 
   const loadedStory = story;
   const question = loadedStory.questions[current]!;
@@ -63,7 +90,7 @@ export function QuizPage() {
     setError(null);
     try {
       const attemptId = crypto.randomUUID();
-      const result = await api.submitAttempt(loadedStory.storyId, answers as number[], attemptId);
+      const result = await api.submitAttempt(loadedStory.storyId, answers as number[], attemptId, journey?.checkpointStars ?? 0);
       saveAttemptResult(result);
       navigate(`/historias/${loadedStory.storyId}/resultados/${result.attemptId}`);
     } catch (submitError) {
@@ -88,6 +115,8 @@ export function QuizPage() {
           ))}
         </div>
       </div>
+
+      {journey ? <motion.div className="quiz-journey-ribbon" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}><TreeStructureIcon /><span><strong>Tu recorrido:</strong> {journey.decisions.map((decision) => decision.choiceLabel).join(" → ")}</span><button type="button" onClick={() => setShowJourneyIntro(true)}>Ver mapa</button></motion.div> : null}
 
       <AnimatePresence mode="wait">
         <motion.section

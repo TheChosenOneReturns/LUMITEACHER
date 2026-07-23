@@ -1,4 +1,5 @@
 import { motion } from "motion/react"
+import lumiImage from "../../assets/generated/lumi-transition.webp"
 
 interface CurtainLogoProps {
     visible: boolean
@@ -7,24 +8,18 @@ interface CurtainLogoProps {
 export default function CurtainLogo({ visible }: CurtainLogoProps) {
     return (
         <motion.div
-            initial={{
-                opacity: 0,
-                scale: 0.8,
-                y: 20,
-                filter: "blur(4px)"
-            }}
-            animate={{
-                opacity: visible ? 1 : 0,
-                scale: visible ? 1 : 0.7,
-                y: visible ? 0 : 20,
-                filter: visible ? "blur(0px)" : "blur(10px)"
-            }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: visible ? 1 : 0 }}
             transition={{
-                duration: 0.5
+                duration: 0.16
             }}
             className="fixed inset-0 z-[60] flex items-center justify-center pointer-events-none"
         >
-            <span className="text-white text-6xl font-bold"> LUMI </span>
+            <span className="curtain-logo">
+                <img src={lumiImage} alt="" />
+                <strong>LUMI</strong>
+                <small>Preparando la próxima aventura…</small>
+            </span>
         </motion.div>
     )
 }
