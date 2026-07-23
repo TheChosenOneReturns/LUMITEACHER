@@ -223,6 +223,20 @@ export class PlatformService {
     await this.revokeInviteRecord(courseId);
   }
 
+  async getActiveInvite(userId: string, courseId: string): Promise<Invite | null> {
+    await this.requireOwner(userId, courseId);
+    const response = await this.client.send(
+      new GetCommand({
+        TableName: this.config.tableName,
+        Key: { PK: coursePartition(courseId), SK: "INVITE" },
+      }),
+    );
+    const item = response.Item as InviteItem | undefined;
+    if (!item || item.status !== "active") return null;
+    if (new Date(item.expiresAt).getTime() <= Date.now()) return null;
+    return toInvite(item);
+  }
+
   async getInvite(token: string): Promise<Invite> {
     const response = await this.client.send(
       new GetCommand({

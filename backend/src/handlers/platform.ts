@@ -119,6 +119,10 @@ export async function handler(event: ApiEvent): Promise<ApiResponse> {
       return json(200, await service.getCourse(userId, courseMatch[1]));
     }
     const inviteAction = path.match(/^\/courses\/([^/]+)\/invite(?:\/(revoke))?$/u);
+    if (method === "GET" && inviteAction?.[1] && !inviteAction[2]) {
+      const active = await service.getActiveInvite(userId, inviteAction[1]);
+      return json(200, { invite: active });
+    }
     if (method === "POST" && inviteAction?.[1] && inviteAction[2] === "revoke") {
       await service.revokeInvite(userId, inviteAction[1]);
       return json(204, null);

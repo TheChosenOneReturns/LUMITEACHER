@@ -108,6 +108,14 @@ paths:
         - {$ref: '#/components/parameters/CourseId'}
       responses: { '200': { description: Curso } }
   /courses/{courseId}/invite:
+    get:
+      tags: [Courses]
+      summary: Devuelve la invitación activa del curso o null si no existe
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {$ref: '#/components/parameters/CourseId'}
+      responses:
+        '200': { description: Invitación activa o null }
     post:
       tags: [Courses]
       parameters:

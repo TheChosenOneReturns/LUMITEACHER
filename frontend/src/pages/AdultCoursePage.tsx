@@ -34,12 +34,14 @@ export function AdultCoursePage() {
   const load = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
     try {
-      const [nextDashboard, nextMissions] = await Promise.all([
+      const [nextDashboard, nextMissions, activeInvite] = await Promise.all([
         api.getDashboard(courseId),
         api.listMissions(courseId),
+        api.getActiveInvite(courseId),
       ]);
       setDashboard(nextDashboard);
       setMissions(nextMissions);
+      if (activeInvite) setInvite(activeInvite);
       setLastUpdated(new Date());
       setError(null);
     } catch (loadError) {

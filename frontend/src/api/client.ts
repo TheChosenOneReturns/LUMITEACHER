@@ -130,6 +130,11 @@ export const api = {
     );
   },
 
+  async getActiveInvite(courseId: string): Promise<Invite | null> {
+    const response = await request(`/courses/${encodeURIComponent(courseId)}/invite`) as { invite: unknown };
+    return response.invite ? inviteSchema.parse(response.invite) : null;
+  },
+
   async revokeInvite(courseId: string): Promise<void> {
     await request(`/courses/${encodeURIComponent(courseId)}/invite/revoke`, { method: "POST" });
   },
