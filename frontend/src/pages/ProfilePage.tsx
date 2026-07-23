@@ -125,7 +125,6 @@ export function ProfilePage() {
               })}
             </div>
           </> : null}
-          <section className="profile-security"><ShieldCheckIcon size={28} weight="duotone"/><div><h2>Tu espacio es local</h2><p>Los datos de cursos y progreso viven únicamente en DynamoDB Local.</p></div></section>
           <button className="logout-button" type="button" onClick={exit}><SignOutIcon weight="bold" /> Cerrar este perfil</button>
         </motion.aside>
       </div>

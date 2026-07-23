@@ -36,7 +36,7 @@ export function QuizPage() {
     try {
       setStory(await api.getStory(storyId));
     } catch (loadError) {
-      setError(loadError instanceof ApiClientError ? loadError.message : "No pudimos preparar el desafío.");
+      setError(loadError instanceof ApiClientError ? loadError.message : "¡Ups! No pudimos preparar el desafío. Probemos de nuevo.");
     }
   }, [storyId]);
 
@@ -94,7 +94,7 @@ export function QuizPage() {
       saveAttemptResult(result);
       navigate(`/historias/${loadedStory.storyId}/resultados/${result.attemptId}`);
     } catch (submitError) {
-      setError(submitError instanceof ApiClientError ? submitError.message : "No pudimos corregir el desafío.");
+      setError(submitError instanceof ApiClientError ? submitError.message : "¡Ups! No pudimos corregir el desafío. Probemos de nuevo.");
       setSubmitting(false);
     }
   }

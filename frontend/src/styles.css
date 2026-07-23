@@ -416,7 +416,7 @@ svg { flex: 0 0 auto; }
 .profile-level small { color: var(--muted); font-size: .7rem; font-weight: 800; }
 .profile-level strong { font-size: .9rem; }
 .profile-grid { display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(330px, .92fr); gap: 27px; margin-top: 34px; }
-.profile-panel, .profile-stat-card, .profile-security { border: 2px solid var(--border); border-radius: 25px; background: white; box-shadow: 0 8px 0 rgba(83,97,107,.12); padding: clamp(23px, 3.5vw, 34px); }
+.profile-panel, .profile-stat-card,
 .profile-panel { display: grid; align-content: start; }
 .profile-panel .button { width: fit-content; margin-top: 25px; }
 .avatar-picker--profile > div { grid-template-columns: repeat(3, 84px); }
@@ -428,10 +428,6 @@ svg { flex: 0 0 auto; }
 .profile-stats strong { color: var(--primary); font-size: 2rem; line-height: 1; }
 .profile-stats span { margin-top: 5px; color: var(--muted); font-size: .76rem; font-weight: 800; }
 .profile-stat-card > p { margin: 21px 0 0; color: var(--muted); font-size: .9rem; line-height: 1.55; }
-.profile-security { display: flex; gap: 13px; border-color: rgba(36,109,0,.3); background: #f2ffed; box-shadow: none; }
-.profile-security > svg { color: var(--green-dark); }
-.profile-security h2 { margin: 0 0 5px; color: #24530e; font-size: 1rem; }
-.profile-security p { margin: 0; color: #416632; font-size: .84rem; line-height: 1.5; }
 .logout-button { display: inline-flex; width: fit-content; align-items: center; gap: 8px; border: 0; background: transparent; padding: 8px; color: #9f281a; font-weight: 850; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 
 /* States, footer and mobile navigation */
@@ -697,7 +693,7 @@ svg { flex: 0 0 auto; }
   .profile-hero { grid-template-columns: 1fr; justify-items: center; text-align: center; }
   .profile-hero__avatar { width: 110px; height: 110px; border-radius: 34px; }
   .profile-level { grid-column: auto; }
-  .profile-panel, .profile-stat-card, .profile-security { padding: 22px 17px; }
+  .profile-panel, .profile-stat-card, 
   .profile-panel .button { width: 100%; }
   .adult-hero, .course-dashboard-header, .progress-hero, .rewards-hero { align-items: flex-start; flex-direction: column; padding: 24px 18px; }
   .adult-hero__orb { width: 82px; height: 82px; border-radius: 25px; }
@@ -1540,7 +1536,7 @@ svg { flex: 0 0 auto; }
 .outfit-swatch--adventure-cape { background: #ffd8cf; color: var(--coral-dark); }
 .outfit-swatch--idea-headphones { background: var(--violet-soft); color: var(--violet-dark); }
 .outfit-swatch--cosmic-backpack { background: var(--aqua-soft); color: var(--primary); }
-.profile-wardrobe .profile-security { margin-top: 19px; }
+.profile-wardrobe 
 .profile-wardrobe .logout-button { margin-top: 13px; }
 
 /* Cognitive game surfaces */

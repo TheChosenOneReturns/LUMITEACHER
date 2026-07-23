@@ -98,7 +98,7 @@ export function CreateStoryPage() {
       const story = await api.createStory(validation.data, courseId || null);
       navigate(`/historias/${story.storyId}`);
     } catch (createError) {
-      setError(createError instanceof ApiClientError ? createError.message : "No pudimos crear la aventura."); setLoading(false);
+      setError(createError instanceof ApiClientError ? createError.message : "¡Ups! No pudimos crear la aventura. Probemos de nuevo."); setLoading(false);
     }
   }
 
