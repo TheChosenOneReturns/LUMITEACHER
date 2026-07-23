@@ -5,12 +5,13 @@ import { handler as getStory } from "./handlers/getStory";
 import { handler as health } from "./handlers/health";
 import { handler as listStories } from "./handlers/listStories";
 import { handler as submitAttempt } from "./handlers/submitAttempt";
+import { handler as getAttempt } from "./handlers/getAttempt";
+import { handler as platform } from "./handlers/platform";
 
 process.env.TABLE_NAME ??= "StoryTeacherLocal";
 process.env.DYNAMODB_ENDPOINT ??= "http://127.0.0.1:8000";
 process.env.AWS_REGION ??= "us-east-1";
 process.env.STORY_GENERATOR_MODE ??= "fixture";
-process.env.ALLOWED_DEMO_USER_ID ??= "demo-sofia";
 process.env.ALLOWED_ORIGIN ??= "http://localhost:5173";
 
 const port = Number(process.env.PORT ?? 3000);
@@ -29,9 +30,11 @@ const server = createServer(async (request, response) => {
   const attemptMatch = url.pathname.match(
     /^\/stories\/([^/]+)\/attempts$/u,
   );
+  const getAttemptMatch = url.pathname.match(/^\/attempts\/([^/]+)$/u);
   const event = makeEvent(request, url, body, {
     ...(storyMatch?.[1] ? { storyId: storyMatch[1] } : {}),
     ...(attemptMatch?.[1] ? { storyId: attemptMatch[1] } : {}),
+    ...(getAttemptMatch?.[1] ? { attemptId: getAttemptMatch[1] } : {}),
   });
 
   let result: ApiResponse;
@@ -45,12 +48,10 @@ const server = createServer(async (request, response) => {
     result = await getStory(event);
   } else if (request.method === "POST" && attemptMatch) {
     result = await submitAttempt(event);
+  } else if (request.method === "GET" && getAttemptMatch) {
+    result = await getAttempt(event);
   } else {
-    result = {
-      statusCode: 404,
-      headers: { "content-type": "application/json; charset=utf-8" },
-      body: JSON.stringify({ error: { code: "NOT_FOUND" } }),
-    };
+    result = await platform(event);
   }
 
   response.writeHead(result.statusCode ?? 200, normalizeHeaders(result.headers));
@@ -124,7 +125,6 @@ function corsHeaders(): Record<string, string> {
     "access-control-allow-origin": process.env.ALLOWED_ORIGIN!,
     "access-control-allow-headers":
       "Content-Type,X-Demo-User-Id,Idempotency-Key",
-    "access-control-allow-methods": "GET,POST,OPTIONS",
+    "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
   };
 }
-

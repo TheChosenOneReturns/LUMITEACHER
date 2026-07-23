@@ -2,6 +2,7 @@ import type {
   AttemptResult,
   GeneratedStory,
   GenerateStoryInput,
+  RewardGrant,
   StoryPublic,
   StorySummary,
   SubmitAttemptInput,
@@ -18,6 +19,9 @@ export interface StoredStory extends GeneratedStory {
   input: GenerateStoryInput;
   modelId: string;
   promptVersion: string;
+  courseId?: string;
+  missionId?: string;
+  source: "free" | "mission";
 }
 
 export interface StoredAttempt extends AttemptResult {
@@ -26,6 +30,17 @@ export interface StoredAttempt extends AttemptResult {
   entityType: "ATTEMPT";
   userId: string;
   answers: number[];
+  courseId?: string;
+  missionId?: string;
+  storyTitle: string;
+  theme: string;
+  checkpointStars?: number;
+}
+
+export interface StoryCreationContext {
+  courseId?: string;
+  missionId?: string;
+  source?: "free" | "mission";
 }
 
 export interface StoryGenerator {
@@ -41,10 +56,11 @@ export interface StoryRepository {
   ): Promise<StoredStory | null>;
   getStory(userId: string, storyId: string): Promise<StoredStory | null>;
   listStories(userId: string, limit: number): Promise<StorySummary[]>;
+  getAttempt(userId: string, attemptId: string): Promise<StoredAttempt | null>;
 }
 
 export interface AttemptRepository {
-  saveAttempt(attempt: StoredAttempt): Promise<void>;
+  saveAttempt(attempt: StoredAttempt): Promise<RewardGrant | undefined>;
 }
 
 export interface StoryApplicationService {
@@ -52,6 +68,7 @@ export interface StoryApplicationService {
     userId: string,
     input: GenerateStoryInput,
     idempotencyKey: string,
+    context?: StoryCreationContext,
   ): Promise<StoryPublic>;
   getStory(userId: string, storyId: string): Promise<StoryPublic>;
   listStories(userId: string, limit: number): Promise<StorySummary[]>;
@@ -60,5 +77,5 @@ export interface StoryApplicationService {
     storyId: string,
     input: SubmitAttemptInput,
   ): Promise<AttemptResult>;
+  getAttempt(userId: string, attemptId: string): Promise<AttemptResult>;
 }
-

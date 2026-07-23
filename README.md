@@ -1,99 +1,125 @@
 # Story Teacher
 
-Story Teacher es una aplicación educativa para niñas y niños de 6 a 12 años. Genera cuentos personalizados con Amazon Bedrock y, al terminar la lectura, presenta exactamente cinco preguntas de opción múltiple para evaluar comprensión literal, inferencia, vocabulario en contexto, orden de acontecimientos y causa/consecuencia.
+Story Teacher es una plataforma local de lectura para niñas y niños de 6 a 12 años. Crea cuentos personalizados, evalúa cinco habilidades de comprensión y conecta a estudiantes con docentes o familias mediante cursos, misiones, seguimiento y felicitaciones.
 
-Este repositorio contiene actualmente las referencias visuales exportadas desde Google Stitch y la documentación ejecutable del MVP para el hackathon de cinco días, del **martes 21 al sábado 25 de julio de 2026**.
+El hito actual funciona de punta a punta sin credenciales AWS: React consume una API Node/TypeScript, DynamoDB Local persiste todos los datos y un catálogo de seis cuentos sustituye temporalmente a Amazon Bedrock.
 
-## Decisiones cerradas para el MVP
+## Qué incluye
 
-- Producto visible: **Story Teacher**.
-- Mascota y guía: **Lumi**.
-- Público: estudiantes de **6 a 12 años**.
-- Idioma del MVP: español.
-- Frontend: React, TypeScript, Vite y Tailwind CSS.
-- Backend: Node.js y TypeScript sobre AWS Lambda.
-- API: Amazon API Gateway **HTTP API**.
-- Persistencia: Amazon DynamoDB, una tabla.
-- IA: Amazon Bedrock con un modelo Amazon Nova de bajo costo.
-- Login: perfil simulado `demo-sofia`; no representa autenticación real.
-- Infraestructura: AWS SAM.
-- Hosting recomendado: AWS Amplify Hosting.
-- El MVP no genera ilustraciones con IA: usa fondos, íconos y arte temático estático autorizado.
-
-## Recorrido principal
-
-1. La persona entra con el perfil de demostración.
-2. Selecciona edad, tema, dificultad, objetivo educativo, extensión y protagonista opcional.
-3. Bedrock devuelve un cuento y cinco preguntas validadas.
-4. El cuento se guarda en DynamoDB.
-5. El estudiante lee y responde las cinco preguntas.
-6. El backend corrige, explica y guarda el intento.
-7. La pantalla de resultados muestra puntaje total y desempeño por habilidad.
-
-## Documentación
-
-| Documento | Propósito |
-|---|---|
-| [Producto y alcance](docs/01_PRODUCTO_MVP.md) | Problema, usuarios, alcance, recorrido y criterios de aceptación |
-| [Arquitectura, API y datos](docs/02_ARQUITECTURA_API_DATOS.md) | Componentes AWS, endpoints, DynamoDB, errores y observabilidad |
-| [IA y seguridad](docs/03_IA_SEGURIDAD.md) | Prompt, esquema de salida, validación, moderación y privacidad infantil |
-| [UX/UI](docs/04_UX_UI.md) | Auditoría de Stitch, sistema visual, estados y responsive |
-| [AWS: capa gratuita y costos](docs/05_AWS_COSTOS.md) | Elegibilidad, límites, presupuesto y controles de gasto |
-| [Plan de cinco días](docs/06_PLAN_5_DIAS.md) | Cronograma fechado, responsables sugeridos y Definition of Done |
-| [Demo y pitch](docs/07_DEMO_PITCH.md) | Guion, datos de demo, métricas y contingencias |
-| [Flujo con Kiro](docs/08_KIRO_WORKFLOW.md) | Instalación, tareas acotadas, hooks, privacidad y uso de créditos |
-| [Contrato interno de IA](contracts/story-generation.schema.json) | JSON Schema de la respuesta cruda de Bedrock |
-| [Contrato HTTP](contracts/openapi.yaml) | Especificación OpenAPI del MVP |
-| [Prompt v1](prompts/story-v1.txt) | Prompt versionado listo para interpolar en backend |
-| [Ejemplo válido](contracts/story-generation.example.json) | Fixture completo con las cinco habilidades |
+- Dos tipos de perfil demo: `student` y `adult`. Profesor/a y familia comparten permisos adultos.
+- Creador de perfiles infantiles propios con nombre, edad, tema favorito y avatares de animales o niños.
+- Varios cursos por adulto y varias membresías por estudiante.
+- Invitaciones reutilizables durante siete días por enlace y QR, revocables e idempotentes.
+- Misiones creadas por adultos y cuentos libres que el estudiante puede asociar a un curso.
+- Estudio narrativo visual con vista previa en vivo, modo clásico o interactivo, dos decisiones y cuatro finales por aventura.
+- Narración pausada mediante las voces del dispositivo y contenido fixture completo en español o inglés.
+- El recorrido elegido acompaña al quiz de cinco habilidades y vuelve a aparecer en el resultado.
+- Registro de apertura, inicio de quiz e intentos completos.
+- Dashboard de curso con actualización cada 15 segundos, promedio, completitud, habilidades y actividad.
+- Historial completo por estudiante, incluyendo respuesta elegida, respuesta correcta y explicación.
+- Postales moderadas de hasta 160 caracteres, sin impacto académico.
+- Recompensas académicamente neutras: el primer intento entrega `5 + aciertos` estrellas y cualquier intento con 60% domina el cuento, avanza uno de los 24 hitos y entrega una carga de carta para minijuegos.
+- Diez minijuegos cognitivos visuales y 24 poderes de carta únicos para entrenar inferencia, memoria, secuencia, planificación, emociones, vocabulario, evidencia, causalidad, perspectiva y orientación espacial.
+- Partidas rejugables en niveles Explorador, Aventurero y Maestro: cada sesión reorganiza desafíos, respuestas, tableros, rutas y distractores sin depender de velocidad.
+- Tres desafíos cognitivos de inferencia, vocabulario, asociación semántica y secuencia causal, con devolución explicada.
+- Seis cuentos fixture y 15 escenarios automáticos; Bedrock/Nova y Guardrails quedan listos detrás de la misma interfaz, sin invocaciones reales.
 
 ## Arranque local
 
-Requisitos: Node.js 22 o superior y Docker Desktop iniciado.
+Requisitos: Node.js 22+, Docker Desktop y los puertos 5173, 3000 y 8000 disponibles.
 
 ```powershell
 npm install
 npm run local
 ```
 
-El comando crea la tabla `StoryTeacherLocal`, inicia la API local en
-`http://127.0.0.1:3000` y Vite en `http://localhost:5173`. El generador
-predeterminado usa el fixture validado; no necesita una cuenta AWS ni genera
-costos. Para detener la base, ejecutar `npm run db:down`.
+`npm run local` inicia DynamoDB, crea `StoryTeacherLocal`, siembra datos de manera idempotente y levanta API + frontend:
 
-Cada tarea realizada con Kiro debe terminar con:
+- Web: `http://127.0.0.1:5173`
+- API: `http://127.0.0.1:3000`
+- DynamoDB Local: `http://127.0.0.1:8000`
+
+Para reconstruir exclusivamente la tabla local y volver a sembrarla:
 
 ```powershell
-npm run verify
+npm run local:fresh
 ```
 
-## Variables y despliegue
+Para detener DynamoDB:
 
-- `STORY_GENERATOR_MODE=fixture|bedrock` selecciona el generador.
-- `DYNAMODB_ENDPOINT=http://127.0.0.1:8000` se usa únicamente en local.
-- `VITE_API_URL` apunta a la URL pública de API Gateway en Amplify.
-- `BEDROCK_MODEL_ID` identifica el modelo o inference profile configurado.
-- `BEDROCK_GUARDRAIL_ID` y `BEDROCK_GUARDRAIL_VERSION` activan moderación.
+```powershell
+npm run db:down
+```
 
-No se deben versionar credenciales ni archivos `.env`. Para desplegar, configurar
-AWS CLI y SAM CLI y ejecutar `npm run sam:validate`, `npm run sam:build` y
-`sam deploy --guided`. El primer despliegue debe conservar el modo `fixture`;
-Bedrock se activa después de probar Nova y Guardrails. Amplify usa `amplify.yml`
-y debe recibir `VITE_API_URL` y la redirección SPA `/* /index.html 200`.
+## Perfiles y datos sembrados
 
-## Estructura implementada
+| Perfil | Tipo | Estado inicial |
+|---|---|---|
+| Lucía | Adulto · Profesor/a | Dueña de Lectores del cuarto B |
+| Sofía | Estudiante | Miembro, misión completada y recompensas |
+| Mateo | Estudiante | Miembro, cuento libre e intento |
+| Valentina | Estudiante | Disponible para probar una invitación |
+| Luna | Estudiante | Demo `Todo desbloqueado`: 999 estrellas, 24 hitos, cartas, personajes y minijuegos |
+
+También se pueden crear nuevos exploradores desde el login. La sesión del navegador conserva solamente `story-teacher:demo-user-id`. Perfiles, cursos, membresías, historias, intentos, actividad, recompensas y postales viven en DynamoDB Local.
+
+## Comandos
+
+```powershell
+npm run local          # base + seed + API + web
+npm run local:fresh    # reinicio seguro de StoryTeacherLocal + entorno
+npm run ai:test        # 15 escenarios del generador fixture
+npm run test:e2e       # reinicia StoryTeacherLocal y ejecuta el recorrido Playwright
+npm run verify         # typecheck + tests + builds
+npm run sam:validate   # validación de infraestructura
+npm run sam:build      # bundle de Lambdas
+```
+
+`npm run test:e2e` elimina únicamente la tabla local `StoryTeacherLocal`, vuelve a sembrarla y usa Chrome instalado para reproducir el flujo adulto → invitación → estudiante → misión → recompensa → postal.
+
+## IA
+
+`StoryGenerator` mantiene separados el dominio y el proveedor:
+
+- `fixture`: modo local por defecto, determinista y gratuito.
+- `bedrock`: Amazon Nova 2 Lite mediante Converse, temperatura `0.2`, prompt versionado, Guardrails de entrada/salida, validación Zod y un reintento de reparación.
+
+Variables relevantes:
+
+- `STORY_GENERATOR_MODE=fixture|bedrock`
+- `BEDROCK_MODEL_ID=us.amazon.nova-2-lite-v1:0`
+- `BEDROCK_GUARDRAIL_ID`
+- `BEDROCK_GUARDRAIL_VERSION`
+- `DYNAMODB_ENDPOINT=http://127.0.0.1:8000` sólo en local
+- `VITE_API_URL` para la URL desplegada de API Gateway
+
+No se deben versionar claves AWS ni archivos `.env` con secretos. Los créditos de Kiro aceleran desarrollo y revisión; no pagan llamadas de Bedrock.
+
+## Contratos y documentación
+
+- [Contrato OpenAPI](contracts/openapi.yaml)
+- [JSON Schema de la IA](contracts/story-generation.schema.json)
+- [Prompt Story v1](prompts/story-v1.txt)
+- [Contrato JSON de cuentos interactivos](contracts/interactive-story.schema.json)
+- [Prompt de cuentos interactivos v2](prompts/story-interactive-v2.txt)
+- [Producto y alcance](docs/01_PRODUCTO_MVP.md)
+- [Arquitectura, API y datos](docs/02_ARQUITECTURA_API_DATOS.md)
+- [IA y seguridad](docs/03_IA_SEGURIDAD.md)
+- [UX/UI](docs/04_UX_UI.md)
+- [AWS y costos](docs/05_AWS_COSTOS.md)
+- [Flujo con Kiro](docs/08_KIRO_WORKFLOW.md)
+- [Cursos, seguimiento y recompensas locales](docs/09_CURSOS_RECOMPENSAS_LOCAL.md)
+- [Arte generado para las 24 cartas](docs/10_ARTE_CARTAS_GENERADO.md)
+- [Generación de cuentos interactivos con IA](docs/12_IA_CUENTOS_INTERACTIVOS.md)
+
+## Arquitectura
 
 ```text
-.
-├── frontend/                 # React + TypeScript + Tailwind
-├── backend/                  # Lambdas, dominio y adaptadores AWS
-├── contracts/                # JSON Schema y OpenAPI
-├── prompts/                  # Prompts versionados de Bedrock
-├── docs/                     # Plan y decisiones del producto
-├── template.yaml             # Infraestructura AWS SAM
-└── stitch_story_teacher_ai_platform/ # Referencias visuales originales
+frontend (React + Motion)
+        │ HTTP + X-Demo-User-Id
+backend (Node + TypeScript)
+        ├── StoryGenerator ── Fixture / Amazon Bedrock
+        └── tabla PK/SK ───── DynamoDB Local / DynamoDB
 ```
 
-## Principio de entrega
-
-La demo se considera completa cuando una persona puede crear un cuento, leerlo, responder las cinco preguntas, ver el resultado y encontrar el cuento en su biblioteca desde una URL pública. Elementos como chat libre con Lumi, imágenes generadas, rachas, monedas, logros, portal de padres y autenticación real quedan explícitamente fuera del MVP.
+La infraestructura desplegable usa AWS SAM, API Gateway HTTP API, Lambda y una tabla DynamoDB. El login continúa siendo una simulación y no debe utilizarse como autenticación de producción.

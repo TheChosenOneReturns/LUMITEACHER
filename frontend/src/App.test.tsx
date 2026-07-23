@@ -1,81 +1,86 @@
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { App } from "./App";
-import { AuthProvider, demoProfile } from "./auth/AuthContext";
+import { AuthProvider } from "./auth/AuthContext";
+import { sessionUserKey } from "./auth/session";
+import TransitionProvider from "./components/motion/TransitionProvider";
+
+const profiles = [
+  { userId: "demo-sofia", role: "student", displayName: "Sofía", age: 8, avatarId: "explorer", favoriteTheme: "Espacio", selectedAccessoryId: null },
+  { userId: "demo-mateo", role: "student", displayName: "Mateo", age: 10, avatarId: "inventor", favoriteTheme: "Inventos", selectedAccessoryId: null },
+  { userId: "demo-lucia", role: "adult", displayName: "Lucía", avatarId: "mentor", favoriteTheme: "Fantasía", adultLabel: "Profesor/a", selectedAccessoryId: null },
+];
+const createdProfile = { userId: "demo-nina-new001", role: "student", displayName: "Nina", age: 9, avatarId: "animal-panda", favoriteTheme: "Selva", selectedAccessoryId: null };
+
+function response(data: unknown, status = 200) {
+  return Promise.resolve(new Response(status === 204 ? null : JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } }));
+}
 
 function renderApp(path: string) {
-  return render(
-    <MemoryRouter initialEntries={[path]}>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </MemoryRouter>,
-  );
+  return render(<MemoryRouter initialEntries={[path]}><TransitionProvider><AuthProvider><App /></AuthProvider></TransitionProvider></MemoryRouter>);
 }
 
 describe("Story Teacher app", () => {
   beforeEach(() => {
-    cleanup();
-    localStorage.clear();
+    cleanup(); localStorage.clear();
+    vi.stubGlobal("fetch", vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
+      const url = String(input);
+      if (url.endsWith("/demo/profiles") && init?.method === "POST") return response(createdProfile, 201);
+      if (url.endsWith("/demo/profiles")) return response({ items: profiles });
+      if (url.endsWith("/me")) {
+        const userId = (init?.headers as Record<string, string> | undefined)?.["X-Demo-User-Id"] ?? localStorage.getItem(sessionUserKey);
+        return response([...profiles, createdProfile].find((profile) => profile.userId === userId) ?? { error: { message: "Sin sesión" } }, userId ? 200 : 401);
+      }
+      if (url.endsWith("/courses")) return response({ items: [] });
+      return response({ error: { message: `Ruta sin mock: ${url}` } }, 404);
+    }));
   });
 
-  it("muestra una landing en español y lleva al acceso simulado", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("muestra la landing en español sin la antigua etiqueta de IA", () => {
     renderApp("/");
-
-    expect(
-      screen.getByRole("heading", { name: /una historia que cobra vida para vos/i }),
-    ).toBeInTheDocument();
-    expect(screen.queryByText("Lectura + imaginación + IA")).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /crear mi historia/i })).toHaveAttribute(
-      "href",
-      "/login?next=%2Fcrear",
-    );
+    expect(screen.getByRole("heading", { name: /una historia que cobra vida para vos/i })).toBeInTheDocument();
+    expect(screen.queryByText(/Lectura \+ imaginación \+ IA/i)).not.toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /crear mi historia/i })).toHaveAttribute("href", "/login?next=%2Fcrear");
   });
 
-  it("permite entrar con un perfil de demostración", () => {
-    renderApp("/login?next=%2F");
-
-    expect(screen.getByText("Acceso de demostración")).toBeInTheDocument();
+  it("ofrece perfiles de estudiante y adulto sin pedir la edad", async () => {
+    renderApp("/login");
+    expect(await screen.findByRole("button", { name: /sofía/i })).toBeInTheDocument();
     expect(screen.queryByLabelText("Edad")).not.toBeInTheDocument();
-    expect(screen.getByLabelText("Mundo favorito")).toBeInTheDocument();
-    fireEvent.change(screen.getByLabelText("Nombre o apodo"), {
-      target: { value: "Valen" },
-    });
-    fireEvent.click(screen.getByRole("button", { name: /abrir mi mundo/i }));
-
-    expect(screen.getByTitle("Abrir perfil de demostración")).toHaveTextContent("Valen");
+    fireEvent.click(screen.getByRole("tab", { name: /adulto/i }));
+    expect(screen.getByRole("button", { name: /lucía/i })).toBeInTheDocument();
   });
 
-  it("protege el configurador y muestra el objetivo educativo al ingresar", () => {
-    localStorage.setItem("story-teacher:demo-profile", JSON.stringify(demoProfile));
-    renderApp("/crear");
-
-    expect(screen.getByText("Misión de aprendizaje")).toBeInTheDocument();
-    expect(
-      screen.getByLabelText("¿Qué te gustaría practicar o aprender?"),
-    ).toBeInTheDocument();
+  it("permite entrar con un perfil demo y conserva sólo su identificador", async () => {
+    renderApp("/login");
+    fireEvent.click(await screen.findByRole("button", { name: /sofía/i }));
+    await waitFor(() => expect(localStorage.getItem(sessionUserKey)).toBe("demo-sofia"));
+    expect(localStorage.length).toBe(1);
   });
 
-  it("carga una receta de prueba completa en el configurador", () => {
-    localStorage.setItem("story-teacher:demo-profile", JSON.stringify(demoProfile));
+  it("permite crear un explorador infantil propio y entrar con él", async () => {
+    renderApp("/login");
+    fireEvent.click(await screen.findByRole("button", { name: /crear mi propio explorador/i }));
+    fireEvent.change(screen.getByLabelText(/cómo querés que te llamemos/i), { target: { value: "Nina" } });
+    fireEvent.click(screen.getByRole("button", { name: /crear y empezar/i }));
+    await waitFor(() => expect(localStorage.getItem(sessionUserKey)).toBe(createdProfile.userId));
+  });
+
+  it("protege el configurador y carga una receta completa", async () => {
+    localStorage.setItem(sessionUserKey, "demo-sofia");
     renderApp("/crear");
+    expect(await screen.findByText("Misión de aprendizaje")).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cargar prueba El invento submarino" }));
+    expect(screen.getByRole("button", { name: "10 años" })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.getByLabelText("¿Qué te gustaría practicar o aprender?")).toHaveValue("Analizar causas y consecuencias para encontrar soluciones sustentables");
+  });
 
-    fireEvent.click(
-      screen.getByRole("button", { name: "Cargar prueba El invento submarino" }),
-    );
-
-    expect(screen.getByRole("button", { name: "10 años" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    expect(
-      screen.getByLabelText("¿Qué te gustaría practicar o aprender?"),
-    ).toHaveValue(
-      "Analizar causas y consecuencias para encontrar soluciones sustentables",
-    );
-    expect(
-      screen.getByLabelText("¿Quién será el héroe de la aventura?"),
-    ).toHaveValue("Nico, un inventor que conversa con las ballenas");
+  it("redirige un adulto fuera de las rutas de estudiante", async () => {
+    localStorage.setItem(sessionUserKey, "demo-lucia");
+    renderApp("/crear");
+    expect(await screen.findByRole("heading", { name: /hola, lucía/i })).toBeInTheDocument();
   });
 });

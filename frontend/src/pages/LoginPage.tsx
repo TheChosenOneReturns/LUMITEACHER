@@ -1,180 +1,151 @@
+import type { UserProfile, UserRole } from "@story-teacher/shared";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { api, ApiClientError } from "../api/client";
+import { useAuth, type AvatarId } from "../auth/AuthContext";
 import {
   ArrowRightIcon,
   CheckCircleIcon,
-  LockKeyOpenIcon,
-  MagicWandIcon,
-  ShieldCheckIcon,
+  GraduationCapIcon,
+  PlusIcon,
   SparkleIcon,
+  UserCircleIcon,
 } from "../components/icons";
-import { motion } from "motion/react";
-import { useState, type FormEvent } from "react";
-import { useSearchParams } from "react-router-dom";
-import {
-  demoProfile,
-  useAuth,
-  type AvatarId,
-  type DemoProfile,
-} from "../auth/AuthContext";
+import { Lumi } from "../components/Lumi";
+import { riseItem, staggerContainer } from "../components/MotionPrimitives";
 import { useTransition } from "../components/motion/TransitionContext";
-import { FloatingShape, riseItem, staggerContainer } from "../components/MotionPrimitives";
 import { ProfileAvatar } from "../components/VisualIcons";
-import heroImage from "../../../stitch_story_teacher_ai_platform/a_giant_magical_open_book_for_a_kids_app_landing_page._from_the_pages_friendly/screen.png";
+import { CreateProfileModal } from "../components/CreateProfileModal";
 
-const avatarOptions: Array<{ id: AvatarId; label: string }> = [
-  { id: "explorer", label: "Explorador" },
-  { id: "dreamer", label: "Soñador" },
-  { id: "inventor", label: "Inventor" },
-];
-
-function safeNext(value: string | null): string {
-  return value?.startsWith("/") && !value.startsWith("//") ? value : "/inicio";
+function safeNext(value: string | null, role: UserRole): string {
+  if (value?.startsWith("/") && !value.startsWith("//")) return value;
+  return role === "adult" ? "/adulto" : "/inicio";
 }
 
 export function LoginPage() {
-  const { login, profile } = useAuth();
+  const { login } = useAuth();
   const { startTransition } = useTransition();
   const [searchParams] = useSearchParams();
-  const [name, setName] = useState(profile?.name ?? "");
-  const [favoriteTheme, setFavoriteTheme] = useState(profile?.favoriteTheme ?? "Espacio");
-  const [avatarId, setAvatarId] = useState<AvatarId>(profile?.avatarId ?? "explorer");
+  const [role, setRole] = useState<UserRole>("student");
+  const [profiles, setProfiles] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [entering, setEntering] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [creatingProfile, setCreatingProfile] = useState(false);
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const cleanName = name.trim();
-    if (cleanName.length < 2) {
-      setError("Escribí un nombre o apodo de al menos 2 letras.");
-      return;
+  useEffect(() => {
+    api.listDemoProfiles()
+      .then(setProfiles)
+      .catch((loadError) => setError(
+        loadError instanceof ApiClientError ? loadError.message : "No pudimos cargar los perfiles demo.",
+      ))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const visibleProfiles = useMemo(
+    () => profiles.filter((profile) => profile.role === role),
+    [profiles, role],
+  );
+
+  async function enter(profile: UserProfile) {
+    setEntering(profile.userId);
+    setError(null);
+    try {
+      const next = await login(profile.userId);
+      startTransition(safeNext(searchParams.get("next"), next.role));
+    } catch (enterError) {
+      setError(enterError instanceof ApiClientError ? enterError.message : "No pudimos abrir el perfil.");
+      setEntering(null);
     }
-    const nextProfile: DemoProfile = {
-      name: cleanName.slice(0, 30),
-      age: profile?.age ?? demoProfile.age,
-      favoriteTheme,
-      avatarId,
-    };
-    login(nextProfile);
-    startTransition(safeNext(searchParams.get("next")));
   }
 
-  function enterAsSofia() {
-    login(demoProfile);
-    startTransition(safeNext(searchParams.get("next")));
+  async function useCreatedProfile(profile: UserProfile) {
+    setProfiles((current) => [...current, profile]);
+    setCreatingProfile(false);
+    await enter(profile);
   }
 
   return (
     <div className="login-page page-width">
-      <motion.section
-        className="login-world"
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div className="login-world__copy" variants={riseItem}>
-          <span className="pill"><SparkleIcon weight="fill" /> Tu aventura empieza acá</span>
-          <h1>Tu puerta secreta a miles de historias</h1>
-          <p>
-            Creá un perfil de exploración para que Lumi recuerde cómo te gusta
-            aprender en este dispositivo.
-          </p>
-          <div className="login-benefits">
-            <span><CheckCircleIcon weight="fill" /> Cuentos a tu medida</span>
-            <span><CheckCircleIcon weight="fill" /> Desafíos de comprensión</span>
-            <span><CheckCircleIcon weight="fill" /> Biblioteca personal</span>
-          </div>
+      <motion.section className="login-intro" variants={staggerContainer} initial="hidden" animate="visible">
+        <motion.div className="login-intro__copy" variants={riseItem}>
+          <span className="pill"><SparkleIcon weight="fill" /> Ingresar a Story Teacher</span>
+          <h1>¿Quién va a aprender hoy?</h1>
+          <p>Elegí si entrás para jugar y leer, o para acompañar el progreso. En esta demo no necesitás contraseña.</p>
+          <ol className="login-steps" aria-label="Pasos para ingresar">
+            <li className="is-current"><span>1</span><strong>Elegí tu modo</strong></li>
+            <li><span>2</span><strong>Elegí tu perfil</strong></li>
+            <li><span>3</span><strong>¡A explorar!</strong></li>
+          </ol>
         </motion.div>
-
-        <motion.div className="login-portal" variants={riseItem} aria-hidden="true">
-          <motion.div
-            className="login-portal__ring"
-            animate={{ rotate: 360 }}
-            transition={{ duration: 26, repeat: Number.POSITIVE_INFINITY, ease: "linear" }}
-          />
-          <img src={heroImage} alt="" />
-          <FloatingShape className="login-float login-float--one"><MagicWandIcon weight="duotone" /></FloatingShape>
-          <FloatingShape className="login-float login-float--two" delay={0.8}><SparkleIcon weight="fill" /></FloatingShape>
+        <motion.div className="login-intro__lumi" variants={riseItem}>
+          <span className="login-orbit login-orbit--one" aria-hidden="true"><SparkleIcon weight="fill" /></span>
+          <span className="login-orbit login-orbit--two" aria-hidden="true"><SparkleIcon weight="fill" /></span>
+          <Lumi mood="encouraging" message="¡Yo te acompaño! Primero elegí cómo querés entrar." />
         </motion.div>
       </motion.section>
 
-      <motion.section
-        className="login-card"
-        initial={{ opacity: 0, y: 28, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ type: "spring", stiffness: 150, damping: 21, delay: 0.12 }}
-      >
+      <motion.section className="login-card login-card--profiles" initial={{ opacity: 0, y: 28, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }}>
         <div className="login-card__heading">
-          <span className="login-card__icon"><LockKeyOpenIcon size={28} weight="duotone" /></span>
-          <div>
-            <span className="eyebrow">Acceso de demostración</span>
-            <h2>¿Quién va a explorar hoy?</h2>
-          </div>
+          <span className="login-step-number">1</span>
+          <div><span className="eyebrow">Primero</span><h2>Elegí tu modo de entrada</h2></div>
         </div>
 
-        <div className="demo-notice">
-          <ShieldCheckIcon size={24} weight="duotone" />
-          <p><strong>Sin contraseña ni cuenta real.</strong> Este perfil se guarda solamente en este navegador.</p>
-        </div>
-
-        <form onSubmit={submit} className="login-form">
-          <label className="text-field">
-            <span>Nombre o apodo</span>
-            <input
-              value={name}
-              minLength={2}
-              maxLength={30}
-              autoComplete="nickname"
-              placeholder="Ej.: Vale"
-              onChange={(event) => setName(event.target.value)}
-            />
-          </label>
-
-          <label className="text-field">
-            <span>Mundo favorito</span>
-            <select value={favoriteTheme} onChange={(event) => setFavoriteTheme(event.target.value)}>
-              {[
-                "Espacio",
-                "Fantasía",
-                "Océano",
-                "Selva",
-                "Inventos",
-              ].map((theme) => <option key={theme}>{theme}</option>)}
-            </select>
-          </label>
-
-          <fieldset className="avatar-picker">
-            <legend>Elegí tu insignia</legend>
-            <div>
-              {avatarOptions.map((option) => (
-                <motion.button
-                  key={option.id}
-                  type="button"
-                  className={avatarId === option.id ? "is-selected" : ""}
-                  aria-pressed={avatarId === option.id}
-                  onClick={() => setAvatarId(option.id)}
-                  whileHover={{ y: -4 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <ProfileAvatar avatarId={option.id} size={34} />
-                  <span>{option.label}</span>
-                </motion.button>
-              ))}
-            </div>
-          </fieldset>
-
-          {error ? <p className="form-error" role="alert">{error}</p> : null}
-
-          <motion.button
-            className="button button--yellow login-submit"
-            type="submit"
-            whileHover={{ y: -3, scale: 1.01 }}
-            whileTap={{ y: 3, scale: 0.98 }}
-          >
-            Abrir mi mundo <ArrowRightIcon size={22} weight="bold" />
-          </motion.button>
-          <button className="login-quick" type="button" onClick={enterAsSofia}>
-            Probar rápidamente como Sofía
+        <div className="role-switch" role="tablist" aria-label="Tipo de perfil">
+          <button type="button" role="tab" aria-label="Alumno" aria-selected={role === "student"} className={role === "student" ? "is-active" : ""} onClick={() => setRole("student")}>
+            <span><UserCircleIcon size={30} weight="duotone" /></span>
+            <strong>Quiero aprender</strong>
+            <small>Leer cuentos, superar desafíos y ganar premios</small>
+            <CheckCircleIcon className="role-switch__check" weight="fill" />
           </button>
-        </form>
+          <button type="button" role="tab" aria-label="Adulto" aria-selected={role === "adult"} className={role === "adult" ? "is-active" : ""} onClick={() => setRole("adult")}>
+            <span><GraduationCapIcon size={30} weight="duotone" /></span>
+            <strong>Quiero acompañar</strong>
+            <small>Crear cursos, enviar misiones y ver avances</small>
+            <CheckCircleIcon className="role-switch__check" weight="fill" />
+          </button>
+        </div>
+
+        <div className="profile-picker-heading">
+          <span className="login-step-number">2</span>
+          <div><span className="eyebrow">Después</span><h3>Elegí quién sos</h3></div>
+          <span className="demo-mode-badge">Demo sin contraseña</span>
+        </div>
+
+        {role === "student" ? <motion.button className="create-profile-button" type="button" onClick={() => setCreatingProfile(true)} whileHover={{ y: -3 }} whileTap={{ scale: .98 }}><span><PlusIcon weight="bold" /></span><span><strong>Crear mi propio explorador</strong><small>Elegí un animal o personaje y personalizalo</small></span><ArrowRightIcon weight="bold" /></motion.button> : null}
+
+        {loading ? <p className="profile-picker-status">Preparando perfiles…</p> : null}
+        <div className="profile-picker-grid">
+          {visibleProfiles.map((profile, index) => (
+            <motion.button
+              key={profile.userId}
+              type="button"
+              className="profile-login-card"
+              onClick={() => void enter(profile)}
+              disabled={Boolean(entering)}
+              initial={{ opacity: 0, y: 14 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.06 }}
+              whileHover={{ y: -5, rotate: index % 2 ? 0.6 : -0.6 }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <span className="profile-login-card__avatar">
+                <ProfileAvatar avatarId={profile.avatarId as AvatarId} size={42} />
+              </span>
+              <span className="profile-login-card__copy">
+                <strong>{profile.displayName}</strong>
+                <small>{profile.role === "adult" ? profile.adultLabel : `Le gustan: ${profile.favoriteTheme}`}</small>
+                <b>{entering === profile.userId ? "Abriendo su mundo…" : `Entrar como ${profile.displayName}`}</b>
+              </span>
+              <span className="profile-login-card__arrow"><ArrowRightIcon size={20} weight="bold" /></span>
+            </motion.button>
+          ))}
+        </div>
+        {error ? <p className="form-error" role="alert">{error}</p> : null}
+        <p className="login-privacy"><CheckCircleIcon weight="fill" /> Todo el progreso de esta demo queda guardado únicamente en tu computadora.</p>
       </motion.section>
+      <AnimatePresence>{creatingProfile ? <CreateProfileModal onClose={() => setCreatingProfile(false)} onCreated={useCreatedProfile} /> : null}</AnimatePresence>
     </div>
   );
 }

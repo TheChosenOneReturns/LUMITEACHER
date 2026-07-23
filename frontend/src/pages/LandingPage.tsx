@@ -12,6 +12,7 @@ import { motion } from "motion/react";
 import TransitionLink from "../components/motion/TransitionLink";
 import { useAuth } from "../auth/AuthContext";
 import { FloatingShape, riseItem, staggerContainer } from "../components/MotionPrimitives";
+import { Lumi } from "../components/Lumi";
 import heroImage from "../../../stitch_story_teacher_ai_platform/a_giant_magical_open_book_for_a_kids_app_landing_page._from_the_pages_friendly/screen.png";
 
 export function LandingPage() {
@@ -71,11 +72,8 @@ export function LandingPage() {
             transition={{ duration: 5.5, repeat: Number.POSITIVE_INFINITY, ease: "easeInOut" }}
           >
             <img src={heroImage} alt="Libro mágico abierto con mundos de fantasía, ciencia y naturaleza" />
-            <div className="hero-stage__caption">
-              <span><SparkleIcon size={18} weight="fill" /></span>
-              <p><small>Lumi está listo</small><strong>¿Qué imaginamos hoy?</strong></p>
-            </div>
           </motion.div>
+          <div className="hero-stage__mascot"><Lumi compact mood="encouraging" message="¿Qué imaginamos hoy?" /></div>
           <FloatingShape className="hero-float hero-float--rocket"><RocketLaunchIcon weight="duotone" /></FloatingShape>
           <FloatingShape className="hero-float hero-float--castle" delay={0.9}><CastleTurretIcon weight="duotone" /></FloatingShape>
           <FloatingShape className="hero-float hero-float--spark" delay={1.6}><SparkleIcon weight="fill" /></FloatingShape>

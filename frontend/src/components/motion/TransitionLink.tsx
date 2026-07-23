@@ -1,63 +1,39 @@
-import { ReactNode } from "react"
-import { useLocation } from "react-router-dom"
-import { useTransition } from "./TransitionContext"
+import type { AnchorHTMLAttributes, MouseEvent, ReactNode } from "react";
+import { useLocation } from "react-router-dom";
+import { useTransition } from "./TransitionContext";
 
-
-interface Props {
-    href: string
-    children: ReactNode
-    className?: string
+interface Props extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href"> {
+  href: string;
+  children: ReactNode;
 }
 
+export default function TransitionLink({ href, children, onClick, ...props }: Props) {
+  const { startTransition } = useTransition();
+  const { pathname } = useLocation();
 
-export default function TransitionLink({
-    href,
-    children,
-    className
-}: Props) {
+  function navigate(event: MouseEvent<HTMLAnchorElement>) {
+    onClick?.(event);
+    if (
+      event.defaultPrevented ||
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey ||
+      props.target === "_blank" ||
+      /^(?:https?:|mailto:|tel:)/u.test(href)
+    ) return;
 
+    event.preventDefault();
+    if (href.includes("#")) {
+      const [path, hash] = href.split("#");
+      if (hash && (!path || path === pathname || (path === "/" && pathname === "/"))) {
+        document.getElementById(hash)?.scrollIntoView({ behavior: "smooth" });
+        return;
+      }
+    }
+    startTransition(href);
+  }
 
-    const { startTransition } = useTransition()
-
-    const { pathname } = useLocation()
-
-
-    return (
-        <a
-            href={href}
-            className={className}
-            onClick={(e) => {
-
-                e.preventDefault()
-
-                if(href.includes("#")){
-                    
-                    const [path, hash] = href.split("#")
-
-
-                    if(path && hash && (pathname === path || (path === "/" && pathname === "/"))){
-                        document
-                        .getElementById(hash)
-                        ?.scrollIntoView({
-                            behavior:"smooth"
-                        })
-
-                        return
-                    }
-
-                }
-
-
-                if(pathname === href){
-                    return
-                }
-
-
-                startTransition(href)
-
-            }}
-        >
-            {children}
-        </a>
-    )
+  return <a href={href} {...props} onClick={navigate}>{children}</a>;
 }

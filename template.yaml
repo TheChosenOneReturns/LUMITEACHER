@@ -34,7 +34,6 @@ Globals:
         BEDROCK_MODEL_ID: !Ref BedrockModelId
         BEDROCK_GUARDRAIL_ID: !Ref BedrockGuardrailId
         BEDROCK_GUARDRAIL_VERSION: !Ref BedrockGuardrailVersion
-        ALLOWED_DEMO_USER_ID: demo-sofia
         ALLOWED_ORIGIN: !Ref AllowedOrigin
   HttpApi:
     CorsConfiguration:
@@ -47,6 +46,7 @@ Globals:
       AllowMethods:
         - GET
         - POST
+        - PATCH
         - OPTIONS
       MaxAge: 600
 
@@ -207,6 +207,68 @@ Resources:
           - .js=.mjs
         EntryPoints:
           - backend/src/handlers/submitAttempt.ts
+
+  GetAttemptFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/getAttempt.handler
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref StoryTeacherTable
+      Events:
+        GetAttempt:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /attempts/{attemptId}
+            Method: GET
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        EntryPoints:
+          - backend/src/handlers/getAttempt.ts
+
+  PlatformFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/platform.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StoryTeacherTable
+        - Statement:
+            - Effect: Allow
+              Action:
+                - bedrock:InvokeModel
+                - bedrock:ApplyGuardrail
+              Resource: "*"
+      Events:
+        PlatformRoot:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /{proxy+}
+            Method: ANY
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: esm
+        OutExtension:
+          - .js=.mjs
+        EntryPoints:
+          - backend/src/handlers/platform.ts
 
   StoryTeacherTable:
     Type: AWS::DynamoDB::Table

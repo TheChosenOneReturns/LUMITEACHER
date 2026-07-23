@@ -31,10 +31,9 @@ export function PageTransition({ children }: { children: ReactNode }) {
   return (
     <motion.div
       className="page-transition"
-      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 14 }}
+      initial={reduceMotion ? false : { opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -10 }}
-      transition={reduceMotion ? { duration: 0.1 } : gentleSpring}
+      transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 170, damping: 24, mass: 0.82 }}
     >
       {children}
     </motion.div>

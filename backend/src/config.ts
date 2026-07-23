@@ -6,7 +6,6 @@ export interface AppConfig {
   modelId: string;
   guardrailId?: string;
   guardrailVersion?: string;
-  allowedDemoUserId: string;
   allowedOrigin: string;
   promptVersion: string;
 }
@@ -32,10 +31,7 @@ export function getConfig(): AppConfig {
     ...(process.env.BEDROCK_GUARDRAIL_VERSION
       ? { guardrailVersion: process.env.BEDROCK_GUARDRAIL_VERSION }
       : {}),
-    allowedDemoUserId:
-      process.env.ALLOWED_DEMO_USER_ID ?? "demo-sofia",
     allowedOrigin: process.env.ALLOWED_ORIGIN ?? "http://localhost:5173",
     promptVersion: "story-v1",
   };
 }
-

@@ -16,10 +16,11 @@ import type {
   StoredAttempt,
   StoredStory,
   StoryApplicationService,
+  StoryCreationContext,
   StoryGenerator,
   StoryRepository,
 } from "../domain/models";
-import { userPartition } from "../repositories/dynamoStoryRepository";
+import { storyPartition, userPartition } from "../repositories/dynamoStoryRepository";
 
 export class StoryService implements StoryApplicationService {
   constructor(
@@ -33,6 +34,7 @@ export class StoryService implements StoryApplicationService {
     userId: string,
     input: GenerateStoryInput,
     idempotencyKey: string,
+    context: StoryCreationContext = {},
   ): Promise<StoryPublic> {
     const existing = await this.storyRepository.findByIdempotencyKey(
       userId,
@@ -46,8 +48,8 @@ export class StoryService implements StoryApplicationService {
     const storyId = ulid();
     const createdAt = new Date().toISOString();
     const stored: StoredStory = {
-      PK: userPartition(userId),
-      SK: `STORY#${storyId}`,
+      PK: storyPartition(storyId),
+      SK: "META",
       entityType: "STORY",
       userId,
       storyId,
@@ -59,6 +61,9 @@ export class StoryService implements StoryApplicationService {
       questions: generated.questions,
       modelId: this.generator.modelId,
       promptVersion: this.config.promptVersion,
+      source: context.source ?? "free",
+      ...(context.courseId ? { courseId: context.courseId } : {}),
+      ...(context.missionId ? { missionId: context.missionId } : {}),
     };
 
     try {
@@ -109,6 +114,9 @@ export class StoryService implements StoryApplicationService {
         isCorrect: selectedAnswer === question.correctAnswer,
         skill: question.skill,
         explanation: question.explanation,
+        statement: question.statement,
+        selectedOption: question.options[selectedAnswer]!,
+        correctOption: question.options[question.correctAnswer]!,
       };
     });
     const correctCount = results.filter((result) => result.isCorrect).length;
@@ -125,14 +133,35 @@ export class StoryService implements StoryApplicationService {
     const stored: StoredAttempt = {
       ...result,
       PK: userPartition(userId),
-      SK: `ATTEMPT#${storyId}#${input.attemptId}`,
+      SK: `ATTEMPT#${input.attemptId}`,
       entityType: "ATTEMPT",
       userId,
       answers: input.answers,
+      storyTitle: story.title,
+      theme: story.input.theme,
+      checkpointStars: input.checkpointStars ?? 0,
+      ...(story.courseId ? { courseId: story.courseId } : {}),
+      ...(story.missionId ? { missionId: story.missionId } : {}),
     };
 
-    await this.attemptRepository.saveAttempt(stored);
-    return result;
+    const rewardGrant = await this.attemptRepository.saveAttempt(stored);
+    return { ...result, rewardGrant: rewardGrant ?? null };
+  }
+
+  async getAttempt(userId: string, attemptId: string): Promise<AttemptResult> {
+    const attempt = await this.storyRepository.getAttempt(userId, attemptId);
+    if (!attempt) {
+      throw new StoryNotFoundError();
+    }
+    return {
+      attemptId: attempt.attemptId,
+      storyId: attempt.storyId,
+      createdAt: attempt.createdAt,
+      correctCount: attempt.correctCount,
+      scorePercent: attempt.scorePercent,
+      results: attempt.results,
+      rewardGrant: attempt.rewardGrant ?? null,
+    };
   }
 }
 
@@ -143,6 +172,9 @@ export function toPublicStory(story: StoredStory): StoryPublic {
     input: story.input,
     title: story.title,
     story: story.story,
+    courseId: story.courseId ?? null,
+    missionId: story.missionId ?? null,
+    source: story.source,
     questions: story.questions.map((question, index) => ({
       questionId: `q${index + 1}`,
       statement: question.statement,
@@ -151,4 +183,3 @@ export function toPublicStory(story: StoredStory): StoryPublic {
     })),
   };
 }
-
