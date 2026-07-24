@@ -13,7 +13,7 @@ test("un alumno crea una aventura, elige un final y lleva su recorrido al quiz",
   await page.goto("/crear");
 
   await page.getByRole("button", { name: "Cargar prueba La señal del planeta azul" }).click();
-  await page.getByRole("button", { name: /4 Desafío Aventurero/i }).click();
+  await page.getByRole("button", { name: /Tu aventura/i }).click();
   await page.getByRole("button", { name: "Crear aventura interactiva" }).click();
 
   await expect(page.getByRole("heading", { name: "Un mensaje entre estrellas" })).toBeVisible();

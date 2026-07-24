@@ -69,14 +69,15 @@ describe("Story Teacher app", () => {
     await waitFor(() => expect(localStorage.getItem(sessionUserKey)).toBe(createdProfile.userId));
   });
 
-  it("protege el configurador y carga una receta completa", async () => {
+  it("protege el configurador, mantiene simple el flujo y carga una receta completa", async () => {
     localStorage.setItem(sessionUserKey, "demo-sofia");
     renderApp("/crear");
-    expect(await screen.findByText("Misión de aprendizaje")).toBeInTheDocument();
+    expect(await screen.findByRole("heading", { name: "Armemos tu cuento" })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Cargar prueba El invento submarino" }));
-    // El preset salta al paso Mundo (step 1); verificamos edad y objetivo
+    fireEvent.click(screen.getByRole("button", { name: /modo avanzado/i }));
     expect(await screen.findByRole("button", { name: "10 años" })).toHaveAttribute("aria-pressed", "true");
-    expect(screen.getByLabelText("¿Qué te gustaría practicar o aprender?")).toHaveValue("Analizar causas y consecuencias para encontrar soluciones sustentables");
+    fireEvent.click(screen.getByRole("button", { name: /misión/i }));
+    expect(await screen.findByLabelText("¿Qué te gustaría practicar o aprender?")).toHaveValue("Analizar causas y consecuencias para encontrar soluciones sustentables");
   });
 
   it("redirige un adulto fuera de las rutas de estudiante", async () => {
