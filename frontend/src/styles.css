@@ -2210,3 +2210,14 @@ svg { flex: 0 0 auto; }
 
 
 .sr-only { position:absolute !important; width:1px !important; height:1px !important; padding:0 !important; margin:-1px !important; overflow:hidden !important; clip:rect(0,0,0,0) !important; white-space:nowrap !important; border:0 !important; }
+
+
+/* Keep every configuration step in one stable viewport while Motion swaps content. */
+.studio-step-shell { display:grid; min-height:480px; overflow:hidden; }
+.studio-step-shell > .studio-step { grid-area:1/1; min-height:480px; }
+.story-lab__heading { position:relative; z-index:4; }
+.story-lab__heading .advanced-toggle { display:grid; visibility:visible; opacity:1; }
+
+@media (max-width:760px) {
+  .studio-step-shell,.studio-step-shell > .studio-step { min-height:420px; }
+}

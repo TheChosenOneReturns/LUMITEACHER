@@ -324,8 +324,9 @@ export function CreateStoryPage() {
         <div className="story-lab__body">
           <div className="story-studio__workspace">
             <div className="story-studio__progress"><motion.span animate={{ width: `${((step + 1) / simpleSteps.length) * 100}%` }} transition={{ type: "spring", stiffness: 140, damping: 22 }} /></div>
-            <AnimatePresence initial={false} mode="popLayout">
-              <motion.section key={step} className="studio-step studio-step--simple" initial={{ opacity: 0, x: 34, filter: "blur(4px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }} exit={{ opacity: 0, x: -28, filter: "blur(4px)" }} transition={{ type: "spring", stiffness: 180, damping: 23 }}>
+            <div className="studio-step-shell">
+              <AnimatePresence initial={false} mode="wait">
+                <motion.section key={step} className="studio-step studio-step--simple" initial={reduceMotion ? false : { opacity: 0, x: 24 }} animate={{ opacity: 1, x: 0 }} exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: -20 }} transition={reduceMotion ? { duration: 0 } : { duration: .22, ease: "easeOut" }}>
                 {step === 0 ? <>
                   <span className="eyebrow"><CompassIcon /> Paso 1</span><h2>¿Dónde empieza?</h2>
                   <div className="studio-world-grid studio-world-grid--simple">{themes.map((option, index) => { const selected = option === theme && !customTheme; return <motion.button key={option} type="button" aria-pressed={selected} className={selected ? "is-selected" : ""} onClick={() => { setTheme(option); setCustomTheme(""); }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .045 }} whileHover={{ y: -4, scale: 1.015 }} whileTap={{ scale: .96 }}><StoryThemeIcon theme={option} size={36} /><span>{option}</span><AnimatePresence>{selected ? <SelectionMark /> : null}</AnimatePresence></motion.button>; })}</div>
@@ -358,7 +359,8 @@ export function CreateStoryPage() {
                   </div>
                 </> : null}
               </motion.section>
-            </AnimatePresence>
+              </AnimatePresence>
+            </div>
 
             {error ? <motion.p className="form-error" role="alert" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>{error}</motion.p> : null}
             <div className="studio-navigation">
