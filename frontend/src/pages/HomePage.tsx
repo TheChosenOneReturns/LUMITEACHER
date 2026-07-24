@@ -63,7 +63,7 @@ export function HomePage() {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
-  if (loading) return <LoadingState message="Buscando tus misiones y aventuras…" />;
+  if (loading) return <LoadingState message="Preparando tus aventuras…" />;
   if (error) return <ErrorState message={error} onRetry={load} />;
 
   return (
@@ -72,7 +72,7 @@ export function HomePage() {
         <div className="welcome-banner__copy">
           <span className="eyebrow"><SparkleIcon weight="fill" /> Tu mundo lector</span>
           <h1>Hola, {profile!.displayName}</h1>
-          <p>Tenés {missions.length} {missions.length === 1 ? "misión" : "misiones"} y un mapa esperando nuevas estrellas.</p>
+          <p>Tenés {missions.length} {missions.length === 1 ? "misión" : "misiones"} esperándote. ¡A sumar estrellas!</p>
         </div>
         <div className="welcome-banner__lumi"><Lumi compact mood="reading" /></div>
         <div className="welcome-actions">
@@ -83,12 +83,12 @@ export function HomePage() {
 
       <section className="student-quick-grid" aria-label="Resumen personal">
         <article><UsersThreeIcon size={30} weight="duotone" /><strong>{courses.length}</strong><span>{courses.length === 1 ? "curso" : "cursos"}</span></article>
-        <article><StarFourIcon size={30} weight="fill" /><strong>{rewards?.mapStep ?? 0}/24</strong><span>hitos del atlas</span></article>
+        <article><StarFourIcon size={30} weight="fill" /><strong>{rewards?.mapStep ?? 0}/24</strong><span>pasos del mapa</span></article>
         <article><BellIcon size={30} weight="duotone" /><strong>{postcards.length}</strong><span>postales</span></article>
       </section>
 
       <div className="section-heading">
-        <div><span className="eyebrow">Mis cursos</span><h2>Misiones compartidas</h2></div>
+        <div><span className="eyebrow">Mis cursos</span><h2>Misiones para vos</h2></div>
         <span className="count-badge"><GraduationCapIcon size={18} weight="duotone" /> {missions.length} activas</span>
       </div>
       {missions.length ? (
@@ -99,16 +99,16 @@ export function HomePage() {
               <span className="pill">{mission.courseName}</span>
               <h3>{mission.title}</h3>
               <p>{mission.educationalObjective}</p>
-              <Link className="button button--green" to={`/historias/${mission.storyId}`}>Comenzar misión <ArrowRightIcon /></Link>
+              <Link className="button button--green" to={`/historias/${mission.storyId}`}>¡Empezar! <ArrowRightIcon /></Link>
             </motion.article>
           ))}
         </motion.section>
       ) : (
-        <section className="empty-state"><BooksIcon size={64} weight="duotone" /><h2>Todavía no hay misiones</h2><p>Podés crear una aventura libre mientras llega la próxima.</p></section>
+        <section className="empty-state"><BooksIcon size={64} weight="duotone" /><h2>Todavía no hay misiones</h2><p>Mientras tanto, podés crear una aventura por tu cuenta.</p></section>
       )}
 
       <div className="section-heading library-heading">
-        <div><span className="eyebrow">Mis cuentos</span><h2>Historias creadas por vos</h2></div>
+        <div><span className="eyebrow">Mis cuentos</span><h2>Historias que creé</h2></div>
         <span className="count-badge"><BooksIcon size={18} weight="duotone" /> {stories.length}</span>
       </div>
       {stories.length ? (

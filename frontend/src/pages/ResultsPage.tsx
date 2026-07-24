@@ -48,14 +48,14 @@ export function ResultsPage() {
   }, [attemptId, loadStory, result]);
 
   if (error) return <ErrorState message={error} onRetry={loadStory} />;
-  if (!result || !story) return <LoadingState message="Preparando tu resultado…" />;
+  if (!result || !story) return <LoadingState message="Cargando tu resultado…" />;
   const journey = loadJourney(storyId);
 
   const message = result.correctCount === 5
-    ? "¡Increíble! Encontraste todas las pistas como un gran detective."
+    ? "¡Genial! Encontraste todas las pistas."
     : result.correctCount >= 3
-      ? "¡Muy bien! Cada historia te hace más fuerte."
-      : "¡Buen intento! La próxima vez vas a descubrir más pistas.";
+      ? "¡Muy bien! Cada cuento te hace mejor."
+      : "¡Buen intento! La próxima descubrís más.";
 
   return (
     <div className="results-page page-width page-section">
@@ -67,9 +67,9 @@ export function ResultsPage() {
             </motion.span>
           ))}
         </div>
-        <motion.span className="pill" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}><CheckCircleIcon weight="fill" /> Desafío completado</motion.span>
+        <motion.span className="pill" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}><CheckCircleIcon weight="fill" /> ¡Listo!</motion.span>
         <motion.h1 initial={{ opacity: 0, scale: 0.82 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 180, damping: 16, delay: 0.1 }}>
-          Increíble trabajo, {profile!.displayName}
+          ¡Buen trabajo, {profile!.displayName}!
         </motion.h1>
         <p>{message}</p>
         <motion.div className="score-orb" aria-label={`${result.correctCount} de 5 correctas`} initial={{ scale: 0, rotate: -40 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 170, damping: 13, delay: 0.24 }}>
@@ -80,16 +80,16 @@ export function ResultsPage() {
 
       {result.rewardGrant ? <motion.section className="reward-unlock" initial={{ opacity: 0, y: 18, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }}>
         <StarFourIcon size={38} weight="fill" />
-        <div><span className="eyebrow">{result.rewardGrant.starsEarned ? "Recompensa del cuento" : "Nuevo dominio alcanzado"}</span><h2>{result.rewardGrant.starsEarned ? `Ganaste ${result.rewardGrant.starsEarned} estrellas` : "¡Tu esfuerzo hizo avanzar el mapa!"}</h2><p>{result.rewardGrant.mapAdvanced ? `Llegaste al hito ${result.rewardGrant.worldStep} de ${platformCatalog.worlds.find((world) => world.id === result.rewardGrant?.worldId)?.label ?? "tu mundo"}.` : result.scorePercent < 60 ? "Alcanzá 60% en un próximo intento para avanzar el mundo." : "Este mundo ya está completo: sumaste una nueva carga."}{result.rewardGrant.cardCopiesGranted.length ? " Tu mochila recibió una carta de poder." : ""}{result.rewardGrant.newlyUnlockedAvatarIds.length ? " También apareció un nuevo personaje." : ""}</p></div>
-        <Link className="button button--yellow" to="/recompensas">Ver recompensas</Link>
+        <div><span className="eyebrow">{result.rewardGrant.starsEarned ? "¡Premio!" : "¡Avanzaste!"}</span><h2>{result.rewardGrant.starsEarned ? `Ganaste ${result.rewardGrant.starsEarned} estrellas` : "¡Tu mapa avanzó!"}</h2><p>{result.rewardGrant.mapAdvanced ? `Llegaste al paso ${result.rewardGrant.worldStep} de ${platformCatalog.worlds.find((world) => world.id === result.rewardGrant?.worldId)?.label ?? "tu mundo"}.` : result.scorePercent < 60 ? "Conseguí 60% para que el mapa avance." : "Este mundo ya está completo."}{result.rewardGrant.cardCopiesGranted.length ? " ¡Recibiste una carta!" : ""}{result.rewardGrant.newlyUnlockedAvatarIds.length ? " ¡Apareció un personaje nuevo!" : ""}</p></div>
+        <Link className="button button--yellow" to="/recompensas">Ver premios</Link>
       </motion.section> : null}
 
       {journey ? <motion.section className="result-journey" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}><div><span className="eyebrow">El camino que creaste</span><h2>{journey.endingTitle}</h2><p>{journey.endingText}</p></div><ol>{journey.decisions.map((decision) => <li key={decision.choiceId}><CheckCircleIcon weight="fill" /><span><strong>{decision.choiceLabel}</strong><small>{decision.consequence}</small></span></li>)}</ol></motion.section> : null}
 
       <motion.section className="skills-result" initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
         <div className="section-heading">
-          <div><span className="eyebrow">Tus habilidades</span><h2>Las pistas que descubriste</h2></div>
-          <Lumi compact message="Cada intento cuenta." />
+          <div><span className="eyebrow">Tus respuestas</span><h2>Mirá lo que descubriste</h2></div>
+          <Lumi compact message="¡Cada vez mejor!" />
         </div>
         <div className="result-list">
           {result.results.map((questionResult, index) => {
@@ -100,13 +100,13 @@ export function ResultsPage() {
                   <SkillBadge skill={questionResult.skill} />
                   <span className={questionResult.isCorrect ? "status-success" : "status-practice"}>
                     {questionResult.isCorrect ? <CheckCircleIcon size={19} weight="fill" /> : <ArrowClockwiseIcon size={19} weight="bold" />}
-                    {questionResult.isCorrect ? "Logrado" : "A practicar"}
+                    {questionResult.isCorrect ? "¡Bien!" : "A seguir practicando"}
                   </span>
                 </summary>
                 <div className="result-item__details">
                   <h3>{question.statement}</h3>
-                  <p><strong>Tu respuesta:</strong> {question.options[questionResult.selectedAnswer]}</p>
-                  {!questionResult.isCorrect ? <p><strong>Respuesta correcta:</strong> {question.options[questionResult.correctAnswer]}</p> : null}
+                  <p><strong>Elegiste:</strong> {question.options[questionResult.selectedAnswer]}</p>
+                  {!questionResult.isCorrect ? <p><strong>La correcta era:</strong> {question.options[questionResult.correctAnswer]}</p> : null}
                   <p className="explanation"><LightbulbFilamentIcon size={24} weight="duotone" /> <span>{questionResult.explanation}</span></p>
                 </div>
               </motion.details>
@@ -117,7 +117,7 @@ export function ResultsPage() {
 
       <div className="button-row button-row--center">
         <Link className="button button--green" to="/crear"><MagicWandIcon size={21} weight="duotone" /> Crear otra aventura</Link>
-        <Link className="button button--outline" to="/inicio"><BooksIcon size={21} weight="duotone" /> Ver biblioteca</Link>
+        <Link className="button button--outline" to="/inicio"><BooksIcon size={21} weight="duotone" /> Volver al inicio</Link>
       </div>
     </div>
   );

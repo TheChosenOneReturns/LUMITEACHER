@@ -30,11 +30,11 @@ export function LandingPage() {
           animate="visible"
         >
           <motion.h1 variants={riseItem}>
-            Una historia que <span>cobra vida</span> para vos
+            Un cuento que <span>cobra vida</span> para vos
           </motion.h1>
           <motion.p variants={riseItem}>
-            Elegí el mundo, el personaje y lo que querés aprender. Lumi crea
-            una aventura única y después te desafía a descubrir sus pistas.
+            Elegí el mundo y el personaje. Lumi crea una aventura solo para vos
+            y después te hace preguntas para ver cuánto descubriste.
           </motion.p>
           <motion.div className="button-row" variants={riseItem}>
             <motion.div whileHover={{ y: -4, scale: 1.02 }} whileTap={{ y: 3, scale: 0.98 }}>
@@ -45,13 +45,13 @@ export function LandingPage() {
             </motion.div>
             <motion.div whileHover={{ y: -4 }} whileTap={{ y: 3 }}>
               <TransitionLink href={libraryPath} className="button button--outline">
-                <BookOpenTextIcon size={22} weight="duotone" /> Explorar historias
+                <BookOpenTextIcon size={22} weight="duotone" /> Ver mis cuentos
               </TransitionLink>
             </motion.div>
           </motion.div>
           <motion.div className="landing-proof" variants={riseItem}>
-            <div><BrainIcon size={23} weight="duotone" /><span><strong>5 desafíos</strong> por cuento</span></div>
-            <div><StarFourIcon size={23} weight="duotone" /><span><strong>6 a 12 años</strong> adaptado a su edad</span></div>
+            <div><BrainIcon size={23} weight="duotone" /><span><strong>5 preguntas</strong> por cuento</span></div>
+            <div><StarFourIcon size={23} weight="duotone" /><span><strong>6 a 12 años</strong> pensado para vos</span></div>
           </motion.div>
         </motion.div>
 
@@ -83,9 +83,9 @@ export function LandingPage() {
       <section className="landing-ribbon" aria-label="Cómo funciona">
         <motion.div className="page-width" variants={staggerContainer} initial="hidden" whileInView="visible" viewport={{ once: true, amount: 0.4 }}>
           {[
-            ["01", "Elegí", "Un tema y una misión"],
+            ["01", "Elegí", "Un tema y un personaje"],
             ["02", "Imaginá", "Lumi crea tu cuento"],
-            ["03", "Descubrí", "Cinco pistas para aprender"],
+            ["03", "Descubrí", "Respondé preguntas y ganá"],
           ].map(([number, title, copy]) => (
             <motion.div key={number} variants={riseItem}>
               <span>{number}</span><p><strong>{title}</strong><small>{copy}</small></p>

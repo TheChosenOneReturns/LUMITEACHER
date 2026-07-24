@@ -75,7 +75,7 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
 
         {profile ? (
           <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
-            <Link className="profile-chip" to="/perfil" title="Abrir perfil de demostración">
+            <Link className="profile-chip" to="/perfil" title="Mi perfil">
               {profile.role === "adult" ? <GraduationCapIcon size={18} weight="duotone" /> : null}
               <span>{profile.displayName}</span>
               <span className="profile-chip__avatar">
@@ -107,7 +107,7 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
         </nav>
       ) : null}
 
-      {isPublic ? <footer className="footer"><Lumi compact /><p>Historias para imaginar, leer y aprender.</p></footer> : null}
+      {isPublic ? <footer className="footer"><Lumi compact /><p>Cuentos para imaginar, leer y aprender.</p></footer> : null}
     </div>
   );
 }

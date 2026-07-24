@@ -18,7 +18,7 @@ export function JoinCoursePage() {
   const load = useCallback(async () => {
     setError(null);
     try { setInvite(await api.getInvite(token)); }
-    catch (loadError) { setError(loadError instanceof ApiClientError ? loadError.message : "La invitación no está disponible."); }
+    catch (loadError) { setError(loadError instanceof ApiClientError ? loadError.message : "¡Ups! No encontramos esta invitación. Probemos de nuevo."); }
   }, [token]);
   useEffect(() => { void load(); }, [load]);
 

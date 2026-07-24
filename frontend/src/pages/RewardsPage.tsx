@@ -33,15 +33,15 @@ export function RewardsPage() {
   useEffect(() => { void load(); }, [load]);
 
   if (error && (!rewards || !catalog)) return <ErrorState message={error} onRetry={load} />;
-  if (!rewards || !catalog) return <LoadingState message="Desplegando tu colección…" />;
+  if (!rewards || !catalog) return <LoadingState message="Abriendo tus premios…" />;
 
   return (
     <div className="page-width page-section rewards-page">
       <motion.section className="rewards-hero" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
         <div>
-          <span className="pill"><GiftIcon weight="duotone" /> Tu sala de premios</span>
-          <h1>Leé, ganá estrellas y descubrí sorpresas</h1>
-          <p>Cada cuento que completás te da premios: insignias, cartas y personajes nuevos.</p>
+          <span className="pill"><GiftIcon weight="duotone" /> Tus premios</span>
+          <h1>Leé cuentos y ganá sorpresas</h1>
+          <p>Cada cuento te da estrellas, insignias y cartas.</p>
           <strong className="star-counter"><StarFourIcon weight="fill" /> {rewards.totalStars} estrellas</strong>
         </div>
         <Lumi mood="celebrating" message="¡Mirá todo lo que construimos!" />
@@ -53,7 +53,7 @@ export function RewardsPage() {
 
       <div className="reward-columns">
         <section className="reward-panel">
-          <div className="panel-title"><MedalIcon size={28} weight="duotone" /><div><span className="eyebrow">Colección</span><h2>Insignias</h2></div></div>
+          <div className="panel-title"><MedalIcon size={28} weight="duotone" /><div><span className="eyebrow">Tu colección</span><h2>Insignias</h2></div></div>
           <div className="badge-cabinet">
             {catalog.badges.map((badge) => {
               const unlocked = rewards.unlockedBadgeIds.includes(badge.id);
@@ -64,9 +64,9 @@ export function RewardsPage() {
       </div>
 
       <section className="reward-panel postcards">
-        <div className="panel-title"><GiftIcon size={28} weight="duotone" /><div><span className="eyebrow">Mensajes que acompañan</span><h2>Mis postales</h2></div></div>
+        <div className="panel-title"><GiftIcon size={28} weight="duotone" /><div><span className="eyebrow">De tus profes y familia</span><h2>Mis postales</h2></div></div>
         <AnimatePresence>
-          {postcards.length ? <div className="postcard-grid">{postcards.map((postcard, index) => <motion.article key={postcard.congratulationId} className={`postcard postcard--${index % 3 + 1}`} initial={{ opacity: 0, rotate: -3, y: 14 }} animate={{ opacity: 1, rotate: index % 2 ? 2 : -1, y: 0 }}><span className="postcard__art" style={catalogArtStyle(postcard.assetId)} /><div><SparkleIcon weight="fill"/><p>"{postcard.message}"</p><small>{postcard.fromDisplayName}</small></div></motion.article>)}</div> : <p className="empty-copy">Tus felicitaciones aparecerán acá cuando un adulto te envíe una postal.</p>}
+          {postcards.length ? <div className="postcard-grid">{postcards.map((postcard, index) => <motion.article key={postcard.congratulationId} className={`postcard postcard--${index % 3 + 1}`} initial={{ opacity: 0, rotate: -3, y: 14 }} animate={{ opacity: 1, rotate: index % 2 ? 2 : -1, y: 0 }}><span className="postcard__art" style={catalogArtStyle(postcard.assetId)} /><div><SparkleIcon weight="fill"/><p>"{postcard.message}"</p><small>{postcard.fromDisplayName}</small></div></motion.article>)}</div> : <p className="empty-copy">Acá van a aparecer las postales que te manden los adultos.</p>}
         </AnimatePresence>
       </section>
     </div>

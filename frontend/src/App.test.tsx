@@ -41,7 +41,7 @@ describe("Story Teacher app", () => {
 
   it("muestra la landing en español sin la antigua etiqueta de IA", () => {
     renderApp("/");
-    expect(screen.getByRole("heading", { name: /una historia que cobra vida para vos/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /un cuento que cobra vida para vos/i })).toBeInTheDocument();
     expect(screen.queryByText(/Lectura \+ imaginación \+ IA/i)).not.toBeInTheDocument();
     expect(screen.getByRole("link", { name: /crear mi historia/i })).toHaveAttribute("href", "/login?next=%2Fcrear");
   });
@@ -63,7 +63,7 @@ describe("Story Teacher app", () => {
 
   it("permite crear un explorador infantil propio y entrar con él", async () => {
     renderApp("/login");
-    fireEvent.click(await screen.findByRole("button", { name: /crear mi propio explorador/i }));
+    fireEvent.click(await screen.findByRole("button", { name: /crear mi personaje/i }));
     fireEvent.change(screen.getByLabelText(/cómo querés que te llamemos/i), { target: { value: "Nina" } });
     fireEvent.click(screen.getByRole("button", { name: /crear y empezar/i }));
     await waitFor(() => expect(localStorage.getItem(sessionUserKey)).toBe(createdProfile.userId));
@@ -72,7 +72,7 @@ describe("Story Teacher app", () => {
   it("protege el configurador y carga una receta completa", async () => {
     localStorage.setItem(sessionUserKey, "demo-sofia");
     renderApp("/crear");
-    expect(await screen.findByText("Misión de aprendizaje")).toBeInTheDocument();
+    expect(await screen.findByText("¿Qué querés aprender?")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Cargar prueba El invento submarino" }));
     expect(screen.getByRole("button", { name: "10 años" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByLabelText("¿Qué te gustaría practicar o aprender?")).toHaveValue("Analizar causas y consecuencias para encontrar soluciones sustentables");

@@ -31,7 +31,7 @@ export function CreateProfileModal({ onClose, onCreated }: { onClose: () => void
       const profile = await api.createDemoProfile({ displayName, age, avatarId, favoriteTheme });
       await onCreated(profile);
     } catch (createError) {
-      setError(createError instanceof ApiClientError ? createError.message : "No pudimos crear el perfil.");
+      setError(createError instanceof ApiClientError ? createError.message : "¡Ups! No pudimos crear el personaje. Probemos de nuevo.");
       setSubmitting(false);
     }
   }
@@ -39,7 +39,7 @@ export function CreateProfileModal({ onClose, onCreated }: { onClose: () => void
   return (
     <motion.div className="profile-creator" role="dialog" aria-modal="true" aria-labelledby="create-profile-title" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
       <motion.form className="profile-creator__card" onSubmit={submit} initial={{ opacity: 0, y: 34, scale: .92 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 20, scale: .95 }} transition={{ type: "spring", stiffness: 210, damping: 23 }}>
-        <header><div><span><SparkleIcon weight="fill" /></span><div><small>Nuevo explorador</small><h2 id="create-profile-title">Creá tu personaje</h2></div></div><button type="button" aria-label="Cerrar creador de perfil" onClick={onClose}><XIcon weight="bold" /></button></header>
+        <header><div><span><SparkleIcon weight="fill" /></span><div><small>Nuevo personaje</small><h2 id="create-profile-title">Creá tu personaje</h2></div></div><button type="button" aria-label="Cerrar" onClick={onClose}><XIcon weight="bold" /></button></header>
         <div className="profile-creator__layout">
           <motion.div className="profile-creator__preview" key={`${avatarId}-${favoriteTheme}`} initial={{ scale: .9, rotate: -3 }} animate={{ scale: 1, rotate: 0 }}>
             <CharacterAvatar avatarId={avatarId} size={220} animated />
@@ -54,7 +54,7 @@ export function CreateProfileModal({ onClose, onCreated }: { onClose: () => void
           </div>
         </div>
         {error ? <p className="form-error" role="alert">{error}</p> : null}
-        <footer><p><CheckCircleIcon weight="fill" /> Después vas a desbloquear ropa y accesorios con tus estrellas.</p><button className="button button--primary" type="submit" disabled={submitting || displayName.trim().length < 2}>{submitting ? "Creando tu mundo…" : "Crear y empezar"}</button></footer>
+        <footer><p><CheckCircleIcon weight="fill" /> Después podés ganar premios leyendo cuentos.</p><button className="button button--primary" type="submit" disabled={submitting || displayName.trim().length < 2}>{submitting ? "Creando…" : "¡Crear y empezar!"}</button></footer>
       </motion.form>
     </motion.div>
   );
