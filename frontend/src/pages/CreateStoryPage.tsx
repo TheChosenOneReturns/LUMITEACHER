@@ -46,12 +46,14 @@ const difficultyOptions: { value: Difficulty; label: string; hint: string }[] = 
   { value: "media", label: "Aventurero", hint: "Algo de misterio" },
   { value: "desafio", label: "Detective", hint: "Más inferencias" },
 ];
-const simpleSteps = [
-  { label: "Mundo", Icon: CompassIcon },
-  { label: "Protagonista", Icon: UsersThreeIcon },
-  { label: "Misión", Icon: LightbulbFilamentIcon },
-  { label: "Tu aventura", Icon: RocketLaunchIcon },
-];
+const storySteps = [
+  { id: "world", label: "Mundo", Icon: CompassIcon },
+  { id: "protagonist", label: "Protagonista", Icon: UsersThreeIcon },
+  { id: "mission", label: "Misión", Icon: LightbulbFilamentIcon },
+  { id: "adventure", label: "Aventura", Icon: RocketLaunchIcon },
+] as const;
+
+type StoryStepId = (typeof storySteps)[number]["id"];
 const generationPhases = [
   { label: "Imaginando el mundo", shortLabel: "Mundo", hint: "Colores y lugares", progress: 18, Icon: MapTrifoldIcon },
   { label: "Ordenando las escenas", shortLabel: "Escenas", hint: "Cada momento encuentra su lugar", progress: 44, Icon: BookOpenTextIcon },
@@ -96,7 +98,7 @@ export function CreateStoryPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const reduceMotion = useReducedMotion();
-  const [step, setStep] = useState(0);
+  const [step, setStep] = useState<StoryStepId>("world");
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [age, setAge] = useState(profile?.age ?? 8);
   const [theme, setTheme] = useState("Espacio");
@@ -117,6 +119,18 @@ export function CreateStoryPage() {
   const sceneImage = useMemo(() => getStorySceneImage(selectedTheme), [selectedTheme]);
   const currentGeneration = generationPhases[generationPhase] ?? generationPhases[0]!;
   const generationSparkPosition = 9 + currentGeneration.progress * 0.82;
+  const currentStepIndex = storySteps.findIndex(({ id }) => id === step);
+  const isAdventureStep = step === "adventure";
+
+  function goToNextStep() {
+    const nextStep = storySteps[currentStepIndex + 1];
+    if (nextStep) setStep(nextStep.id);
+  }
+
+  function goToPreviousStep() {
+    const previousStep = storySteps[currentStepIndex - 1];
+    if (previousStep) setStep(previousStep.id);
+  }
 
   useEffect(() => { void api.listCourses().then(setCourses).catch(() => setCourses([])); }, []);
   useEffect(() => {
@@ -142,7 +156,7 @@ export function CreateStoryPage() {
     setStoryMode(preset.storyMode ?? "interactive");
     setLanguage(preset.language ?? "es");
     setLoadedPreset(preset.id);
-    setStep(0);
+    setStep("world");
     setError(null);
     window.setTimeout(() => {
       const storyLab = document.querySelector(".story-lab");
@@ -154,6 +168,10 @@ export function CreateStoryPage() {
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!isAdventureStep) {
+      goToNextStep();
+      return;
+    }
     setError(null);
     const candidate: GenerateStoryInput = {
       age,
@@ -313,41 +331,41 @@ export function CreateStoryPage() {
         </AnimatePresence>
 
         <nav className="story-studio__steps story-lab__steps story-lab__steps--simple" aria-label="Pasos para crear el cuento">
-          {simpleSteps.map(({ label, Icon }, index) => (
-            <motion.button type="button" key={label} className={step === index ? "is-active" : index < step ? "is-complete" : ""} aria-current={step === index ? "step" : undefined} onClick={() => setStep(index)} whileHover={{ y: -2 }} whileTap={{ scale: .97 }}>
-              {step === index ? <motion.i className="step-active-bg" layoutId="active-story-step" transition={{ type: "spring", stiffness: 330, damping: 28 }} /> : null}
-              <span>{index < step ? <CheckIcon weight="bold" /> : index === step ? index + 1 : <Icon weight="duotone" />}</span><b>{label}</b>
+          {storySteps.map(({ id, label, Icon }, index) => (
+            <motion.button type="button" key={id} className={step === id ? "is-active" : index < currentStepIndex ? "is-complete" : ""} aria-current={step === id ? "step" : undefined} onClick={() => setStep(id)} whileHover={{ y: -2 }} whileTap={{ scale: .97 }}>
+              {step === id ? <motion.i className="step-active-bg" layoutId="active-story-step" transition={{ type: "spring", stiffness: 330, damping: 28 }} /> : null}
+              <span>{index < currentStepIndex ? <CheckIcon weight="bold" /> : step === id ? index + 1 : <Icon weight="duotone" />}</span><b>{label}</b>
             </motion.button>
           ))}
         </nav>
 
         <div className="story-lab__body">
           <div className="story-studio__workspace">
-            <div className="story-studio__progress"><motion.span animate={{ width: `${((step + 1) / simpleSteps.length) * 100}%` }} transition={{ type: "spring", stiffness: 140, damping: 22 }} /></div>
+            <div className="story-studio__progress"><motion.span animate={{ width: `${((currentStepIndex + 1) / storySteps.length) * 100}%` }} transition={{ type: "spring", stiffness: 140, damping: 22 }} /></div>
             <AnimatePresence initial={false}>
               <motion.section key={step} className="studio-step studio-step--simple" initial={{ opacity: 0, x: 34, filter: "blur(4px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }} exit={{ opacity: 0, x: -28, filter: "blur(4px)" }} transition={{ type: "spring", stiffness: 180, damping: 23 }}>
-                {step === 0 ? <>
+                {step === "world" ? <>
                   <span className="eyebrow"><CompassIcon /> Paso 1</span><h2>¿Dónde empieza?</h2>
                   <div className="studio-world-grid studio-world-grid--simple">{themes.map((option, index) => { const selected = option === theme && !customTheme; return <motion.button key={option} type="button" aria-pressed={selected} className={selected ? "is-selected" : ""} onClick={() => { setTheme(option); setCustomTheme(""); }} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * .045 }} whileHover={{ y: -4, scale: 1.015 }} whileTap={{ scale: .96 }}><StoryThemeIcon theme={option} size={36} /><span>{option}</span><AnimatePresence>{selected ? <SelectionMark /> : null}</AnimatePresence></motion.button>; })}</div>
                   <label className="text-field studio-custom-world"><span><PencilSimpleIcon /> Otro mundo</span><div className="input-with-icon"><SparkleIcon /><input value={customTheme} maxLength={60} placeholder="Ej.: una ciudad de nubes" onChange={(event) => setCustomTheme(event.target.value)} /></div></label>
                 </> : null}
 
-                {step === 1 ? <>
+                {step === "protagonist" ? <>
                   <span className="eyebrow"><UsersThreeIcon /> Paso 2</span><h2>¿Quién vive la aventura?</h2>
                   <label className="studio-character-field studio-character-field--simple"><span><UsersThreeIcon /> Protagonista</span><input value={mainCharacter} maxLength={60} placeholder="Ej.: Kira, una gata astronauta" onChange={(event) => setMainCharacter(event.target.value)} /><small>{mainCharacter.length}/60 · Vacío = sorpresa</small></label>
                 </> : null}
 
-                {step === 2 ? <>
+                {step === "mission" ? <>
                   <span className="eyebrow"><LightbulbFilamentIcon /> Paso 3</span><h2>¿Qué querés practicar?</h2>
                   <label className="studio-objective-field studio-objective-field--simple"><span><LightbulbFilamentIcon /> Misión de aprendizaje</span><textarea aria-label="¿Qué te gustaría practicar o aprender?" value={educationalObjective} minLength={5} maxLength={160} rows={4} required onChange={(event) => setEducationalObjective(event.target.value)} /><small><ShieldCheckIcon /> Sin datos personales · {educationalObjective.length}/160</small></label>
                 </> : null}
 
-                {step === 3 ? <>
-                  <span className="eyebrow"><RocketLaunchIcon /> Paso 4</span><h2>Todo listo</h2>
+                {step === "adventure" ? <>
+                  <span className="eyebrow"><RocketLaunchIcon /> Paso 4</span><h2>Tu aventura está lista</h2>
                   <div className="simple-review-grid">
-                    <motion.button type="button" onClick={() => setStep(0)} whileHover={{ y: -3 }}><span><StoryThemeIcon theme={selectedTheme} size={28} /></span><small>Mundo</small><strong>{selectedTheme}</strong><PencilSimpleIcon /></motion.button>
-                    <motion.button type="button" onClick={() => setStep(1)} whileHover={{ y: -3 }}><span><UsersThreeIcon size={28} weight="duotone" /></span><small>Protagonista</small><strong>{mainCharacter || "Sorpresa de Lumi"}</strong><PencilSimpleIcon /></motion.button>
-                    <motion.button type="button" onClick={() => setStep(2)} whileHover={{ y: -3 }}><span><LightbulbFilamentIcon size={28} weight="duotone" /></span><small>Misión</small><strong>{educationalObjective}</strong><PencilSimpleIcon /></motion.button>
+                    <motion.button type="button" onClick={() => setStep("world")} whileHover={{ y: -3 }}><span><StoryThemeIcon theme={selectedTheme} size={28} /></span><small>Mundo</small><strong>{selectedTheme}</strong><PencilSimpleIcon /></motion.button>
+                    <motion.button type="button" onClick={() => setStep("protagonist")} whileHover={{ y: -3 }}><span><UsersThreeIcon size={28} weight="duotone" /></span><small>Protagonista</small><strong>{mainCharacter || "Sorpresa de Lumi"}</strong><PencilSimpleIcon /></motion.button>
+                    <motion.button type="button" onClick={() => setStep("mission")} whileHover={{ y: -3 }}><span><LightbulbFilamentIcon size={28} weight="duotone" /></span><small>Misión</small><strong>{educationalObjective}</strong><PencilSimpleIcon /></motion.button>
                   </div>
                   <div className="review-specs" aria-label="Ajustes del cuento">
                     <span title="Formato"><TreeStructureIcon /> {storyMode === "interactive" ? "Con caminos" : "Clásico"}</span>
@@ -362,8 +380,8 @@ export function CreateStoryPage() {
 
             {error ? <motion.p className="form-error" role="alert" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>{error}</motion.p> : null}
             <div className="studio-navigation">
-              <motion.button className="button button--outline studio-back" type="button" disabled={step === 0} onClick={() => setStep((value) => Math.max(0, value - 1))} whileTap={{ scale: .96 }}><ArrowLeftIcon /> <span>Atrás</span></motion.button>
-              {step < simpleSteps.length - 1 ? <motion.button className="button button--yellow" type="button" onClick={() => setStep((value) => Math.min(simpleSteps.length - 1, value + 1))} whileHover={{ y: -2 }} whileTap={{ scale: .97 }}>Continuar <ArrowRightIcon /></motion.button> : <motion.button aria-label={storyMode === "interactive" ? "Crear aventura interactiva" : "Crear cuento"} className="button button--yellow studio-create-button" type="submit" whileHover={{ y: -4, boxShadow: "0 11px 0 var(--yellow-dark)" }} whileTap={{ y: 2, scale: .98 }}><RocketLaunchIcon size={24} /> Crear aventura</motion.button>}
+              <motion.button className="button button--outline studio-back" type="button" disabled={currentStepIndex === 0} onClick={goToPreviousStep} whileTap={{ scale: .96 }}><ArrowLeftIcon /> <span>Atrás</span></motion.button>
+              {!isAdventureStep ? <motion.button className="button button--yellow" type="button" onClick={goToNextStep} whileHover={{ y: -2 }} whileTap={{ scale: .97 }}>Continuar <ArrowRightIcon /></motion.button> : <motion.button aria-label={storyMode === "interactive" ? "Crear aventura interactiva" : "Crear cuento"} className="button button--yellow studio-create-button" type="submit" whileHover={{ y: -4, boxShadow: "0 11px 0 var(--yellow-dark)" }} whileTap={{ y: 2, scale: .98 }}><RocketLaunchIcon size={24} /> Crear aventura</motion.button>}
             </div>
           </div>
 
