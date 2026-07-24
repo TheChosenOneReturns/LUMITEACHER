@@ -95,7 +95,7 @@ export function ReadingPage() {
   const loadStory = useCallback(async () => {
     setError(null);
     try { setStory(await api.getStory(storyId)); }
-    catch (loadError) { setError(loadError instanceof ApiClientError ? loadError.message : "No pudimos abrir la aventura."); }
+    catch (loadError) { setError(loadError instanceof ApiClientError ? loadError.message : "¡Ups! No pudimos abrir la aventura. Probemos de nuevo."); }
   }, [storyId]);
 
   useEffect(() => { void loadStory(); }, [loadStory]);

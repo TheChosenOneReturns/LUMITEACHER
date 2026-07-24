@@ -56,7 +56,7 @@ export function HomePage() {
       setRewards(nextRewards);
       setPostcards(nextPostcards);
     } catch (loadError) {
-      setError(loadError instanceof ApiClientError ? loadError.message : "No pudimos abrir tu espacio lector.");
+      setError(loadError instanceof ApiClientError ? loadError.message : "¡Ups! No pudimos abrir tu espacio lector. Probemos de nuevo.");
     } finally {
       setLoading(false);
     }
@@ -74,7 +74,7 @@ export function HomePage() {
           <h1>Hola, {profile!.displayName}</h1>
           <p>Tenés {missions.length} {missions.length === 1 ? "misión" : "misiones"} y un mapa esperando nuevas estrellas.</p>
         </div>
-        <div className="welcome-banner__lumi"><Lumi compact mood="reading" accessoryId={rewards?.selectedAccessoryId} /></div>
+        <div className="welcome-banner__lumi"><Lumi compact mood="reading" /></div>
         <div className="welcome-actions">
           <Link className="button button--yellow" to="/crear"><MagicWandIcon size={22} weight="duotone" /> Crear aventura</Link>
           <Link className="button button--outline" to="/recompensas"><GiftIcon size={22} weight="duotone" /> Premios y juegos · {rewards?.totalStars ?? 0}</Link>

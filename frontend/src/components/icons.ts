@@ -8,6 +8,7 @@ export { BookOpenTextIcon } from "@phosphor-icons/react/BookOpenText";
 export { BooksIcon } from "@phosphor-icons/react/Books";
 export { BrainIcon } from "@phosphor-icons/react/Brain";
 export { CardsThreeIcon } from "@phosphor-icons/react/CardsThree";
+export { CaretDownIcon } from "@phosphor-icons/react/CaretDown";
 export { CastleTurretIcon } from "@phosphor-icons/react/CastleTurret";
 export { CheckCircleIcon } from "@phosphor-icons/react/CheckCircle";
 export { CheckIcon } from "@phosphor-icons/react/Check";

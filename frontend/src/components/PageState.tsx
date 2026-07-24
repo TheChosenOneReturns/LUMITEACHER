@@ -34,11 +34,11 @@ export function ErrorState({
       >
         <CloudSlashIcon size={58} weight="duotone" />
       </motion.div>
-      <h1>La aventura hizo una pausa</h1>
+      <h1>¡Ups! Algo no salió bien</h1>
       <p>{message}</p>
       {onRetry ? (
         <button className="button button--primary" onClick={onRetry}>
-          <ArrowClockwiseIcon size={21} weight="bold" /> Intentar nuevamente
+          <ArrowClockwiseIcon size={21} weight="bold" /> Probemos de nuevo
         </button>
       ) : null}
     </section>

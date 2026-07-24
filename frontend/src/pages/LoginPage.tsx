@@ -38,7 +38,7 @@ export function LoginPage() {
     api.listDemoProfiles()
       .then(setProfiles)
       .catch((loadError) => setError(
-        loadError instanceof ApiClientError ? loadError.message : "No pudimos cargar los perfiles demo.",
+        loadError instanceof ApiClientError ? loadError.message : "¡Ups! No pudimos cargar los perfiles. Probemos de nuevo.",
       ))
       .finally(() => setLoading(false));
   }, []);
@@ -55,7 +55,7 @@ export function LoginPage() {
       const next = await login(profile.userId);
       startTransition(safeNext(searchParams.get("next"), next.role));
     } catch (enterError) {
-      setError(enterError instanceof ApiClientError ? enterError.message : "No pudimos abrir el perfil.");
+      setError(enterError instanceof ApiClientError ? enterError.message : "¡Ups! No pudimos abrir el perfil. Probemos de nuevo.");
       setEntering(null);
     }
   }

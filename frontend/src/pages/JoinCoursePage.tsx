@@ -25,7 +25,7 @@ export function JoinCoursePage() {
   async function join() {
     setJoining(true); setError(null);
     try { await api.joinInvite(token); navigate("/inicio", { replace: true }); }
-    catch (joinError) { setError(joinError instanceof ApiClientError ? joinError.message : "No pudimos unirte al curso."); setJoining(false); }
+    catch (joinError) { setError(joinError instanceof ApiClientError ? joinError.message : "¡Ups! No pudimos unirte al curso. Probemos de nuevo."); setJoining(false); }
   }
 
   if (error && !invite) return <ErrorState message={error} onRetry={load} />;

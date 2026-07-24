@@ -31,7 +31,7 @@ export function ResultsPage() {
     try {
       setStory(await api.getStory(storyId));
     } catch (loadError) {
-      setError(loadError instanceof ApiClientError ? loadError.message : "No pudimos abrir el resultado.");
+      setError(loadError instanceof ApiClientError ? loadError.message : "¡Ups! No pudimos abrir el resultado. Probemos de nuevo.");
     }
   }, [storyId]);
 
@@ -43,7 +43,7 @@ export function ResultsPage() {
     }
     void api.getAttempt(attemptId)
       .then((stored) => { if (active) setResult(stored); })
-      .catch((loadError) => { if (active) setError(loadError instanceof ApiClientError ? loadError.message : "No pudimos recuperar el resultado."); });
+      .catch((loadError) => { if (active) setError(loadError instanceof ApiClientError ? loadError.message : "¡Ups! No pudimos recuperar el resultado."); });
     return () => { active = false; };
   }, [attemptId, loadStory, result]);
 
@@ -52,10 +52,10 @@ export function ResultsPage() {
   const journey = loadJourney(storyId);
 
   const message = result.correctCount === 5
-    ? "Excelente lectura. Encontraste todas las pistas."
+    ? "¡Increíble! Encontraste todas las pistas como un gran detective."
     : result.correctCount >= 3
-      ? "Muy buen trabajo. Cada historia te ayuda a mejorar."
-      : "Buen intento. Revisemos las pistas y probemos otra vez.";
+      ? "¡Muy bien! Cada historia te hace más fuerte."
+      : "¡Buen intento! La próxima vez vas a descubrir más pistas.";
 
   return (
     <div className="results-page page-width page-section">
