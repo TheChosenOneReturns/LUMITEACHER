@@ -324,7 +324,7 @@ export function CreateStoryPage() {
         <div className="story-lab__body">
           <div className="story-studio__workspace">
             <div className="story-studio__progress"><motion.span animate={{ width: `${((step + 1) / simpleSteps.length) * 100}%` }} transition={{ type: "spring", stiffness: 140, damping: 22 }} /></div>
-            <AnimatePresence initial={false}>
+            <AnimatePresence initial={false} mode="popLayout">
               <motion.section key={step} className="studio-step studio-step--simple" initial={{ opacity: 0, x: 34, filter: "blur(4px)" }} animate={{ opacity: 1, x: 0, filter: "blur(0px)" }} exit={{ opacity: 0, x: -28, filter: "blur(4px)" }} transition={{ type: "spring", stiffness: 180, damping: 23 }}>
                 {step === 0 ? <>
                   <span className="eyebrow"><CompassIcon /> Paso 1</span><h2>¿Dónde empieza?</h2>
@@ -367,16 +367,55 @@ export function CreateStoryPage() {
             </div>
           </div>
 
-          <aside className="story-studio__preview story-studio__preview--simple" aria-label="Vista previa del cuento">
-            <span className="preview-live"><motion.i animate={reduceMotion ? {} : { scale: [1, 1.5, 1] }} transition={{ duration: 1.7, repeat: Infinity }} /> Tu aventura</span>
-            <div className="story-studio__preview-image"><motion.img key={sceneImage} src={sceneImage} alt="" initial={{ opacity: 0, scale: 1.08 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: .6 }} /><motion.span key={selectedTheme} initial={{ scale: 0, rotate: -18 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring" }}><StoryThemeIcon theme={selectedTheme} size={44} /></motion.span></div>
-            <AnimatePresence mode="wait"><motion.div className="preview-title" key={`${previewTitle}-${mainCharacter}`} initial={{ opacity: 0, y: 7 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -7 }}><h3>{previewTitle}</h3><p>{mainCharacter || (language === "es" ? "Lumi elegirá al protagonista." : "Lumi will choose the hero.")}</p></motion.div></AnimatePresence>
-            <div className="preview-icon-row" aria-label="Resumen visual">
-              <span title={selectedTheme} aria-label={`Mundo: ${selectedTheme}`}><StoryThemeIcon theme={selectedTheme} size={23} /></span>
-              <span title={storyMode === "interactive" ? "Con caminos" : "Clásico"} aria-label={storyMode === "interactive" ? "Aventura con caminos" : "Cuento clásico"}><TreeStructureIcon /></span>
+          <motion.aside
+            className="story-cover-preview"
+            aria-label="Vista previa del cuento"
+            initial={reduceMotion ? false : { opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 170, damping: 22 }}
+          >
+            <div className="story-cover-preview__art">
+              <motion.img
+                key={sceneImage}
+                src={sceneImage}
+                alt=""
+                initial={reduceMotion ? false : { opacity: 0, scale: 1.08 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: reduceMotion ? 0 : .65 }}
+              />
+              <div className="story-cover-preview__scrim" />
+              <header className="story-cover-preview__top">
+                <span><motion.i animate={reduceMotion ? {} : { scale: [1, 1.5, 1] }} transition={{ duration: 1.7, repeat: Infinity }} /> {language === "es" ? "EN CREACIÓN" : "IN PROGRESS"}</span>
+                <b><span aria-hidden="true">{age}</span><span className="sr-only">{age} años</span></b>
+              </header>
+              <motion.div
+                className="story-cover-preview__seal"
+                key={selectedTheme}
+                initial={reduceMotion ? false : { scale: 0, rotate: -20 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 260, damping: 18 }}
+              ><StoryThemeIcon theme={selectedTheme} size={34} /></motion.div>
+              <AnimatePresence mode="wait">
+                <motion.div
+                  className="story-cover-preview__copy"
+                  key={`${previewTitle}-${mainCharacter}`}
+                  initial={reduceMotion ? false : { opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: -8 }}
+                  transition={{ duration: reduceMotion ? 0 : .25 }}
+                >
+                  <span><SparkleIcon weight="fill" /> {language === "es" ? "TU CUENTO" : "YOUR STORY"}</span>
+                  <h3>{previewTitle}</h3>
+                  {mainCharacter ? <p><UsersThreeIcon /> {mainCharacter}</p> : null}
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            <div className="story-cover-preview__dock" aria-label="Resumen visual del cuento">
+              <span title={selectedTheme} aria-label={`Mundo: ${selectedTheme}`}><StoryThemeIcon theme={selectedTheme} size={22} /></span>
+              <span title={storyMode === "interactive" ? "Con caminos" : "Clásico"} aria-label={storyMode === "interactive" ? "Aventura con caminos" : "Cuento clásico"}>{storyMode === "interactive" ? <TreeStructureIcon /> : <BookOpenTextIcon />}</span>
               <span title={language === "es" ? "Voz en español" : "English voice"} aria-label={language === "es" ? "Voz en español" : "English voice"}><SpeakerHighIcon /></span>
             </div>
-          </aside>
+          </motion.aside>
         </div>
       </form>
 
