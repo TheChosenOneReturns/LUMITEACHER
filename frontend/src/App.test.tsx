@@ -74,7 +74,8 @@ describe("Story Teacher app", () => {
     renderApp("/crear");
     expect(await screen.findByText("Misión de aprendizaje")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "Cargar prueba El invento submarino" }));
-    expect(screen.getByRole("button", { name: "10 años" })).toHaveAttribute("aria-pressed", "true");
+    // El preset salta al paso Mundo (step 1); verificamos edad y objetivo
+    expect(await screen.findByRole("button", { name: "10 años" })).toHaveAttribute("aria-pressed", "true");
     expect(screen.getByLabelText("¿Qué te gustaría practicar o aprender?")).toHaveValue("Analizar causas y consecuencias para encontrar soluciones sustentables");
   });
 
