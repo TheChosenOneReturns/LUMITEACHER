@@ -20,16 +20,16 @@ import { ProfileAvatar } from "./VisualIcons";
 import { useTransition } from "./motion/TransitionContext";
 
 const studentNav = [
-  { to: "/inicio", icon: HouseIcon, label: "Inicio" },
-  { to: "/crear", icon: MagicWandIcon, label: "Crear" },
-  { to: "/recompensas", icon: GiftIcon, label: "Juegos" },
-  { to: "/perfil", icon: UserCircleIcon, label: "Perfil" },
+  { to: "/inicio", icon: HouseIcon, label: "Inicio", end: false },
+  { to: "/crear", icon: MagicWandIcon, label: "Crear", end: false },
+  { to: "/recompensas", icon: GiftIcon, label: "Juegos", end: false },
+  { to: "/perfil", icon: UserCircleIcon, label: "Perfil", end: false },
 ];
 
 const adultNav = [
-  { to: "/adulto", icon: ChartLineUpIcon, label: "Panel" },
-  { to: "/adulto", icon: UsersThreeIcon, label: "Cursos" },
-  { to: "/perfil", icon: UserCircleIcon, label: "Perfil" },
+  { to: "/adulto", icon: ChartLineUpIcon, label: "Panel", end: true },
+  { to: "/adulto/cursos", icon: UsersThreeIcon, label: "Cursos", end: false },
+  { to: "/perfil", icon: UserCircleIcon, label: "Perfil", end: false },
 ];
 
 export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolean }) {
@@ -68,7 +68,7 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
           <nav className="desktop-nav" aria-label="Navegación principal">
             {navItems.slice(0, profile.role === "adult" ? 2 : 3).map((item) => {
               const Icon = item.icon;
-              return <NavLink key={`${item.to}-${item.label}`} to={item.to}><Icon /> {item.label}</NavLink>;
+              return <NavLink key={`${item.to}-${item.label}`} to={item.to} end={item.end}><Icon /> {item.label}</NavLink>;
             })}
           </nav>
         ) : null}
@@ -99,7 +99,7 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <NavLink key={`${item.to}-${item.label}`} to={item.to} className={item.label === "Crear" ? "mobile-nav__create" : ""}>
+              <NavLink key={`${item.to}-${item.label}`} to={item.to} end={item.end} className={item.label === "Crear" ? "mobile-nav__create" : ""}>
                 <Icon size={24} weight="duotone" aria-hidden="true" /><small>{item.label}</small>
               </NavLink>
             );

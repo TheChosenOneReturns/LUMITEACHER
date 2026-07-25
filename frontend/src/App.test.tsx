@@ -85,4 +85,21 @@ describe("Story Teacher app", () => {
     renderApp("/crear");
     expect(await screen.findByRole("heading", { name: /hola, lucía/i })).toBeInTheDocument();
   });
+
+  it("separa el panel adulto de la administración de cursos", async () => {
+    localStorage.setItem(sessionUserKey, "demo-lucia");
+    renderApp("/adulto");
+    expect(await screen.findByRole("heading", { name: /hola, lucía/i })).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /cursos/i })[0]).toHaveAttribute("href", "/adulto/cursos");
+    expect(screen.getAllByRole("link", { name: /crear un curso/i })).toEqual(
+      expect.arrayContaining([expect.objectContaining({ href: expect.stringMatching(/\/adulto\/cursos$/) })]),
+    );
+  });
+
+  it("muestra la página independiente de cursos", async () => {
+    localStorage.setItem(sessionUserKey, "demo-lucia");
+    renderApp("/adulto/cursos");
+    expect(await screen.findByRole("heading", { name: /tus cursos y grupos/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /crear un curso/i })).toBeInTheDocument();
+  });
 });
