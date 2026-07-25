@@ -8,6 +8,7 @@ import { LoadingState } from "./components/PageState";
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { NotFoundPage } from "./pages/NotFoundPage";
+import { FaqPage } from "./pages/FaqPage";
 
 const HomePage = lazy(() => import("./pages/HomePage").then((module) => ({ default: module.HomePage })));
 const CreateStoryPage = lazy(() => import("./pages/CreateStoryPage").then((module) => ({ default: module.CreateStoryPage })));
@@ -45,6 +46,7 @@ export function App() {
           <Route element={<AppShell />}>
             <Route index element={<LandingPage />} />
             <Route path="login" element={<LoginPage />} />
+            <Route path="preguntas-frecuentes" element={<FaqPage />} />
             <Route path="unirse/:token" element={<JoinCoursePage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Route>

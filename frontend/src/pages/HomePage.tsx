@@ -1,7 +1,7 @@
 import type { Congratulation, CourseSummary, Mission, RewardState, StorySummary } from "@story-teacher/shared";
-import { motion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { api, ApiClientError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import {
@@ -20,6 +20,7 @@ import { staggerContainer } from "../components/MotionPrimitives";
 import { ErrorState, LoadingState } from "../components/PageState";
 import { StoryCard } from "../components/StoryCard";
 import { StoryThemeIcon } from "../components/VisualIcons";
+import { StudentOnboarding } from "../components/StudentOnboarding";
 
 interface MissionWithCourse extends Mission {
   courseName: string;
@@ -27,6 +28,7 @@ interface MissionWithCourse extends Mission {
 
 export function HomePage() {
   const { profile } = useAuth();
+  const navigate = useNavigate();
   const [stories, setStories] = useState<StorySummary[]>([]);
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [missions, setMissions] = useState<MissionWithCourse[]>([]);
@@ -34,6 +36,19 @@ export function HomePage() {
   const [postcards, setPostcards] = useState<Congratulation[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const onboardingKey = `story-teacher:onboarding:${profile!.userId}`;
+  const [showOnboarding, setShowOnboarding] = useState(() => localStorage.getItem(onboardingKey) !== "complete");
+
+  function completeOnboarding() {
+    localStorage.setItem(onboardingKey, "complete");
+    setShowOnboarding(false);
+  }
+
+  function finishOnboarding() {
+    localStorage.setItem(onboardingKey, "complete");
+    setShowOnboarding(false);
+    navigate("/crear");
+  }
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -68,6 +83,15 @@ export function HomePage() {
 
   return (
     <div className="page-width page-section home-page student-dashboard">
+      <AnimatePresence>
+        {showOnboarding ? (
+          <StudentOnboarding
+            displayName={profile!.displayName}
+            onDismiss={completeOnboarding}
+            onFinish={finishOnboarding}
+          />
+        ) : null}
+      </AnimatePresence>
       <motion.section className="welcome-banner" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
         <div className="welcome-banner__copy">
           <span className="eyebrow"><SparkleIcon weight="fill" /> Tu mundo lector</span>

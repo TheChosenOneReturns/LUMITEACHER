@@ -41,9 +41,22 @@ describe("Story Teacher app", () => {
 
   it("muestra la landing en español sin la antigua etiqueta de IA", () => {
     renderApp("/");
-    expect(screen.getByRole("heading", { name: /una historia que cobra vida para vos/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /historias que despiertan las ganas de leer/i })).toBeInTheDocument();
     expect(screen.queryByText(/Lectura \+ imaginación \+ IA/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /crear mi historia/i })).toHaveAttribute("href", "/login?next=%2Fcrear");
+    expect(screen.getByRole("link", { name: /crear mi aventura/i })).toHaveAttribute("href", "/login?next=%2Fcrear");
+    expect(screen.getAllByRole("link", { name: /soy docente o familiar/i })).toEqual(
+      expect.arrayContaining([expect.objectContaining({ href: expect.stringMatching(/\/login\?next=%2Fadulto$/) })]),
+    );
+    expect(screen.getByRole("link", { name: /preguntas frecuentes/i })).toHaveAttribute("href", "/preguntas-frecuentes");
+  });
+
+  it("muestra las preguntas frecuentes en una página independiente", () => {
+    renderApp("/preguntas-frecuentes");
+    expect(screen.getByRole("heading", { name: /^preguntas frecuentes$/i })).toBeInTheDocument();
+    expect(screen.getByText(/¿para qué edades está pensado story teacher?/i)).toBeInTheDocument();
+    expect(screen.getAllByRole("link", { name: /crear una aventura/i })).toEqual(
+      expect.arrayContaining([expect.objectContaining({ href: expect.stringMatching(/\/login\?next=%2Fcrear$/) })]),
+    );
   });
 
   it("ofrece perfiles de estudiante y adulto sin pedir la edad", async () => {

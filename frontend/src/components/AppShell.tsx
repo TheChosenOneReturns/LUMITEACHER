@@ -5,8 +5,11 @@ import {
   GiftIcon,
   GraduationCapIcon,
   HouseIcon,
+  HeartIcon,
   MagicWandIcon,
+  ShieldCheckIcon,
   SignInIcon,
+  SparkleIcon,
   UserCircleIcon,
   UsersThreeIcon,
 } from "./icons";
@@ -107,7 +110,48 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
         </nav>
       ) : null}
 
-      {isPublic ? <footer className="footer"><Lumi compact /><p>Historias para imaginar, leer y aprender.</p></footer> : null}
+      {isPublic ? (
+        <footer className="footer">
+          <div className="footer__main page-width">
+            <section className="footer__brand" aria-label="Story Teacher">
+              <Link className="brand" to="/" aria-label="Story Teacher, volver al inicio">
+                <span className="brand__mark" aria-hidden="true"><BookOpenTextIcon size={29} weight="duotone" /></span>
+                <span>Story <strong>Teacher</strong></span>
+              </Link>
+              <p>Historias personalizadas para imaginar, comprender y descubrir las ganas de leer.</p>
+              <div className="footer__lumi"><Lumi compact mood="encouraging" message="¡Nos vemos en la próxima aventura!" /></div>
+            </section>
+
+            <nav className="footer__nav" aria-label="Explorar Story Teacher">
+              <strong>Explorar</strong>
+              <a href="/#como-funciona">Cómo funciona</a>
+              <a href="/#experiencia">La experiencia</a>
+              <a href="/#habilidades">Habilidades lectoras</a>
+              <Link to="/preguntas-frecuentes">Preguntas frecuentes</Link>
+            </nav>
+
+            <nav className="footer__nav" aria-label="Accesos por perfil">
+              <strong>Empezar</strong>
+              <Link to="/login?next=%2Finicio">Quiero aprender</Link>
+              <Link to="/login?next=%2Fadulto">Soy docente o familiar</Link>
+              <Link to="/login?next=%2Fcrear">Crear una aventura</Link>
+            </nav>
+
+            <section className="footer__trust">
+              <strong>Un espacio cuidado</strong>
+              <p><ShieldCheckIcon weight="duotone" /> Diseñado para lectores de 6 a 12 años.</p>
+              <p><SparkleIcon weight="fill" /> Sin publicidad ni competencia por velocidad.</p>
+            </section>
+          </div>
+          <div className="footer__bottom">
+            <div className="page-width">
+              <span>© {new Date().getFullYear()} Story Teacher</span>
+              <span>Hecho con <HeartIcon weight="fill" aria-label="cariño" /> para acompañar cada lectura.</span>
+              <span>Demo educativa</span>
+            </div>
+          </div>
+        </footer>
+      ) : null}
     </div>
   );
 }
