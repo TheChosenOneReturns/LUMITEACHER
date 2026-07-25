@@ -18,6 +18,7 @@ const ResultsPage = lazy(() => import("./pages/ResultsPage").then((module) => ({
 const RewardsPage = lazy(() => import("./pages/RewardsPage").then((module) => ({ default: module.RewardsPage })));
 const JoinCoursePage = lazy(() => import("./pages/JoinCoursePage").then((module) => ({ default: module.JoinCoursePage })));
 const AdultDashboardPage = lazy(() => import("./pages/AdultDashboardPage").then((module) => ({ default: module.AdultDashboardPage })));
+const AdultCoursesPage = lazy(() => import("./pages/AdultCoursesPage").then((module) => ({ default: module.AdultCoursesPage })));
 const AdultCoursePage = lazy(() => import("./pages/AdultCoursePage").then((module) => ({ default: module.AdultCoursePage })));
 const CreateMissionPage = lazy(() => import("./pages/CreateMissionPage").then((module) => ({ default: module.CreateMissionPage })));
 const StudentProgressPage = lazy(() => import("./pages/StudentProgressPage").then((module) => ({ default: module.StudentProgressPage })));
@@ -61,6 +62,7 @@ export function App() {
           </Route>
           <Route element={<RequireAuth role="adult" />}>
             <Route path="adulto" element={<AdultDashboardPage />} />
+            <Route path="adulto/cursos" element={<AdultCoursesPage />} />
             <Route path="adulto/cursos/:courseId" element={<AdultCoursePage />} />
             <Route path="adulto/cursos/:courseId/crear-mision" element={<CreateMissionPage />} />
             <Route path="adulto/cursos/:courseId/alumnos/:studentId" element={<StudentProgressPage />} />
