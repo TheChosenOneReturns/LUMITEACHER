@@ -7,7 +7,9 @@ import {
   type ReactNode,
 } from "react";
 import type { UserProfile } from "@story-teacher/shared";
-import { api } from "../api/client";
+import { signOut } from "aws-amplify/auth";
+import { api, ApiClientError } from "../api/client";
+import { authMode } from "./config";
 import { getSessionUserId, setSessionUserId } from "./session";
 
 export type AvatarId = string;
@@ -25,18 +27,27 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [loading, setLoading] = useState(Boolean(getSessionUserId()));
+  const [loading, setLoading] = useState(
+    authMode === "cognito" || Boolean(getSessionUserId()),
+  );
 
   async function refreshProfile() {
-    if (!getSessionUserId()) {
+    if (authMode === "demo" && !getSessionUserId()) {
       setProfile(null);
       setLoading(false);
       return;
     }
     try {
       setProfile(await api.getMe());
-    } catch {
-      setSessionUserId(null);
+    } catch (error) {
+      if (
+        authMode === "cognito" &&
+        error instanceof ApiClientError &&
+        error.status === 401
+      ) {
+        await signOut().catch(() => undefined);
+      }
+      if (authMode === "demo") setSessionUserId(null);
       setProfile(null);
     } finally {
       setLoading(false);
@@ -48,6 +59,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   async function login(userId: string): Promise<UserProfile> {
+    if (authMode === "cognito") {
+      throw new Error("El ingreso Cognito no acepta perfiles demo.");
+    }
     setSessionUserId(userId);
     try {
       const next = await api.getMe();
@@ -60,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   function logout() {
+    if (authMode === "cognito") void signOut();
     setSessionUserId(null);
     setProfile(null);
   }

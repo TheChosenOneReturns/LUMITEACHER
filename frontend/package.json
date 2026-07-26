@@ -12,11 +12,12 @@
   "dependencies": {
     "@phosphor-icons/react": "^2.1.10",
     "@story-teacher/shared": "*",
+    "aws-amplify": "^6.19.0",
     "motion": "^12.42.2",
     "qrcode.react": "^4.2.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router-dom": "^7.7.1"
+    "react-router-dom": "7.18.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.1.11",

@@ -1,12 +1,20 @@
 import type {
   AttemptResult,
+  GeneratedInteractiveStory,
   GeneratedStory,
   GenerateStoryInput,
+  InteractiveAdventurePublic,
   RewardGrant,
   StoryPublic,
   StorySummary,
   SubmitAttemptInput,
 } from "@story-teacher/shared";
+
+export interface AuthenticatedIdentity {
+  userId: string;
+  sessionId?: string;
+  expiresAtEpochSeconds?: number;
+}
 
 export interface StoredStory extends GeneratedStory {
   PK: string;
@@ -19,6 +27,7 @@ export interface StoredStory extends GeneratedStory {
   input: GenerateStoryInput;
   modelId: string;
   promptVersion: string;
+  adventure?: InteractiveAdventurePublic;
   courseId?: string;
   missionId?: string;
   source: "free" | "mission";
@@ -46,6 +55,9 @@ export interface StoryCreationContext {
 export interface StoryGenerator {
   readonly modelId: string;
   generate(input: GenerateStoryInput): Promise<GeneratedStory>;
+  generateInteractive?(
+    input: GenerateStoryInput,
+  ): Promise<GeneratedInteractiveStory>;
 }
 
 export interface StoryRepository {
@@ -57,6 +69,11 @@ export interface StoryRepository {
   getStory(userId: string, storyId: string): Promise<StoredStory | null>;
   listStories(userId: string, limit: number): Promise<StorySummary[]>;
   getAttempt(userId: string, attemptId: string): Promise<StoredAttempt | null>;
+  claimGenerationSlot(
+    userId: string,
+    dayKey: string,
+    maxPerDay: number,
+  ): Promise<boolean>;
 }
 
 export interface AttemptRepository {

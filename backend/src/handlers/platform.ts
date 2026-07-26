@@ -2,18 +2,22 @@ import {
   activityTypeSchema,
   createDemoProfileSchema,
   gameIdSchema,
+  generationIdSchema,
   skillSchema,
-  storyInputSchema,
 } from "@story-teacher/shared";
 import { z } from "zod";
-import { getPlatformService } from "../container";
+import { getConfig } from "../config";
+import {
+  getGenerationJobRepository,
+  getPlatformService,
+  getStoryService,
+} from "../container";
 import { ApplicationError } from "../domain/errors";
 import {
   handleRequest,
   json,
   parseJsonBody,
-  requireDemoUser,
-  requireIdempotencyKey,
+  requireUser,
   type ApiEvent,
   type ApiResponse,
 } from "../http/api";
@@ -27,6 +31,26 @@ const updateProfileSchema = z
     adultLabel: z.enum(["Profesor/a", "Familia"]).optional(),
   })
   .strict();
+
+const authenticatedProfileSchema = z
+  .object({
+    role: z.enum(["student", "adult"]),
+    displayName: z.string().trim().min(2).max(40),
+    age: z.number().int().min(6).max(12).optional(),
+    avatarId: z.string().min(1).max(40).default("animal-fox"),
+    favoriteTheme: z.string().trim().min(2).max(60).default("Tema libre"),
+    adultLabel: z.enum(["Profesor/a", "Familia"]).optional(),
+  })
+  .strict()
+  .superRefine((profile, context) => {
+    if (profile.role === "student" && profile.age === undefined) {
+      context.addIssue({
+        code: "custom",
+        path: ["age"],
+        message: "La edad es obligatoria para un perfil estudiante.",
+      });
+    }
+  });
 
 const courseInputSchema = z
   .object({
@@ -55,6 +79,9 @@ const congratulationInputSchema = z
 
 const accessorySchema = z.object({ accessoryId: z.string().nullable() }).strict();
 const cardUseSchema = z.object({ gameId: gameIdSchema, sessionId: z.string().min(8).max(64) }).strict();
+const publishMissionSchema = z
+  .object({ generationId: generationIdSchema })
+  .strict();
 
 export async function handler(event: ApiEvent): Promise<ApiResponse> {
   return handleRequest(event, async () => {
@@ -63,9 +90,15 @@ export async function handler(event: ApiEvent): Promise<ApiResponse> {
     const path = event.rawPath;
 
     if (method === "GET" && path === "/demo/profiles") {
+      if (getConfig().authMode !== "demo") {
+        throw new ApplicationError("FORBIDDEN", 403, "El acceso demo está deshabilitado.");
+      }
       return json(200, { items: await service.listDemoProfiles() });
     }
     if (method === "POST" && path === "/demo/profiles") {
+      if (getConfig().authMode !== "demo") {
+        throw new ApplicationError("FORBIDDEN", 403, "El acceso demo está deshabilitado.");
+      }
       return json(201, await service.createDemoStudent(createDemoProfileSchema.parse(parseJsonBody(event))));
     }
     if (method === "GET" && path === "/catalog") {
@@ -77,8 +110,17 @@ export async function handler(event: ApiEvent): Promise<ApiResponse> {
       return json(200, await service.getInvite(inviteMatch[1]));
     }
 
-    const userId = requireDemoUser(event);
+    const { userId } = await requireUser(event);
 
+    if (method === "POST" && path === "/me/bootstrap") {
+      return json(
+        201,
+        await service.createAuthenticatedProfile(
+          userId,
+          authenticatedProfileSchema.parse(parseJsonBody(event)),
+        ),
+      );
+    }
     if (method === "GET" && path === "/me") {
       return json(200, await service.getProfile(userId));
     }
@@ -135,12 +177,47 @@ export async function handler(event: ApiEvent): Promise<ApiResponse> {
       return json(200, { items: await service.listMissions(userId, missionsMatch[1]) });
     }
     if (method === "POST" && missionsMatch?.[1]) {
-      return json(201, await service.createMission(
-        userId,
-        missionsMatch[1],
-        storyInputSchema.parse(parseJsonBody(event)),
-        requireIdempotencyKey(event),
-      ));
+      const courseId = missionsMatch[1];
+      const { generationId } = publishMissionSchema.parse(parseJsonBody(event));
+      const job = await getGenerationJobRepository().get(userId, generationId);
+      if (!job) {
+        throw new ApplicationError(
+          "GENERATION_NOT_FOUND",
+          404,
+          "No encontramos esa vista previa.",
+        );
+      }
+      if (job.status === "pending") {
+        throw new ApplicationError(
+          "GENERATION_PENDING",
+          409,
+          "La vista previa todavía se está generando.",
+        );
+      }
+      if (job.status === "failed") {
+        throw new ApplicationError(job.error.code, 422, job.error.message);
+      }
+      if (
+        job.context.source !== "mission" ||
+        job.context.courseId !== courseId ||
+        !job.context.missionId
+      ) {
+        throw new ApplicationError(
+          "VALIDATION_ERROR",
+          409,
+          "La vista previa no pertenece a este curso.",
+        );
+      }
+      const story = await getStoryService().getStory(userId, job.storyId);
+      return json(
+        201,
+        await service.publishMission(
+          userId,
+          courseId,
+          job.context.missionId,
+          story,
+        ),
+      );
     }
     const activityMatch = path.match(/^\/courses\/([^/]+)\/activity-events$/u);
     if (method === "POST" && activityMatch?.[1]) {

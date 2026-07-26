@@ -10,15 +10,25 @@ Parameters:
     Type: String
     Default: fixture
     AllowedValues: [fixture, bedrock]
+  DynamoDbEndpoint:
+    Type: String
+    Default: ""
   BedrockModelId:
     Type: String
-    Default: us.amazon.nova-2-lite-v1:0
+    Default: us.anthropic.claude-sonnet-4-5-20250929-v1:0
   BedrockGuardrailId:
     Type: String
     Default: ""
   BedrockGuardrailVersion:
     Type: String
     Default: DRAFT
+  SessionIpPolicy:
+    Type: String
+    Default: observe
+    AllowedValues: [off, observe, strict]
+
+Conditions:
+  HasGuardrail: !Not [!Equals [!Ref BedrockGuardrailId, ""]]
 
 Globals:
   Function:
@@ -30,16 +40,21 @@ Globals:
     Environment:
       Variables:
         TABLE_NAME: !Ref StoryTeacherTable
+        DYNAMODB_ENDPOINT: !Ref DynamoDbEndpoint
         STORY_GENERATOR_MODE: !Ref StoryGeneratorMode
+        AUTH_MODE: cognito
+        SESSION_IP_POLICY: !Ref SessionIpPolicy
         BEDROCK_MODEL_ID: !Ref BedrockModelId
         BEDROCK_GUARDRAIL_ID: !Ref BedrockGuardrailId
         BEDROCK_GUARDRAIL_VERSION: !Ref BedrockGuardrailVersion
         ALLOWED_ORIGIN: !Ref AllowedOrigin
+        MAX_GENERATIONS_PER_USER_PER_DAY: "20"
   HttpApi:
     CorsConfiguration:
       AllowOrigins:
         - !Ref AllowedOrigin
       AllowHeaders:
+        - Authorization
         - Content-Type
         - X-Demo-User-Id
         - Idempotency-Key
@@ -51,10 +66,91 @@ Globals:
       MaxAge: 600
 
 Resources:
+  StoryTeacherUserPool:
+    Type: AWS::Cognito::UserPool
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      UserPoolName: !Sub ${AWS::StackName}-users
+      UsernameAttributes:
+        - email
+      AutoVerifiedAttributes:
+        - email
+      MfaConfiguration: "OFF"
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 12
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+          TemporaryPasswordValidityDays: 3
+      Schema:
+        - Name: email
+          AttributeDataType: String
+          Mutable: true
+          Required: true
+      UserAttributeUpdateSettings:
+        AttributesRequireVerificationBeforeUpdate:
+          - email
+
+  StoryTeacherUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${AWS::StackName}-web
+      UserPoolId: !Ref StoryTeacherUserPool
+      GenerateSecret: false
+      EnableTokenRevocation: true
+      PreventUserExistenceErrors: ENABLED
+      ExplicitAuthFlows:
+        - ALLOW_USER_SRP_AUTH
+      AccessTokenValidity: 15
+      IdTokenValidity: 15
+      RefreshTokenValidity: 7
+      TokenValidityUnits:
+        AccessToken: minutes
+        IdToken: minutes
+        RefreshToken: days
+      RefreshTokenRotation:
+        Feature: ENABLED
+        RetryGracePeriodSeconds: 10
+      ReadAttributes:
+        - email
+      WriteAttributes:
+        - email
+
+  ApiAccessLogGroup:
+    Type: AWS::Logs::LogGroup
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      RetentionInDays: 30
+
   StoryTeacherApi:
     Type: AWS::Serverless::HttpApi
     Properties:
       StageName: $default
+      AccessLogSettings:
+        DestinationArn: !GetAtt ApiAccessLogGroup.Arn
+        Format: >-
+          {"requestId":"$context.requestId","routeKey":"$context.routeKey","status":"$context.status","responseLength":"$context.responseLength","integrationError":"$context.integrationErrorMessage"}
+      DefaultRouteSettings:
+        ThrottlingBurstLimit: 50
+        ThrottlingRateLimit: 25
+      Auth:
+        Authorizers:
+          CognitoJwtAuthorizer:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub https://cognito-idp.${AWS::Region}.${AWS::URLSuffix}/${StoryTeacherUserPool}
+              audience:
+                - !Ref StoryTeacherUserPoolClient
 
   HealthFunction:
     Type: AWS::Serverless::Function
@@ -75,9 +171,7 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: es2022
-        Format: esm
-        OutExtension:
-          - .js=.mjs
+        Format: cjs
         EntryPoints:
           - backend/src/handlers/health.ts
 
@@ -86,6 +180,41 @@ Resources:
     Properties:
       CodeUri: .
       Handler: backend/src/handlers/createStory.handler
+      Environment:
+        Variables:
+          GENERATION_WORKER_FUNCTION_NAME: !Ref GenerationWorkerFunction
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StoryTeacherTable
+        - LambdaInvokePolicy:
+            FunctionName: !Ref GenerationWorkerFunction
+      Events:
+        CreateStory:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /stories
+            Method: POST
+            Auth:
+              Authorizer: CognitoJwtAuthorizer
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: cjs
+        EntryPoints:
+          - backend/src/handlers/createStory.ts
+
+  GenerationWorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/generationWorker.handler
+      MemorySize: 1024
+      Timeout: 300
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref StoryTeacherTable
@@ -97,15 +226,20 @@ Resources:
             - Effect: Allow
               Action:
                 - bedrock:InvokeModel
-                - bedrock:ApplyGuardrail
-              Resource: "*"
-      Events:
-        CreateStory:
-          Type: HttpApi
-          Properties:
-            ApiId: !Ref StoryTeacherApi
-            Path: /stories
-            Method: POST
+              Resource:
+                - !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:inference-profile/${BedrockModelId}"
+                - !Sub "arn:aws:bedrock:${AWS::Region}::foundation-model/${BedrockModelId}"
+                - "arn:aws:bedrock:*::foundation-model/anthropic.claude-sonnet-4-5-20250929-v1:0"
+                - "arn:aws:bedrock:*::foundation-model/anthropic.claude-haiku-4-5-20251001-v1:0"
+                - "arn:aws:bedrock:*::foundation-model/amazon.nova-2-lite-v1:0"
+                - "arn:aws:bedrock:*::foundation-model/amazon.nova-micro-v1:0"
+            - Fn::If:
+                - HasGuardrail
+                - Effect: Allow
+                  Action:
+                    - bedrock:ApplyGuardrail
+                  Resource: !Sub "arn:aws:bedrock:${AWS::Region}:${AWS::AccountId}:guardrail/${BedrockGuardrailId}"
+                - !Ref "AWS::NoValue"
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -113,11 +247,37 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: es2022
-        Format: esm
-        OutExtension:
-          - .js=.mjs
+        Format: cjs
         EntryPoints:
-          - backend/src/handlers/createStory.ts
+          - backend/src/handlers/generationWorker.ts
+
+  GetGenerationFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: .
+      Handler: backend/src/handlers/getGeneration.handler
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref StoryTeacherTable
+      Events:
+        GetGeneration:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /generations/{generationId}
+            Method: GET
+            Auth:
+              Authorizer: CognitoJwtAuthorizer
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Bundle: true
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: cjs
+        EntryPoints:
+          - backend/src/handlers/getGeneration.ts
 
   ListStoriesFunction:
     Type: AWS::Serverless::Function
@@ -125,7 +285,7 @@ Resources:
       CodeUri: .
       Handler: backend/src/handlers/listStories.handler
       Policies:
-        - DynamoDBReadPolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref StoryTeacherTable
       Events:
         ListStories:
@@ -134,6 +294,8 @@ Resources:
             ApiId: !Ref StoryTeacherApi
             Path: /stories
             Method: GET
+            Auth:
+              Authorizer: CognitoJwtAuthorizer
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -141,9 +303,7 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: es2022
-        Format: esm
-        OutExtension:
-          - .js=.mjs
+        Format: cjs
         EntryPoints:
           - backend/src/handlers/listStories.ts
 
@@ -153,7 +313,7 @@ Resources:
       CodeUri: .
       Handler: backend/src/handlers/getStory.handler
       Policies:
-        - DynamoDBReadPolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref StoryTeacherTable
       Events:
         GetStory:
@@ -162,6 +322,8 @@ Resources:
             ApiId: !Ref StoryTeacherApi
             Path: /stories/{storyId}
             Method: GET
+            Auth:
+              Authorizer: CognitoJwtAuthorizer
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -169,9 +331,7 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: es2022
-        Format: esm
-        OutExtension:
-          - .js=.mjs
+        Format: cjs
         EntryPoints:
           - backend/src/handlers/getStory.ts
 
@@ -195,6 +355,8 @@ Resources:
             ApiId: !Ref StoryTeacherApi
             Path: /stories/{storyId}/attempts
             Method: POST
+            Auth:
+              Authorizer: CognitoJwtAuthorizer
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -202,9 +364,7 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: es2022
-        Format: esm
-        OutExtension:
-          - .js=.mjs
+        Format: cjs
         EntryPoints:
           - backend/src/handlers/submitAttempt.ts
 
@@ -214,7 +374,7 @@ Resources:
       CodeUri: .
       Handler: backend/src/handlers/getAttempt.handler
       Policies:
-        - DynamoDBReadPolicy:
+        - DynamoDBCrudPolicy:
             TableName: !Ref StoryTeacherTable
       Events:
         GetAttempt:
@@ -223,6 +383,8 @@ Resources:
             ApiId: !Ref StoryTeacherApi
             Path: /attempts/{attemptId}
             Method: GET
+            Auth:
+              Authorizer: CognitoJwtAuthorizer
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -230,9 +392,7 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: es2022
-        Format: esm
-        OutExtension:
-          - .js=.mjs
+        Format: cjs
         EntryPoints:
           - backend/src/handlers/getAttempt.ts
 
@@ -244,19 +404,45 @@ Resources:
       Policies:
         - DynamoDBCrudPolicy:
             TableName: !Ref StoryTeacherTable
-        - Statement:
-            - Effect: Allow
-              Action:
-                - bedrock:InvokeModel
-                - bedrock:ApplyGuardrail
-              Resource: "*"
       Events:
+        PublicCatalog:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /catalog
+            Method: GET
+        PublicProfilesGet:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /demo/profiles
+            Method: GET
+        PublicProfilesPost:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /demo/profiles
+            Method: POST
+        PublicInvite:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /invites/{token}
+            Method: GET
+        CorsPreflight:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref StoryTeacherApi
+            Path: /{proxy+}
+            Method: OPTIONS
         PlatformRoot:
           Type: HttpApi
           Properties:
             ApiId: !Ref StoryTeacherApi
             Path: /{proxy+}
             Method: ANY
+            Auth:
+              Authorizer: CognitoJwtAuthorizer
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -264,19 +450,16 @@ Resources:
         Minify: true
         Sourcemap: true
         Target: es2022
-        Format: esm
-        OutExtension:
-          - .js=.mjs
+        Format: cjs
         EntryPoints:
           - backend/src/handlers/platform.ts
 
   StoryTeacherTable:
     Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
     Properties:
-      BillingMode: PROVISIONED
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
+      BillingMode: PAY_PER_REQUEST
       AttributeDefinitions:
         - AttributeName: PK
           AttributeType: S
@@ -288,7 +471,10 @@ Resources:
         - AttributeName: SK
           KeyType: RANGE
       PointInTimeRecoverySpecification:
-        PointInTimeRecoveryEnabled: false
+        PointInTimeRecoveryEnabled: true
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
       SSESpecification:
         SSEEnabled: true
       Tags:
@@ -304,3 +490,9 @@ Outputs:
   TableName:
     Description: Tabla DynamoDB
     Value: !Ref StoryTeacherTable
+  UserPoolId:
+    Description: User Pool de Cognito para Amplify
+    Value: !Ref StoryTeacherUserPool
+  UserPoolClientId:
+    Description: Cliente web público de Cognito
+    Value: !Ref StoryTeacherUserPoolClient

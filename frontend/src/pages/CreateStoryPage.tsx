@@ -58,7 +58,7 @@ const generationPhases = [
   { label: "Imaginando el mundo", shortLabel: "Mundo", hint: "Colores y lugares", progress: 18, Icon: MapTrifoldIcon },
   { label: "Ordenando las escenas", shortLabel: "Escenas", hint: "Cada momento encuentra su lugar", progress: 44, Icon: BookOpenTextIcon },
   { label: "Dando voz al cuento", shortLabel: "Voz", hint: "Cada escena cobra vida", progress: 72, Icon: SpeakerHighIcon },
-  { label: "Afinando el desafío", shortLabel: "Desafío", hint: "Últimos detalles", progress: 94, Icon: BrainIcon },
+  { label: "Revisando los cuatro caminos", shortLabel: "Desafío", hint: "Lumi comprueba cada escena; puede tardar unos minutos", progress: 94, Icon: BrainIcon },
 ];
 
 interface StoryPreset extends GenerateStoryInput {

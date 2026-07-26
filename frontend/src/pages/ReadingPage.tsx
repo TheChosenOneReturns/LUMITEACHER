@@ -20,6 +20,7 @@ import type { NarrationHighlight } from "../components/StoryNarrator";
 import { StoryThemeIcon } from "../components/VisualIcons";
 import { playPageTurnSound } from "../audio/pageTurn";
 import {
+  adventureFromApi,
   buildInteractiveAdventure,
   clearJourney,
   getStorySceneImage,
@@ -105,7 +106,19 @@ export function ReadingPage() {
     void api.recordActivity(story.courseId, { storyId: story.storyId, ...(story.missionId ? { missionId: story.missionId } : {}), type: "story_opened" }).catch(() => undefined);
   }, [story]);
 
-  const adventure = useMemo(() => story ? buildInteractiveAdventure(story) : null, [story]);
+  const adventure = useMemo(() => {
+    if (!story) return null;
+    if (story.input.storyMode !== "interactive") {
+      return buildInteractiveAdventure(story);
+    }
+    return (
+      adventureFromApi(story) ??
+      (import.meta.env.DEV ||
+      import.meta.env.VITE_ALLOW_LOCAL_STORY_FALLBACK === "true"
+        ? buildInteractiveAdventure(story)
+        : null)
+    );
+  }, [story]);
   const scene = adventure?.scenes.find((item) => item.id === sceneId) ?? adventure?.scenes[0];
   const activeReadingText = story?.input.storyMode === "interactive" ? scene?.text ?? "" : story?.story ?? "";
   const readingPages = useMemo(() => paginateStoryText(activeReadingText, story?.input.maxWords === 1200 ? 135 : 120), [activeReadingText, story?.input.maxWords]);
@@ -162,6 +175,14 @@ export function ReadingPage() {
   }
 
   if (error) return <ErrorState message={error} onRetry={loadStory} />;
+  if (story?.input.storyMode === "interactive" && !adventure) {
+    return (
+      <ErrorState
+        message="Esta aventura antigua no contiene el recorrido generado por Bedrock. Creá una nueva para continuar."
+        onRetry={loadStory}
+      />
+    );
+  }
   if (!story || !adventure || !scene) return <LoadingState message="Abriendo el libro mágico…" />;
 
   const language = story.input.language ?? "es";
@@ -206,7 +227,7 @@ export function ReadingPage() {
 
         <AnimatePresence mode="wait">
           <motion.article key={scene.id} className={`immersive-card ${scene.ending ? "immersive-card--ending" : ""}`} initial={{ opacity: 0, y: 34, scale: .97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -24, scale: .98 }} transition={{ type: "spring", stiffness: 150, damping: 22 }}>
-            <span className="eyebrow">{scene.eyebrow}</span><h1>{scene.title}</h1>
+            <span className="eyebrow">{scene.eyebrow}</span><h1 className={scene.title.length > 56 ? "immersive-card__title--long" : undefined}>{scene.title}</h1>
             <div className="immersive-page-shell" style={{ perspective: 1500 }}>
               <AnimatePresence initial={false} mode="wait" custom={pageDirection}>
                 <motion.div key={`${scene.id}-page-${pageIndex}`} className="immersive-page-sheet" custom={pageDirection} variants={pageVariants} initial="enter" animate="center" exit="exit" transition={reduceMotion ? { duration: 0 } : { type: "spring", stiffness: 118, damping: 18, mass: .92 }} style={{ transformOrigin: pageDirection > 0 ? "left center" : "right center" }}>

@@ -132,9 +132,9 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
 
             <nav className="footer__nav" aria-label="Accesos por perfil">
               <strong>Empezar</strong>
-              <Link to="/login?next=%2Finicio">Quiero aprender</Link>
-              <Link to="/login?next=%2Fadulto">Soy docente o familiar</Link>
-              <Link to="/login?next=%2Fcrear">Crear una aventura</Link>
+              <Link to="/login?role=student&next=%2Finicio">Quiero aprender</Link>
+              <Link to="/login?role=adult&next=%2Fadulto">Soy docente o familiar</Link>
+              <Link to="/login?role=student&next=%2Fcrear">Crear una aventura</Link>
             </nav>
 
             <section className="footer__trust">

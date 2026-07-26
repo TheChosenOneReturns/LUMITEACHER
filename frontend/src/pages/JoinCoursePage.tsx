@@ -39,7 +39,7 @@ export function JoinCoursePage() {
       <h1>{invite.courseName}</h1>
       <p>Vas a encontrar misiones, historias y felicitaciones compartidas por quien acompaña el curso.</p>
       <div className="join-benefits"><span><UsersThreeIcon weight="duotone" /> Un espacio compartido</span><span><GraduationCapIcon weight="duotone" /> Tu progreso, a tu ritmo</span></div>
-      {inactive ? <p className="form-error">Esta invitación fue revocada o ya venció.</p> : !profile ? <Link className="button button--yellow" to={`/login?next=${encodeURIComponent(`/unirse/${token}`)}`}>Elegir mi perfil</Link> : profile.role === "adult" ? <p className="form-error">Las invitaciones de curso son únicamente para perfiles de estudiante.</p> : <button className="button button--green" type="button" disabled={joining} onClick={() => void join()}><CheckCircleIcon weight="fill" /> {joining ? "Uniéndome…" : `Unirme como ${profile.displayName}`}</button>}
+      {inactive ? <p className="form-error">Esta invitación fue revocada o ya venció.</p> : !profile ? <Link className="button button--yellow" to={`/login?role=student&next=${encodeURIComponent(`/unirse/${token}`)}`}>Elegir mi perfil</Link> : profile.role === "adult" ? <p className="form-error">Las invitaciones de curso son únicamente para perfiles de estudiante.</p> : <button className="button button--green" type="button" disabled={joining} onClick={() => void join()}><CheckCircleIcon weight="fill" /> {joining ? "Uniéndome…" : `Unirme como ${profile.displayName}`}</button>}
       {error ? <p className="form-error" role="alert">{error}</p> : null}
     </motion.section>
   </div>;

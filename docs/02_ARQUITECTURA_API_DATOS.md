@@ -1,5 +1,10 @@
 # Arquitectura, API y datos
 
+> Documento de diseño original. Para el flujo ejecutable actualmente
+> desplegado —Cognito, generación asíncrona, Claude Sonnet 4.5 y el prompt
+> efectivo— consultar
+> [Implementación actual de IA](14_IA_IMPLEMENTACION_ACTUAL.md).
+
 ## 1. Arquitectura elegida
 
 ```mermaid
@@ -165,10 +170,12 @@ La fuente completa es [openapi.yaml](../contracts/openapi.yaml). Resumen:
 | Método | Ruta | Uso |
 |---|---|---|
 | `GET` | `/health` | salud sin consumo de IA |
-| `POST` | `/stories` | generar y guardar cuento |
+| `POST` | `/stories` | iniciar generación asíncrona de cuento o preview de misión |
+| `GET` | `/generations/{generationId}` | consultar el job y recibir el cuento terminado |
 | `GET` | `/stories` | listar cuentos del perfil demo |
 | `GET` | `/stories/{storyId}` | obtener cuento sin clave de respuestas |
 | `POST` | `/stories/{storyId}/attempts` | corregir cinco respuestas y guardar intento |
+| `POST` | `/courses/{courseId}/missions` | publicar una preview ya generada en el curso |
 
 Todos los endpoints privados reciben `X-Demo-User-Id` con el identificador de un perfil sembrado. El backend resuelve ese perfil en DynamoDB y verifica rol, propiedad y membresía para cada operación. Sigue siendo una simulación y no aporta seguridad de producción.
 
@@ -215,11 +222,12 @@ El frontend muestra mensajes infantiles y accionables; nunca muestra stack trace
 ## 8. Idempotencia y duplicados
 
 - El frontend crea un `Idempotency-Key` para `POST /stories`.
-- La Lambda guarda una marca breve o usa ese valor como `storyId` condicionado.
+- La Lambda deriva un `generationId`, guarda un job condicionado y sólo despacha
+  el worker cuando el job es nuevo.
 - Repetir la misma solicitud devuelve el mismo cuento si ya fue persistido.
+- Publicar una misión usa el `generationId` completado y una clave determinista
+  por `createdAt + missionId`; repetir la confirmación no vuelve a generar.
 - El botón de creación queda deshabilitado mientras hay una solicitud activa.
-
-Si implementar idempotencia completa pone en riesgo P0, el mínimo aceptable es deshabilitar doble envío y usar escrituras condicionales.
 
 ## 9. Variables de entorno
 
@@ -297,6 +305,10 @@ Retención de logs: 7 días para el hackathon.
 4. `GET /stories/{id}` no contiene `correctAnswer`.
 5. `POST /attempts` devuelve el puntaje esperado.
 
-## 13. Riesgo de tiempo de respuesta
+## 13. Tiempo de respuesta
 
-API Gateway HTTP API mantiene una ventana de integración limitada. La generación se implementa sincrónica para mantener el MVP simple y debe probarse temprano con el máximo de 500 palabras. Si p95 supera 25 segundos, el recorte preferido es limitar “Larga” a 400 palabras antes que agregar SQS, jobs y polling en el día 4.
+API Gateway no espera a Bedrock. `CreateStoryFunction` responde `202` después de
+persistir el job y despachar `GenerationWorkerFunction` con invocación
+asíncrona. El navegador consulta cada 2,5 segundos. Este mismo mecanismo se usa
+para aventuras libres y previews de misión, evitando que una generación larga
+termine como `502` o timeout de la integración.

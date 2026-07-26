@@ -1,10 +1,22 @@
 # Contrato de IA para cuentos interactivos largos
 
+> Este documento conserva el contrato narrativo de diseño. La implementación
+> desplegada usa una herramienta plana y una normalización determinista,
+> documentadas en
+> [Implementación actual de IA](14_IA_IMPLEMENTACION_ACTUAL.md).
+
 ## Objetivo
 
-Este documento define cómo el backend deberá pedir a Amazon Bedrock un cuento largo y ramificado. El frontend actual usa fixtures deterministas, pero la respuesta futura de Bedrock deberá conservar exactamente la misma experiencia: páginas, decisiones, checkpoints, cuatro finales, narración y quiz final.
+Este documento define la intención narrativa de un cuento largo y ramificado:
+páginas, decisiones, checkpoints, cuatro finales, narración y quiz final.
 
-La fuente ejecutable del prompt es `prompts/story-interactive-v2.txt` y la forma de la respuesta vive en `contracts/interactive-story.schema.json`.
+La fuente ejecutable actual es
+`backend/src/generators/prompt.ts` (`buildFlatInteractiveStoryPrompt`) y la
+validación efectiva combina el schema plano de
+`backend/src/generators/bedrockStoryGenerator.ts` con los esquemas Zod de
+`packages/shared/src/index.ts`. `prompts/story-interactive-v2.txt` y
+`contracts/interactive-story.schema.json` quedan como referencias editoriales
+y de contrato.
 
 ## Información que recibe Bedrock
 

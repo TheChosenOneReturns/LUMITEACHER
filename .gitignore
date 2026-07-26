@@ -12,6 +12,17 @@ playwright-report/
 .env
 .env.*
 !.env.example
+.envrc
+
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+credentials.json
+secrets*.json
+.aws/
+.amplify/
 
 .local/
 .dynamodb/

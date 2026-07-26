@@ -1,10 +1,15 @@
 openapi: 3.0.3
 info:
   title: Story Teacher API
-  version: 2.0.0
-  description: API local del hackathon. X-Demo-User-Id simula identidad; no es autenticación real.
+  version: 3.0.0
+  description: API serverless. Cognito protege producción; X-Demo-User-Id existe sólo para SAM local.
 servers:
   - url: http://127.0.0.1:3000
+  - url: https://{apiId}.execute-api.us-east-2.amazonaws.com
+    variables:
+      apiId: {default: replace-after-deploy}
+security:
+  - cognitoJwt: []
 tags:
   - name: System
   - name: Identity
@@ -15,15 +20,18 @@ tags:
 paths:
   /health:
     get:
+      security: []
       tags: [System]
       summary: Comprueba la API sin invocar IA
       responses: { '200': { description: Disponible } }
   /demo/profiles:
     get:
+      security: []
       tags: [Identity]
       summary: Lista perfiles sembrados
       responses: { '200': { description: Perfiles demo } }
     post:
+      security: []
       tags: [Identity]
       summary: Crea un perfil infantil local personalizable
       requestBody:
@@ -32,6 +40,7 @@ paths:
       responses: { '201': { description: Perfil creado y disponible para iniciar sesión } }
   /catalog:
     get:
+      security: []
       tags: [System]
       summary: Catálogo canónico de temas, cartas, insignias, accesorios y postales
       responses: { '200': { description: Catálogo } }
@@ -47,6 +56,16 @@ paths:
         required: true
         content: { application/json: { schema: {$ref: '#/components/schemas/ProfilePatch'} } }
       responses: { '200': { description: Perfil actualizado } }
+  /me/bootstrap:
+    post:
+      tags: [Identity]
+      summary: Crea idempotentemente el perfil educativo de una cuenta Cognito
+      requestBody:
+        required: true
+        content: { application/json: { schema: {$ref: '#/components/schemas/ProfileBootstrap'} } }
+      responses:
+        '201': { description: Perfil creado o recuperado }
+        '401': { description: JWT ausente, vencido o inválido }
   /stories:
     get:
       tags: [Stories]
@@ -54,6 +73,7 @@ paths:
       responses: { '200': { description: Historias accesibles por autoría o curso } }
     post:
       tags: [Stories]
+      summary: Genera una aventura libre o una vista previa privada de misión
       parameters:
         - {$ref: '#/components/parameters/DemoUserId'}
         - {$ref: '#/components/parameters/IdempotencyKey'}
@@ -61,9 +81,19 @@ paths:
         required: true
         content: { application/json: { schema: {$ref: '#/components/schemas/GenerateStoryRequest'} } }
       responses:
-        '201': { description: Historia pública sin clave de respuestas }
+        '202': { description: Generación aceptada; consultar su estado por identificador }
         '400': {$ref: '#/components/responses/ValidationError'}
         '422': {$ref: '#/components/responses/ContentBlocked'}
+  /generations/{generationId}:
+    get:
+      tags: [Stories]
+      summary: Consulta el trabajo asíncrono y devuelve la historia al completarse
+      parameters:
+        - {$ref: '#/components/parameters/DemoUserId'}
+        - {name: generationId, in: path, required: true, schema: {type: string, pattern: '^[a-f0-9]{32}$'}}
+      responses:
+        '200': { description: Estado pending, completed con story o failed con error seguro }
+        '404': { description: Generación inexistente o perteneciente a otro usuario }
   /stories/{storyId}:
     get:
       tags: [Stories]
@@ -131,6 +161,7 @@ paths:
       responses: { '204': { description: Invitación revocada } }
   /invites/{token}:
     get:
+      security: []
       tags: [Courses]
       parameters: [{name: token, in: path, required: true, schema: {type: string}}]
       responses: { '200': { description: Vista pública de invitación } }
@@ -150,14 +181,16 @@ paths:
       responses: { '200': { description: Misiones del curso } }
     post:
       tags: [Courses]
+      summary: Publica una vista previa de misión ya completada
       parameters:
         - {$ref: '#/components/parameters/DemoUserId'}
-        - {$ref: '#/components/parameters/IdempotencyKey'}
         - {$ref: '#/components/parameters/CourseId'}
       requestBody:
         required: true
-        content: { application/json: { schema: {$ref: '#/components/schemas/StoryInput'} } }
-      responses: { '201': { description: Cuento generado y asignado como misión } }
+        content: { application/json: { schema: {$ref: '#/components/schemas/MissionPublishRequest'} } }
+      responses:
+        '201': { description: Vista previa publicada idempotentemente como misión }
+        '409': { description: La generación sigue pendiente o no pertenece al curso }
   /courses/{courseId}/activity-events:
     post:
       tags: [Progress]
@@ -218,12 +251,18 @@ paths:
         '400': {$ref: '#/components/responses/ValidationError'}
         '403': {$ref: '#/components/responses/Forbidden'}
 components:
+  securitySchemes:
+    cognitoJwt:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: Access token firmado por el Cognito User Pool del stack SAM.
   parameters:
     DemoUserId:
       name: X-Demo-User-Id
       in: header
-      required: true
-      description: Identificador de cualquiera de los perfiles demo sembrados.
+      required: false
+      description: Identificador local. Ignorado y no permitido como autenticación en AWS.
       schema: {type: string, pattern: '^[a-z0-9][a-z0-9-]{2,63}$'}
     IdempotencyKey:
       name: Idempotency-Key
@@ -251,6 +290,12 @@ components:
         - {$ref: '#/components/schemas/StoryInput'}
         - type: object
           properties: {courseId: {type: string, nullable: true}}
+    MissionPublishRequest:
+      type: object
+      additionalProperties: false
+      required: [generationId]
+      properties:
+        generationId: {type: string, pattern: '^[a-f0-9]{32}$'}
     SubmitAttempt:
       type: object
       additionalProperties: false
@@ -274,6 +319,17 @@ components:
         avatarId: {type: string}
         age: {type: integer, minimum: 6, maximum: 12}
         favoriteTheme: {type: string}
+        adultLabel: {type: string, enum: [Profesor/a, Familia]}
+    ProfileBootstrap:
+      type: object
+      additionalProperties: false
+      required: [role, displayName, avatarId, favoriteTheme]
+      properties:
+        role: {type: string, enum: [student, adult]}
+        displayName: {type: string, minLength: 2, maxLength: 40}
+        age: {type: integer, minimum: 6, maximum: 12}
+        avatarId: {type: string, minLength: 1, maxLength: 40}
+        favoriteTheme: {type: string, minLength: 2, maxLength: 60}
         adultLabel: {type: string, enum: [Profesor/a, Familia]}
     CreateDemoProfile:
       type: object

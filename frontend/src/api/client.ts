@@ -3,6 +3,7 @@ import {
   congratulationSchema,
   courseDashboardSchema,
   courseSummarySchema,
+  generationStatusSchema,
   inviteSchema,
   missionSchema,
   platformCatalogSchema,
@@ -30,7 +31,8 @@ import {
   type UserProfile,
 } from "@story-teacher/shared";
 import { z } from "zod";
-import { getSessionUserId } from "../auth/session";
+import { authMode } from "../auth/config";
+import { getAuthorizationHeader, getSessionUserId } from "../auth/session";
 
 const apiUrl = (import.meta.env.VITE_API_URL || "/api").replace(/\/$/u, "");
 const listStoriesResponse = z.object({ items: z.array(storySummarySchema) });
@@ -50,6 +52,11 @@ export class ApiClientError extends Error {
   }
 }
 
+export interface MissionPreview {
+  generationId: string;
+  story: StoryPublic;
+}
+
 export const api = {
   async listDemoProfiles(): Promise<UserProfile[]> {
     return listProfilesResponse.parse(await request("/demo/profiles", {}, false)).items;
@@ -58,6 +65,22 @@ export const api = {
   async createDemoProfile(input: CreateDemoProfileInput): Promise<UserProfile> {
     return userProfileSchema.parse(
       await request("/demo/profiles", { method: "POST", body: JSON.stringify(input) }, false),
+    );
+  },
+
+  async bootstrapProfile(input: {
+    role: "student" | "adult";
+    displayName: string;
+    age?: number;
+    avatarId: string;
+    favoriteTheme: string;
+    adultLabel?: "Profesor/a" | "Familia";
+  }): Promise<UserProfile> {
+    return userProfileSchema.parse(
+      await request("/me/bootstrap", {
+        method: "POST",
+        body: JSON.stringify(input),
+      }),
     );
   },
 
@@ -76,12 +99,39 @@ export const api = {
   },
 
   async createStory(input: GenerateStoryInput, courseId?: string | null): Promise<StoryPublic> {
-    const response = await request("/stories", {
+    const accepted = generationStatusSchema.parse(await request("/stories", {
       method: "POST",
       headers: { "Idempotency-Key": crypto.randomUUID() },
       body: JSON.stringify({ ...input, ...(courseId ? { courseId } : {}) }),
-    });
-    return storyPublicSchema.parse(response);
+    }));
+    if (accepted.status !== "pending") {
+      return resolveGeneration(accepted);
+    }
+
+    for (let attempt = 0; attempt < 132; attempt += 1) {
+      await delay(2_500);
+      const status = generationStatusSchema.parse(
+        await request(
+          `/generations/${encodeURIComponent(accepted.generationId)}`,
+        ),
+      );
+      if (status.status !== "pending") {
+        return resolveGeneration(status);
+      }
+    }
+
+    throw new ApiClientError(
+      "La aventura está tardando más de lo esperado. Intentá nuevamente.",
+      "GENERATION_TIMEOUT",
+      504,
+    );
+  },
+
+  async createMissionPreview(
+    courseId: string,
+    input: GenerateStoryInput,
+  ): Promise<MissionPreview> {
+    return generateMissionPreview(courseId, input);
   },
 
   async listStories(): Promise<StorySummary[]> {
@@ -155,12 +205,11 @@ export const api = {
     ).items;
   },
 
-  async createMission(courseId: string, input: GenerateStoryInput): Promise<Mission> {
+  async createMission(courseId: string, generationId: string): Promise<Mission> {
     return missionSchema.parse(
       await request(`/courses/${encodeURIComponent(courseId)}/missions`, {
         method: "POST",
-        headers: { "Idempotency-Key": crypto.randomUUID() },
-        body: JSON.stringify(input),
+        body: JSON.stringify({ generationId }),
       }),
     );
   },
@@ -229,13 +278,76 @@ export const api = {
   },
 };
 
+async function generateMissionPreview(
+  courseId: string,
+  input: GenerateStoryInput,
+): Promise<MissionPreview> {
+  const accepted = generationStatusSchema.parse(await request("/stories", {
+    method: "POST",
+    headers: { "Idempotency-Key": crypto.randomUUID() },
+    body: JSON.stringify({ ...input, courseId }),
+  }));
+  if (accepted.status !== "pending") {
+    return {
+      generationId: accepted.generationId,
+      story: resolveGeneration(accepted),
+    };
+  }
+
+  for (let attempt = 0; attempt < 132; attempt += 1) {
+    await delay(2_500);
+    const status = generationStatusSchema.parse(
+      await request(
+        `/generations/${encodeURIComponent(accepted.generationId)}`,
+      ),
+    );
+    if (status.status !== "pending") {
+      return {
+        generationId: status.generationId,
+        story: resolveGeneration(status),
+      };
+    }
+  }
+
+  throw new ApiClientError(
+    "La vista previa está tardando más de lo esperado. Intentá nuevamente.",
+    "GENERATION_TIMEOUT",
+    504,
+  );
+}
+
+function resolveGeneration(
+  generation: ReturnType<typeof generationStatusSchema.parse>,
+): StoryPublic {
+  if (generation.status === "completed") {
+    return storyPublicSchema.parse(generation.story);
+  }
+  if (generation.status === "failed") {
+    throw new ApiClientError(
+      generation.error.message,
+      generation.error.code,
+      502,
+    );
+  }
+  throw new ApiClientError(
+    "La aventura todavía se está creando.",
+    "GENERATION_PENDING",
+    202,
+  );
+}
+
+function delay(milliseconds: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 async function request(
   path: string,
   init: RequestInit = {},
   authenticated = true,
 ): Promise<unknown> {
   const userId = getSessionUserId();
-  if (authenticated && !userId) {
+  const authorization = await getAuthorizationHeader();
+  if (authenticated && !userId && !authorization) {
     throw new ApiClientError("Elegí un perfil para continuar.", "NO_SESSION", 401);
   }
   let response: Response;
@@ -245,12 +357,15 @@ async function request(
       headers: {
         "Content-Type": "application/json",
         ...(userId ? { "X-Demo-User-Id": userId } : {}),
+        ...(authorization ? { Authorization: authorization } : {}),
         ...init.headers,
       },
     });
   } catch {
     throw new ApiClientError(
-      "No pudimos conectarnos. Revisá que el entorno local esté iniciado.",
+      authMode === "cognito"
+        ? "No pudimos conectarnos con AWS. Intentá nuevamente."
+        : "No pudimos conectarnos. Revisá que el entorno local esté iniciado.",
       "NETWORK_ERROR",
       0,
     );

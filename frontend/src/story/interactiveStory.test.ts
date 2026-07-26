@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { StoryPublic } from "@story-teacher/shared";
-import { buildInteractiveAdventure, clearJourney, loadJourney, resolveStoryWorld, saveJourney } from "./interactiveStory";
+import { buildInteractiveAdventure, cleanStoryTitle, clearJourney, loadJourney, resolveStoryWorld, saveJourney } from "./interactiveStory";
 
 function story(language: "es" | "en" = "es", theme = "Espacio"): StoryPublic {
   return {
@@ -51,5 +51,16 @@ describe("interactive story experience", () => {
     expect(resolveStoryWorld("Ciudad de inventos")).toBe("inventions");
     expect(resolveStoryWorld("Bosque secreto")).toBe("jungle");
     expect(resolveStoryWorld("Tema completamente nuevo")).toBe("mystery");
+  });
+
+  it("cleans technical fallback labels before presenting a title", () => {
+    expect(
+      cleanStoryTitle(
+        "Llegada al Planeta · Final alternativo -3 · Final alternativo -2",
+      ),
+    ).toBe("Llegada al Planeta");
+    expect(cleanStoryTitle("Final A1: El puente de cristal")).toBe(
+      "El puente de cristal",
+    );
   });
 });

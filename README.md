@@ -2,7 +2,7 @@
 
 Story Teacher es una plataforma local de lectura para niñas y niños de 6 a 12 años. Crea cuentos personalizados, evalúa cinco habilidades de comprensión y conecta a estudiantes con docentes o familias mediante cursos, misiones, seguimiento y felicitaciones.
 
-El hito actual funciona de punta a punta sin credenciales AWS: React consume una API Node/TypeScript, DynamoDB Local persiste todos los datos y un catálogo de seis cuentos sustituye temporalmente a Amazon Bedrock.
+El hito actual funciona en dos carriles. En local, React consume SAM/Node, DynamoDB Local persiste los datos y los fixtures permiten desarrollar sin costo. En AWS, Amplify Hosting consume API Gateway, Cognito protege las rutas, Lambda invoca Bedrock con Guardrails y DynamoDB guarda perfiles, sesiones seudónimas, historias e intentos.
 
 ## Qué incluye
 
@@ -22,7 +22,7 @@ El hito actual funciona de punta a punta sin credenciales AWS: React consume una
 - Diez minijuegos cognitivos visuales y 24 poderes de carta únicos para entrenar inferencia, memoria, secuencia, planificación, emociones, vocabulario, evidencia, causalidad, perspectiva y orientación espacial.
 - Partidas rejugables en niveles Explorador, Aventurero y Maestro: cada sesión reorganiza desafíos, respuestas, tableros, rutas y distractores sin depender de velocidad.
 - Tres desafíos cognitivos de inferencia, vocabulario, asociación semántica y secuencia causal, con devolución explicada.
-- Seis cuentos fixture y 15 escenarios automáticos; Bedrock/Nova y Guardrails quedan listos detrás de la misma interfaz, sin invocaciones reales.
+- Seis cuentos fixture y 15 escenarios automáticos para local; en AWS Bedrock/Nova genera cuentos clásicos e interactivos detrás de la misma interfaz validada.
 
 ## Arranque local
 
@@ -61,7 +61,7 @@ npm run db:down
 | Valentina | Estudiante | Disponible para probar una invitación |
 | Luna | Estudiante | Demo `Todo desbloqueado`: 999 estrellas, 24 hitos, cartas, personajes y minijuegos |
 
-También se pueden crear nuevos exploradores desde el login. La sesión del navegador conserva solamente `story-teacher:demo-user-id`. Perfiles, cursos, membresías, historias, intentos, actividad, recompensas y postales viven en DynamoDB Local.
+También se pueden crear nuevos exploradores desde el login. En local, la sesión conserva solamente `story-teacher:demo-user-id`. En AWS, Cognito emite JWT breves y rotables guardados en `sessionStorage`; perfiles, cursos, membresías, historias, intentos, actividad, recompensas y postales viven en DynamoDB.
 
 ## Comandos
 
@@ -82,16 +82,25 @@ npm run sam:build      # bundle de Lambdas
 `StoryGenerator` mantiene separados el dominio y el proveedor:
 
 - `fixture`: modo local por defecto, determinista y gratuito.
-- `bedrock`: Amazon Nova 2 Lite mediante Converse, temperatura `0.2`, prompt versionado, Guardrails de entrada/salida, validación Zod y un reintento de reparación.
+- `bedrock`: modelo configurable mediante Converse. El despliegue actual usa Claude Sonnet 4.5 para aventuras libres, Guardrails de entrada/salida, validación Zod y un único intento de reparación.
+
+El prompt efectivo se construye en `backend/src/generators/prompt.ts`. Los
+archivos de `prompts/` son referencias editoriales y actualmente no se cargan
+en runtime. La explicación completa está en
+[Implementación actual de IA](docs/14_IA_IMPLEMENTACION_ACTUAL.md).
 
 Variables relevantes:
 
 - `STORY_GENERATOR_MODE=fixture|bedrock`
-- `BEDROCK_MODEL_ID=us.amazon.nova-2-lite-v1:0`
+- `BEDROCK_MODEL_ID=us.anthropic.claude-sonnet-4-5-20250929-v1:0`
 - `BEDROCK_GUARDRAIL_ID`
 - `BEDROCK_GUARDRAIL_VERSION`
 - `DYNAMODB_ENDPOINT=http://127.0.0.1:8000` sólo en local
 - `VITE_API_URL` para la URL desplegada de API Gateway
+- `VITE_AUTH_MODE=demo|cognito`
+- `VITE_COGNITO_USER_POOL_ID` y `VITE_COGNITO_USER_POOL_CLIENT_ID`
+- `AUTH_MODE=demo|cognito`
+- `SESSION_IP_POLICY=off|observe|strict`
 
 No se deben versionar claves AWS ni archivos `.env` con secretos. Los créditos de Kiro aceleran desarrollo y revisión; no pagan llamadas de Bedrock.
 
@@ -99,9 +108,9 @@ No se deben versionar claves AWS ni archivos `.env` con secretos. Los créditos 
 
 - [Contrato OpenAPI](contracts/openapi.yaml)
 - [JSON Schema de la IA](contracts/story-generation.schema.json)
-- [Prompt Story v1](prompts/story-v1.txt)
+- [Prompt Story v1 (referencia editorial)](prompts/story-v1.txt)
 - [Contrato JSON de cuentos interactivos](contracts/interactive-story.schema.json)
-- [Prompt de cuentos interactivos v2](prompts/story-interactive-v2.txt)
+- [Prompt de cuentos interactivos v2 (referencia editorial)](prompts/story-interactive-v2.txt)
 - [Producto y alcance](docs/01_PRODUCTO_MVP.md)
 - [Arquitectura, API y datos](docs/02_ARQUITECTURA_API_DATOS.md)
 - [IA y seguridad](docs/03_IA_SEGURIDAD.md)
@@ -111,15 +120,19 @@ No se deben versionar claves AWS ni archivos `.env` con secretos. Los créditos 
 - [Cursos, seguimiento y recompensas locales](docs/09_CURSOS_RECOMPENSAS_LOCAL.md)
 - [Arte generado para las 24 cartas](docs/10_ARTE_CARTAS_GENERADO.md)
 - [Generación de cuentos interactivos con IA](docs/12_IA_CUENTOS_INTERACTIVOS.md)
+- [AWS, Amplify, Cognito y sesiones](docs/13_AWS_AMPLIFY_COGNITO.md)
+- [Implementación actual de IA: prompts, Bedrock, validación y operación](docs/14_IA_IMPLEMENTACION_ACTUAL.md)
 
 ## Arquitectura
 
 ```text
-frontend (React + Motion)
-        │ HTTP + X-Demo-User-Id
-backend (Node + TypeScript)
-        ├── StoryGenerator ── Fixture / Amazon Bedrock
-        └── tabla PK/SK ───── DynamoDB Local / DynamoDB
+Amplify (React + Motion)
+        │ HTTPS + JWT Cognito
+API Gateway HTTP API
+        │ authorizer + throttling
+Lambda (Node + TypeScript)
+        ├── StoryGenerator ── Amazon Bedrock + Guardrails
+        └── tabla PK/SK ───── DynamoDB
 ```
 
-La infraestructura desplegable usa AWS SAM, API Gateway HTTP API, Lambda y una tabla DynamoDB. El login continúa siendo una simulación y no debe utilizarse como autenticación de producción.
+SAM local conserva `X-Demo-User-Id` sólo para desarrollo. La infraestructura desplegada usa Cognito, API Gateway HTTP API, Lambda, Bedrock, CloudWatch Logs y DynamoDB. La IP se registra únicamente como huella HMAC de contexto y nunca sustituye la autenticación.

@@ -8,9 +8,12 @@ const config: AppConfig = {
   tableName: "StoryTeacherTest",
   region: "us-east-1",
   generatorMode: "fixture",
+  authMode: "demo",
+  sessionIpPolicy: "off",
   modelId: "fixture",
   allowedOrigin: "http://localhost:5173",
   promptVersion: "story-v1",
+  maxGenerationsPerDay: 20,
 };
 
 const student = {
@@ -23,7 +26,7 @@ const student = {
 };
 
 function serviceWith(send: ReturnType<typeof vi.fn>) {
-  return new PlatformService({ send } as unknown as DynamoDBDocumentClient, config, null as never);
+  return new PlatformService({ send } as unknown as DynamoDBDocumentClient, config);
 }
 
 describe("PlatformService.consumeCard", () => {

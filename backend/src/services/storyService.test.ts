@@ -10,9 +10,12 @@ const config: AppConfig = {
   tableName: "test",
   region: "us-east-1",
   generatorMode: "fixture",
+  authMode: "demo",
+  sessionIpPolicy: "off",
   modelId: "fixture",
   allowedOrigin: "http://localhost:5173",
   promptVersion: "story-v1",
+  maxGenerationsPerDay: 20,
 };
 
 const input: GenerateStoryInput = {

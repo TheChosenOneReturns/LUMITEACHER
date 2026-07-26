@@ -1,15 +1,14 @@
 version = 0.1
 
 [default.build.parameters]
-cached = true
+cached = false
 parallel = true
 
 [default.deploy.parameters]
 stack_name = "story-teacher-dev"
 resolve_s3 = true
 capabilities = "CAPABILITY_IAM"
-region = "us-east-1"
+region = "us-east-2"
 confirm_changeset = true
 fail_on_empty_changeset = false
-parameter_overrides = "StoryGeneratorMode=fixture AllowedOrigin=http://localhost:5173"
-
+parameter_overrides = "StoryGeneratorMode=bedrock SessionIpPolicy=observe AllowedOrigin=https://main.d3l7lwifmxwzzj.amplifyapp.com BedrockModelId=us.anthropic.claude-sonnet-4-5-20250929-v1:0 BedrockGuardrailId=fbqdxds2765e BedrockGuardrailVersion=2"
