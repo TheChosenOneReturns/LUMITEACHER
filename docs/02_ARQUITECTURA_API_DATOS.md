@@ -1,30 +1,44 @@
 # Arquitectura, API y datos
 
-> Documento de diseño original. Para el flujo ejecutable actualmente
-> desplegado —Cognito, generación asíncrona, Claude Sonnet 4.5 y el prompt
-> efectivo— consultar
-> [Implementación actual de IA](14_IA_IMPLEMENTACION_ACTUAL.md).
+> Estado de la arquitectura desplegada en `us-east-2`. Para el detalle del
+> prompt, validación y contrato de Bedrock consultar
+> [Implementación actual de IA](14_IA_IMPLEMENTACION_ACTUAL.md). Para operar o
+> retirar la infraestructura consultar el
+> [runbook AWS](15_AWS_RUNBOOK_OPERACIONES.md).
 
 ## 1. Arquitectura elegida
 
 ```mermaid
 flowchart LR
-  U["Estudiante"] --> F["React + TypeScript\nAmplify Hosting"]
-  F -->|"HTTPS + X-Demo-User-Id"| A["API Gateway HTTP API"]
-  A --> G["Lambda generateStory"]
-  A --> L["Lambda list/getStories"]
-  A --> Q["Lambda submitAttempt"]
-  G --> B["Amazon Bedrock\nAmazon Nova"]
-  G --> R["Bedrock Guardrails"]
-  G --> D["DynamoDB StoryTeacherTable"]
-  L --> D
-  Q --> D
-  G --> C["CloudWatch Logs/Metrics"]
-  L --> C
-  Q --> C
+  U["Estudiante o adulto"] --> F["React + TypeScript\nAmplify Hosting"]
+  F --> COG["Amazon Cognito\nUser Pool"]
+  COG -->|"JWT breve"| F
+  F -->|"HTTPS + Bearer JWT"| API["API Gateway HTTP API\nJWT authorizer + CORS"]
+
+  API --> CS["CreateStoryFunction"]
+  CS -->|"crea job"| D["DynamoDB\nPK/SK · on-demand · TTL · PITR"]
+  CS -->|"Invoke async"| GW["GenerationWorkerFunction\n1024 MB · 300 s"]
+  GW --> BR["Amazon Bedrock\nClaude Sonnet 4.5"]
+  GW --> GR["Bedrock Guardrail v2"]
+  GW -->|"historia validada"| D
+
+  API --> GG["GetGenerationFunction"]
+  API --> LS["List/Get Story Functions"]
+  API --> AT["Submit/Get Attempt Functions"]
+  API --> PF["PlatformFunction\nperfiles · cursos · misiones"]
+  GG --> D
+  LS --> D
+  AT --> D
+  PF --> D
+
+  API --> CW["CloudWatch Logs"]
+  CS --> XR["AWS X-Ray"]
+  GW --> XR
 ```
 
-Todo el backend se despliega en `us-east-1` para mantener API, Lambda, DynamoDB y Bedrock en una región con amplia disponibilidad de modelos. El frontend puede servirse globalmente desde la CDN de Amplify.
+Todo el backend se despliega en `us-east-2`. El frontend se publica globalmente
+desde la CDN de Amplify. `POST /stories` no espera la respuesta del modelo:
+persiste un job, invoca el worker de manera asíncrona y devuelve `202`.
 
 ## 2. Por qué AWS SAM
 
@@ -44,7 +58,8 @@ Serverless Framework sigue siendo válido, pero no se mantiene una segunda confi
 - React Router para las rutas.
 - Zod para validar formularios y respuestas HTTP.
 - Estado local para el cuestionario; no hace falta una librería global.
-- `localStorage` sólo para `demoUserId`, preferencias visuales y recuperación temporal del formulario.
+- En producción, Amplify Auth conserva tokens Cognito en `sessionStorage`.
+- `localStorage` sólo se usa en la demo local y para preferencias no sensibles.
 
 Rutas propuestas:
 
@@ -59,40 +74,46 @@ Rutas propuestas:
 
 ### Backend
 
-Funciones mínimas:
+Funciones desplegadas:
 
 | Función | Responsabilidad | Acceso AWS |
 |---|---|---|
-| `generateStory` | validar entrada, invocar Guardrails/Bedrock, validar salida y guardar | Bedrock invoke + DynamoDB PutItem |
-| `stories` | listar y obtener cuentos públicos | DynamoDB Query/GetItem |
-| `submitAttempt` | cargar clave, corregir y guardar intento | DynamoDB GetItem/PutItem |
-| `health` | comprobar API sin consumir Bedrock | ninguno |
-
-Separar estas funciones permite permisos mínimos. Para ganar velocidad, `list` y `get` pueden compartir el mismo handler `stories`.
+| `CreateStoryFunction` | validar entrada, crear el job e invocar el worker asíncrono | DynamoDB + `lambda:InvokeFunction` sobre el worker |
+| `GenerationWorkerFunction` | invocar Guardrails/Bedrock, validar, reparar una vez y guardar | Bedrock + Guardrail + DynamoDB |
+| `GetGenerationFunction` | devolver estado o resultado del job | DynamoDB |
+| `ListStoriesFunction` / `GetStoryFunction` | listar y obtener cuentos públicos | DynamoDB Query/GetItem |
+| `SubmitAttemptFunction` / `GetAttemptFunction` | corregir, guardar y consultar intentos | DynamoDB |
+| `PlatformFunction` | perfiles, cursos, misiones, recompensas y actividad | DynamoDB |
+| `HealthFunction` | comprobar API sin consumir Bedrock | sin Bedrock |
 
 ### API Gateway
 
 - HTTP API por su menor costo y configuración más simple.
-- CORS sólo para `http://localhost:5173` y la URL real de Amplify.
+- JWT authorizer de Cognito en todas las rutas privadas.
+- CORS limitado a la URL productiva de Amplify; SAM local usa su configuración
+  independiente.
 - Métodos permitidos: `GET`, `POST`, `OPTIONS`.
-- Headers permitidos: `Content-Type`, `X-Demo-User-Id`.
+- Headers permitidos: `Authorization`, `Content-Type` e `Idempotency-Key`.
 - Tamaño máximo de entrada controlado por la Lambda, aunque API Gateway acepte más.
 
 ### Bedrock
 
-- Primera opción: `amazon.nova-2-lite-v1:0` o su perfil de inferencia estadounidense disponible en la cuenta.
-- Alternativa de demo: `amazon.nova-lite-v1:0` si el modelo anterior no está habilitado.
+- Modelo desplegado: perfil de inferencia
+  `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
 - Invocación on-demand, sin Provisioned Throughput.
-- Temperatura baja (`0.2`) para equilibrar creatividad y consistencia.
+- Temperatura baja (`0.3`) para equilibrar creatividad y consistencia.
+- Guardrail `story-teacher-guardrail`, versión `2`, aplicado a entrada y salida.
 - El ID se define como variable de entorno `BEDROCK_MODEL_ID`, nunca queda disperso en el código.
 
 ### DynamoDB
 
 - Una tabla: `StoryTeacherTable`.
 - Clave de partición `PK` y clave de ordenamiento `SK`.
-- Modo provisionado dentro de límites gratuitos para el hackathon, por ejemplo 5 RCU/5 WCU.
-- Sin streams, backups bajo demanda, DAX, tablas globales ni PITR en el MVP.
-- `PAY_PER_REQUEST` es más cómodo ante tráfico incierto, pero no aprovecha las 25 RCU/25 WCU de la oferta gratuita provisionada; por eso se elige provisionado para una demo pequeña.
+- Capacidad `PAY_PER_REQUEST` para absorber tráfico irregular.
+- Cifrado administrado, TTL sobre `ttl` y point-in-time recovery habilitado.
+- Sin Streams, DAX ni tablas globales.
+- `DeletionPolicy: Retain` y `UpdateReplacePolicy: Retain`: eliminar el stack no
+  elimina automáticamente la tabla.
 
 ## 4. Diseño de datos
 
@@ -126,7 +147,7 @@ El `storyId` y `attemptId` son ULID: únicos y ordenables por fecha.
       "explanation": "..."
     }
   ],
-  "modelId": "amazon.nova-2-lite-v1:0",
+  "modelId": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
   "promptVersion": "story-v1"
 }
 ```
@@ -177,7 +198,10 @@ La fuente completa es [openapi.yaml](../contracts/openapi.yaml). Resumen:
 | `POST` | `/stories/{storyId}/attempts` | corregir cinco respuestas y guardar intento |
 | `POST` | `/courses/{courseId}/missions` | publicar una preview ya generada en el curso |
 
-Todos los endpoints privados reciben `X-Demo-User-Id` con el identificador de un perfil sembrado. El backend resuelve ese perfil en DynamoDB y verifica rol, propiedad y membresía para cada operación. Sigue siendo una simulación y no aporta seguridad de producción.
+En producción, todos los endpoints privados reciben `Authorization: Bearer
+<JWT>`. API Gateway valida firma, emisor, audiencia y expiración; el backend usa
+el claim estable `sub` y verifica rol, propiedad y membresía. `X-Demo-User-Id`
+queda limitado a SAM local.
 
 ## 6. Separación de datos públicos y privados
 
@@ -245,9 +269,11 @@ No se usan access keys en `.env`: Lambda recibe permisos mediante su IAM Role. P
 
 ## 10. IAM mínimo
 
-- `generateStory`: `bedrock:InvokeModel`, acciones necesarias del guardrail y `dynamodb:PutItem` sólo sobre la tabla.
-- `stories`: `dynamodb:GetItem` y `dynamodb:Query`.
-- `submitAttempt`: `dynamodb:GetItem` y `dynamodb:PutItem`.
+- `GenerationWorkerFunction`: `bedrock:InvokeModel`,
+  `bedrock:ApplyGuardrail` y acceso de lectura/escritura sobre la tabla.
+- `CreateStoryFunction`: DynamoDB e invocación exclusiva del worker.
+- Funciones de lectura: `dynamodb:GetItem` y `dynamodb:Query`.
+- Funciones de escritura: acciones concretas de DynamoDB sobre una sola tabla.
 - Logs básicos de Lambda en CloudWatch.
 - Ninguna función recibe `dynamodb:*`, `bedrock:*` o permisos administrativos.
 
@@ -276,7 +302,9 @@ No se registra el cuento completo, el objetivo libre, el protagonista ni las res
 - `InvalidModelOutput`.
 - latencia p50/p95 observada en logs.
 
-Retención de logs: 7 días para el hackathon.
+El grupo de access logs de API Gateway tiene retención de 30 días. Los grupos
+automáticos `/aws/lambda/story-teacher-dev-*` no tienen actualmente una
+retención explícita; es una deuda operativa documentada en el runbook.
 
 ## 12. Pruebas
 

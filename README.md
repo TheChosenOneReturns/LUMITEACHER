@@ -22,7 +22,9 @@ El hito actual funciona en dos carriles. En local, React consume SAM/Node, Dynam
 - Diez minijuegos cognitivos visuales y 24 poderes de carta únicos para entrenar inferencia, memoria, secuencia, planificación, emociones, vocabulario, evidencia, causalidad, perspectiva y orientación espacial.
 - Partidas rejugables en niveles Explorador, Aventurero y Maestro: cada sesión reorganiza desafíos, respuestas, tableros, rutas y distractores sin depender de velocidad.
 - Tres desafíos cognitivos de inferencia, vocabulario, asociación semántica y secuencia causal, con devolución explicada.
-- Seis cuentos fixture y 15 escenarios automáticos para local; en AWS Bedrock/Nova genera cuentos clásicos e interactivos detrás de la misma interfaz validada.
+- Seis cuentos fixture y 15 escenarios automáticos para local; en AWS Bedrock
+  con Claude Sonnet 4.5 genera cuentos clásicos e interactivos detrás de la
+  misma interfaz validada.
 
 ## Arranque local
 
@@ -122,17 +124,24 @@ No se deben versionar claves AWS ni archivos `.env` con secretos. Los créditos 
 - [Generación de cuentos interactivos con IA](docs/12_IA_CUENTOS_INTERACTIVOS.md)
 - [AWS, Amplify, Cognito y sesiones](docs/13_AWS_AMPLIFY_COGNITO.md)
 - [Implementación actual de IA: prompts, Bedrock, validación y operación](docs/14_IA_IMPLEMENTACION_ACTUAL.md)
+- [Runbook AWS: comandos, despliegue, diagnóstico, costos y retiro](docs/15_AWS_RUNBOOK_OPERACIONES.md)
 
 ## Arquitectura
 
 ```text
 Amplify (React + Motion)
+        ├── Cognito User Pool
+        │
         │ HTTPS + JWT Cognito
 API Gateway HTTP API
         │ authorizer + throttling
-Lambda (Node + TypeScript)
-        ├── StoryGenerator ── Amazon Bedrock + Guardrails
-        └── tabla PK/SK ───── DynamoDB
+        ├── CreateStoryFunction ── job DynamoDB ── invoke async
+        ├── GenerationWorker ───── Bedrock Claude + Guardrail
+        ├── GetGeneration ──────── polling de estado
+        └── Platform/Stories/Attempts ── tabla PK/SK
+
+DynamoDB: PAY_PER_REQUEST + TTL + cifrado + PITR
+Observabilidad: CloudWatch Logs + X-Ray
 ```
 
 SAM local conserva `X-Demo-User-Id` sólo para desarrollo. La infraestructura desplegada usa Cognito, API Gateway HTTP API, Lambda, Bedrock, CloudWatch Logs y DynamoDB. La IP se registra únicamente como huella HMAC de contexto y nunca sustituye la autenticación.

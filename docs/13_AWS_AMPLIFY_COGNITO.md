@@ -1,5 +1,9 @@
 # AWS, Amplify, Cognito y sesiones
 
+Para los comandos reproducibles de despliegue, diagnóstico, control de costos
+y retiro de recursos consultar el
+[runbook de operación AWS](15_AWS_RUNBOOK_OPERACIONES.md).
+
 ## Objetivo
 
 El entorno desplegado usa una única ruta productiva:
