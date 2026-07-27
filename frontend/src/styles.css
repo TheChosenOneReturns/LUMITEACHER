@@ -853,7 +853,12 @@ svg { flex: 0 0 auto; }
 .missions-strip article, .mission-card { border: 2px solid var(--sky); border-radius: 22px; background: linear-gradient(145deg, #fff, var(--sky-pale)); box-shadow: 0 7px 0 rgba(108,200,255,.18); padding: 20px; }
 .missions-strip article h3, .mission-card h3 { margin: 7px 0; color: var(--primary-dark); }
 .missions-strip article p, .mission-card p { color: var(--muted); font-size: .85rem; }
-.mission-card__art { display: grid; min-height: 88px; place-items: center; border-radius: 16px; background: #fff; }
+.mission-card__art { position: relative; display: grid; min-height: 150px; place-items: center; overflow: hidden; border-radius: 16px; background: #fff; }
+.mission-card__art img { width: 100%; height: 100%; min-height: 150px; object-fit: cover; }
+.mission-card__art::after { position: absolute; inset: 0; background: linear-gradient(0deg, rgba(4,35,59,.3), transparent 55%); content: ""; }
+.mission-card__badge { position: absolute; right: 10px; bottom: 10px; z-index: 1; display: grid; width: 48px; height: 48px; place-items: center; border: 2px solid #fff; border-radius: 15px; background: var(--yellow); color: var(--primary-dark); box-shadow: 0 4px 0 rgba(0,0,0,.22); }
+.mission-card .pill { margin-top: 12px; }
+.mission-card .eyebrow { display: flex; margin-top: 8px; }
 .join-page { display: grid; min-height: 70vh; place-items: center; }
 .join-card { position: relative; width: min(620px, 100%); border: 3px solid var(--primary); border-radius: 34px; background: linear-gradient(145deg, #fff, #eefaff 60%, #fff8cc); box-shadow: 0 12px 0 var(--shadow-blue); padding: clamp(30px, 6vw, 62px); text-align: center; }
 .join-card__seal { display: grid; width: 78px; height: 78px; margin: -80px auto 20px; place-items: center; border: 3px solid var(--primary-dark); border-radius: 25px; background: var(--yellow); box-shadow: 0 6px 0 var(--yellow-dark); }
