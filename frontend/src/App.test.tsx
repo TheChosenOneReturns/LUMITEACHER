@@ -55,7 +55,7 @@ describe("Story Teacher app", () => {
       ]),
     );
     expect(screen.getByRole("heading", { name: /preguntas reales, respuestas claras/i })).toBeInTheDocument();
-    expect(screen.getByRole("img", { name: /^underc0de$/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /^codigofacilito$/i })).toBeInTheDocument();
     expect(screen.getByRole("img", { name: /powered by aws/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /preguntas frecuentes/i })).toHaveAttribute("href", "/preguntas-frecuentes");
   });
