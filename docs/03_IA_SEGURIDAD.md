@@ -1,5 +1,9 @@
 # IA, validación, seguridad y privacidad
 
+> Este documento conserva los criterios de seguridad del diseño. Los modelos,
+> prompts y pasos ejecutables actuales están documentados en
+> [Implementación actual de IA](14_IA_IMPLEMENTACION_ACTUAL.md).
+
 ## 1. Objetivo del componente de IA
 
 La IA cumple una tarea cerrada: crear un cuento educativo y su evaluación. No conversa libremente con el estudiante, no navega, no recomienda productos y no toma decisiones de alto impacto.
@@ -262,4 +266,3 @@ Crear al menos 15 casos:
 - opciones duplicadas.
 
 Guardar sólo los resultados y métricas de las pruebas, no datos infantiles reales.
-

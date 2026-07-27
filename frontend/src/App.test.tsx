@@ -43,10 +43,20 @@ describe("Story Teacher app", () => {
     renderApp("/");
     expect(screen.getByRole("heading", { name: /historias que despiertan las ganas de leer/i })).toBeInTheDocument();
     expect(screen.queryByText(/Lectura \+ imaginación \+ IA/i)).not.toBeInTheDocument();
-    expect(screen.getByRole("link", { name: /crear mi aventura/i })).toHaveAttribute("href", "/login?next=%2Fcrear");
-    expect(screen.getAllByRole("link", { name: /soy docente o familiar/i })).toEqual(
-      expect.arrayContaining([expect.objectContaining({ href: expect.stringMatching(/\/login\?next=%2Fadulto$/) })]),
+    expect(screen.getByRole("link", { name: /crear mi aventura/i })).toHaveAttribute(
+      "href",
+      "/login?role=student&next=%2Fcrear",
     );
+    expect(screen.getAllByRole("link", { name: /soy docente o familiar/i })).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          href: expect.stringMatching(/\/login\?role=adult&next=%2Fadulto$/),
+        }),
+      ]),
+    );
+    expect(screen.getByRole("heading", { name: /preguntas reales, respuestas claras/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /^codigofacilito$/i })).toBeInTheDocument();
+    expect(screen.getByRole("img", { name: /powered by aws/i })).toBeInTheDocument();
     expect(screen.getByRole("link", { name: /preguntas frecuentes/i })).toHaveAttribute("href", "/preguntas-frecuentes");
   });
 
@@ -54,8 +64,13 @@ describe("Story Teacher app", () => {
     renderApp("/preguntas-frecuentes");
     expect(screen.getByRole("heading", { name: /^preguntas frecuentes$/i })).toBeInTheDocument();
     expect(screen.getByText(/¿para qué edades está pensado story teacher?/i)).toBeInTheDocument();
+    expect(screen.getByText(/¿necesito crear una cuenta\?/i)).toBeInTheDocument();
     expect(screen.getAllByRole("link", { name: /crear una aventura/i })).toEqual(
-      expect.arrayContaining([expect.objectContaining({ href: expect.stringMatching(/\/login\?next=%2Fcrear$/) })]),
+      expect.arrayContaining([
+        expect.objectContaining({
+          href: expect.stringMatching(/\/login\?role=student&next=%2Fcrear$/),
+        }),
+      ]),
     );
   });
 

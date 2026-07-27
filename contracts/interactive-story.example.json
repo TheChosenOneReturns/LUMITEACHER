@@ -1,0 +1,226 @@
+{
+  "title": "La señal de los tres destellos",
+  "language": "es",
+  "worldId": "space",
+  "opening": {
+    "id": "opening",
+    "title": "Una luz que parpadea",
+    "pages": [
+      {
+        "id": "opening-1",
+        "text": "Luna miró por la ventana de la estación espacial y vio una luz azul que parpadeaba tres veces seguidas, como un saludo.",
+        "sensoryCue": "Tres destellos azules titilan en la ventana."
+      },
+      {
+        "id": "opening-2",
+        "text": "El capitán dijo que la señal venía del planeta vecino y que necesitaba un equipo valiente para descubrir su significado.",
+        "sensoryCue": "La voz del capitán suena seria pero amable."
+      }
+    ],
+    "checkpoint": {
+      "id": "checkpoint-opening",
+      "statement": "¿Cuántas veces parpadeaba la luz azul?",
+      "options": ["Tres veces seguidas", "Dos veces seguidas", "Diez veces seguidas", "Una sola vez"],
+      "correctAnswer": 0,
+      "skill": "literal",
+      "explanation": "El cuento dice que la luz parpadeaba tres veces seguidas."
+    },
+    "choices": [
+      {
+        "id": "choice-explorar",
+        "label": "Bajar al planeta a investigar",
+        "consequence": "El equipo viaja hasta el origen de la señal.",
+        "nextSceneId": "route-explorar"
+      },
+      {
+        "id": "choice-esperar",
+        "label": "Observar desde la estación",
+        "consequence": "El equipo estudia la señal con el telescopio.",
+        "nextSceneId": "route-esperar"
+      }
+    ]
+  },
+  "routes": [
+    {
+      "id": "route-explorar",
+      "title": "Viaje al planeta vecino",
+      "pages": [
+        {
+          "id": "route-explorar-1",
+          "text": "Luna eligió bajar al planeta con Max. La nave atravesó nubes suaves y aterrizó junto a un lago quieto como un espejo.",
+          "sensoryCue": "El agua está tan quieta que refleja las estrellas."
+        },
+        {
+          "id": "route-explorar-2",
+          "text": "Buscaron la luz azul entre las rocas. Max anotó cada destello en su cuaderno mientras Luna escuchaba el viento con atención.",
+          "sensoryCue": "El viento mueve las páginas del cuaderno."
+        }
+      ],
+      "checkpoint": {
+        "id": "checkpoint-explorar",
+        "statement": "¿Por qué Max anotaba los destellos en su cuaderno?",
+        "options": ["Para descubrir el patrón de la señal", "Para dibujar las rocas del planeta", "Para contar las nubes del cielo", "Para escribir una carta al capitán"],
+        "correctAnswer": 0,
+        "skill": "inference",
+        "explanation": "Anotar los destellos ayudaba a comparar y descubrir el patrón."
+      },
+      "choices": [
+        {
+          "id": "choice-faro",
+          "label": "Encender el faro de la orilla",
+          "consequence": "Usar el patrón para responder desde el faro.",
+          "nextSceneId": "ending-explorar-faro"
+        },
+        {
+          "id": "choice-puente",
+          "label": "Construir un puente de luz",
+          "consequence": "Responder con paneles luminosos de la nave.",
+          "nextSceneId": "ending-explorar-puente"
+        }
+      ],
+      "endings": [
+        {
+          "id": "ending-explorar-faro",
+          "title": "El faro que responde",
+          "pages": [
+            {
+              "id": "ending-explorar-faro-1",
+              "text": "En la orilla encontraron un faro apagado. Luna recordó los tres destellos y giró la perilla tres veces con cuidado.",
+              "sensoryCue": "La perilla gira con tres clics suaves."
+            },
+            {
+              "id": "ending-explorar-faro-2",
+              "text": "El faro se encendió y respondió al cielo. La señal era un faro guía, y el equipo dejó un mapa nuevo para todos los viajeros.",
+              "sensoryCue": "Un haz de luz cruza el cielo estrellado."
+            }
+          ]
+        },
+        {
+          "id": "ending-explorar-puente",
+          "title": "El puente luminoso",
+          "pages": [
+            {
+              "id": "ending-explorar-puente-1",
+              "text": "Max propuso construir un puente de luz con los paneles de la nave. Luna ajustó cada panel siguiendo el patrón anotado.",
+              "sensoryCue": "Los paneles zumban al encenderse."
+            },
+            {
+              "id": "ending-explorar-puente-2",
+              "text": "El puente brilló y la luz azul se volvió estable. Ambos equipos, el del planeta y el de la estación, festejaron juntos.",
+              "sensoryCue": "Dos luces distintas laten al mismo ritmo."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "route-esperar",
+      "title": "Vigilancia desde la estación",
+      "pages": [
+        {
+          "id": "route-esperar-1",
+          "text": "Luna decidió esperar en la estación y observar. Con el telescopio descubrió que la luz formaba un patrón de tres destellos.",
+          "sensoryCue": "El telescopio enfoca con un zumbido suave."
+        },
+        {
+          "id": "route-esperar-2",
+          "text": "El equipo comparó el patrón con viejas señales de socorro. Parecía un pedido de ayuda, pero también podía ser un saludo amistoso.",
+          "sensoryCue": "Las fichas de señales se deslizan sobre la mesa."
+        }
+      ],
+      "checkpoint": {
+        "id": "checkpoint-esperar",
+        "statement": "¿Qué descubrió Luna al usar el telescopio?",
+        "options": ["Que la luz formaba un patrón", "Que el planeta tenía dos lunas", "Que la nave estaba rota", "Que el lago era de cristal"],
+        "correctAnswer": 0,
+        "skill": "cause_effect",
+        "explanation": "Gracias al telescopio, Luna descubrió el patrón de tres destellos."
+      },
+      "choices": [
+        {
+          "id": "choice-mensaje",
+          "label": "Responder con tres destellos",
+          "consequence": "Contestan la señal desde la antena.",
+          "nextSceneId": "ending-esperar-mensaje"
+        },
+        {
+          "id": "choice-equipo",
+          "label": "Pedir ayuda a la tripulación",
+          "consequence": "Todos vigilan y anotan los destellos.",
+          "nextSceneId": "ending-esperar-equipo"
+        }
+      ],
+      "endings": [
+        {
+          "id": "ending-esperar-mensaje",
+          "title": "Una melodía tranquila",
+          "pages": [
+            {
+              "id": "ending-esperar-mensaje-1",
+              "text": "Esperaron una noche más y la luz repitió el patrón. Luna respondió con tres destellos desde la antena de la estación.",
+              "sensoryCue": "La antena vibra al enviar la señal."
+            },
+            {
+              "id": "ending-esperar-mensaje-2",
+              "text": "El planeta contestó con una melodía tranquila. Sin apurarse, el equipo entendió que era un saludo y ganó amigos nuevos.",
+              "sensoryCue": "Una melodía suave llena la cabina."
+            }
+          ]
+        },
+        {
+          "id": "ending-esperar-equipo",
+          "title": "El reloj de luz",
+          "pages": [
+            {
+              "id": "ending-esperar-equipo-1",
+              "text": "Luna pidió ayuda a toda la tripulación. Cada uno vigiló una ventana y anotó la hora exacta de cada destello azul.",
+              "sensoryCue": "Lápices y relojes marcan el ritmo."
+            },
+            {
+              "id": "ending-esperar-equipo-2",
+              "text": "Con todas las notas juntas descifraron el ritmo: era un reloj de luz que invitaba a visitar el planeta en calma.",
+              "sensoryCue": "Las notas forman un mapa ordenado."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "finalQuestions": [
+    {
+      "statement": "¿Qué vio Luna por la ventana de la estación?",
+      "options": ["Una luz azul que parpadeaba", "Un cometa dorado", "Una nave perdida", "Un planeta en llamas"],
+      "correctAnswer": 0,
+      "skill": "literal",
+      "explanation": "Luna vio una luz azul que parpadeaba tres veces seguidas."
+    },
+    {
+      "statement": "¿Por qué el capitán necesitaba un equipo valiente?",
+      "options": ["Para descubrir el significado de la señal", "Para reparar la antena rota", "Para cocinar la cena", "Para pintar la estación"],
+      "correctAnswer": 0,
+      "skill": "inference",
+      "explanation": "La señal era un misterio y había que descubrir qué quería decir."
+    },
+    {
+      "statement": "¿Qué significa 'patrón' en el cuento?",
+      "options": ["Una forma que se repite", "Una nave muy rápida", "Un juego de mesa", "Un tipo de planeta"],
+      "correctAnswer": 0,
+      "skill": "vocabulary",
+      "explanation": "El patrón era la repetición de los tres destellos."
+    },
+    {
+      "statement": "¿Qué pasó primero en la aventura?",
+      "options": ["Luna vio la luz parpadear", "El equipo construyó un puente", "El faro se encendió", "El planeta contestó con música"],
+      "correctAnswer": 0,
+      "skill": "sequence",
+      "explanation": "Todo comenzó cuando Luna vio la luz desde la ventana."
+    },
+    {
+      "statement": "¿Por qué el equipo pudo entender la señal al final?",
+      "options": ["Porque observaron y anotaron el patrón", "Porque adivinaron sin mirar", "Porque apagaron todas las luces", "Porque gritaron muy fuerte"],
+      "correctAnswer": 0,
+      "skill": "cause_effect",
+      "explanation": "Observar y registrar el patrón hizo posible entender la señal."
+    }
+  ]
+}

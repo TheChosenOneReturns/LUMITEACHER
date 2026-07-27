@@ -3,14 +3,14 @@ import { getStoryService } from "../container";
 import {
   handleRequest,
   json,
-  requireDemoUser,
+  requireUser,
   type ApiEvent,
   type ApiResponse,
 } from "../http/api";
 
 export async function handler(event: ApiEvent): Promise<ApiResponse> {
   return handleRequest(event, async () => {
-    const userId = requireDemoUser(event);
+    const { userId } = await requireUser(event);
     const attemptId = event.pathParameters?.attemptId;
     if (!attemptId) {
       throw new ApplicationError(

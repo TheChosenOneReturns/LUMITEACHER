@@ -17,6 +17,21 @@ export class InMemoryStoryRepository
   private readonly rewards = new Map<string, RewardState>();
   private readonly completions = new Set<string>();
   private readonly masteries = new Set<string>();
+  private readonly generationCounters = new Map<string, number>();
+
+  async claimGenerationSlot(
+    userId: string,
+    dayKey: string,
+    maxPerDay: number,
+  ): Promise<boolean> {
+    const key = `${userId}#GEN#${dayKey}`;
+    const current = this.generationCounters.get(key) ?? 0;
+    if (current >= maxPerDay) {
+      return false;
+    }
+    this.generationCounters.set(key, current + 1);
+    return true;
+  }
 
   async saveStory(story: StoredStory): Promise<void> {
     this.stories.set(storyKey(story.userId, story.storyId), story);

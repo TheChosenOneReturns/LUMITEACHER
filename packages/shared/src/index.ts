@@ -127,6 +127,58 @@ export const generatedStorySchema = z
     }
   });
 
+// --- Aventuras interactivas (story-interactive v2): base y formato público ---
+
+const sceneIdSchema = z.string().regex(/^[a-z0-9-]+$/u);
+
+export const interactivePageSchema = z
+  .object({
+    id: sceneIdSchema,
+    text: z.string().trim().min(80).max(1500),
+    sensoryCue: z.string().trim().min(1).max(220),
+  })
+  .strict();
+
+export const interactiveChoiceSchema = z
+  .object({
+    id: sceneIdSchema,
+    label: z.string().trim().min(1).max(140),
+    consequence: z.string().trim().min(1).max(220),
+    nextSceneId: sceneIdSchema,
+  })
+  .strict();
+
+export const interactiveCheckpointSchema = z
+  .object({
+    id: sceneIdSchema,
+    statement: z.string().trim().min(1).max(300),
+    options: z.array(z.string().trim().min(1).max(220)).length(4),
+    correctAnswer: z.number().int().min(0).max(3),
+    skill: z.enum(["literal", "inference", "cause_effect"]),
+    explanation: z.string().trim().min(1).max(400),
+  })
+  .strict();
+
+export const interactiveScenePublicSchema = z
+  .object({
+    id: z.string(),
+    title: z.string(),
+    pages: z.array(interactivePageSchema).min(1),
+    checkpoint: interactiveCheckpointSchema.nullable(),
+    choices: z.array(interactiveChoiceSchema),
+    ending: z.boolean(),
+  })
+  .strict();
+
+export const interactiveAdventurePublicSchema = z
+  .object({
+    title: z.string().min(1),
+    language: storyLanguageSchema,
+    worldId: worldIdSchema,
+    scenes: z.array(interactiveScenePublicSchema).min(7),
+  })
+  .strict();
+
 export const publicQuestionSchema = generatedQuestionBaseSchema.omit({
   correctAnswer: true,
   explanation: true,
@@ -142,11 +194,41 @@ export const storyPublicSchema = z
     title: z.string().min(1),
     story: z.string().min(1),
     questions: z.array(publicQuestionSchema).length(5),
+    adventure: interactiveAdventurePublicSchema.nullable().optional(),
     courseId: z.string().nullable().optional(),
     missionId: z.string().nullable().optional(),
     source: z.enum(["free", "mission"]).optional(),
   })
   .strict();
+
+export const generationIdSchema = z
+  .string()
+  .regex(/^[a-f0-9]{32}$/u, "El identificador de generación no es válido.");
+
+const generationBaseSchema = z
+  .object({
+    generationId: generationIdSchema,
+  })
+  .strict();
+
+export const generationStatusSchema = z.discriminatedUnion("status", [
+  generationBaseSchema.extend({
+    status: z.literal("pending"),
+  }),
+  generationBaseSchema.extend({
+    status: z.literal("completed"),
+    story: storyPublicSchema,
+  }),
+  generationBaseSchema.extend({
+    status: z.literal("failed"),
+    error: z
+      .object({
+        code: z.string().min(1),
+        message: z.string().min(1),
+      })
+      .strict(),
+  }),
+]);
 
 export const storySummarySchema = z
   .object({
@@ -451,6 +533,7 @@ export type GeneratedQuestion = z.infer<typeof generatedQuestionSchema>;
 export type GeneratedStory = z.infer<typeof generatedStorySchema>;
 export type PublicQuestion = z.infer<typeof publicQuestionSchema>;
 export type StoryPublic = z.infer<typeof storyPublicSchema>;
+export type GenerationStatus = z.infer<typeof generationStatusSchema>;
 export type StorySummary = z.infer<typeof storySummarySchema>;
 export type SubmitAttemptInput = z.infer<typeof submitAttemptSchema>;
 export type QuestionResult = z.infer<typeof questionResultSchema>;
@@ -472,12 +555,18 @@ export type StudentProgress = z.infer<typeof studentProgressSchema>;
 export type CourseDashboard = z.infer<typeof courseDashboardSchema>;
 
 export const errorCodes = [
+  "UNAUTHORIZED",
   "VALIDATION_ERROR",
   "CONTENT_BLOCKED",
   "STORY_NOT_FOUND",
+  "GENERATION_NOT_FOUND",
+  "GENERATION_PENDING",
   "ATTEMPT_ALREADY_EXISTS",
   "GENERATION_TIMEOUT",
   "GENERATION_FAILED",
+  "GENERATION_LIMIT",
+  "PROFILE_REQUIRED",
+  "SESSION_CONTEXT_CHANGED",
   "FORBIDDEN",
   "COURSE_NOT_FOUND",
   "INVITE_INVALID",
@@ -529,6 +618,167 @@ export function parseGeneratedStory(
   }
 
   return parsed.data;
+}
+
+// --- Aventuras interactivas (story-interactive v2): salida del modelo ---
+
+const interactivePagesSchema = z.array(interactivePageSchema).min(2);
+
+export const generatedInteractiveStorySchema = z
+  .object({
+    title: z.string().trim().min(1).max(120),
+    language: storyLanguageSchema,
+    worldId: worldIdSchema,
+    opening: z
+      .object({
+        id: z.literal("opening"),
+        title: z.string().trim().min(1).max(120),
+        pages: interactivePagesSchema,
+        checkpoint: interactiveCheckpointSchema,
+        choices: z.array(interactiveChoiceSchema).length(2),
+      })
+      .strict(),
+    routes: z
+      .array(
+        z
+          .object({
+            id: z.string().regex(/^route-[a-z0-9-]+$/u),
+            title: z.string().trim().min(1).max(120),
+            pages: interactivePagesSchema,
+            checkpoint: interactiveCheckpointSchema,
+            choices: z.array(interactiveChoiceSchema).length(2),
+            endings: z
+              .array(
+                z
+                  .object({
+                    id: z.string().regex(/^ending-[a-z0-9-]+$/u),
+                    title: z.string().trim().min(1).max(120),
+                    pages: interactivePagesSchema,
+                  })
+                  .strict(),
+              )
+              .length(2),
+          })
+          .strict(),
+      )
+      .length(2),
+    finalQuestions: z.array(generatedQuestionSchema).length(5),
+  })
+  .strict()
+  .superRefine((adventure, context) => {
+    const routeIds = new Set(adventure.routes.map((route) => route.id));
+    for (const choice of adventure.opening.choices) {
+      if (!routeIds.has(choice.nextSceneId)) {
+        context.addIssue({
+          code: "custom",
+          path: ["opening", "choices"],
+          message: `La decisión "${choice.id}" apunta a una ruta inexistente.`,
+        });
+      }
+    }
+    for (const route of adventure.routes) {
+      const endingIds = new Set(route.endings.map((ending) => ending.id));
+      for (const choice of route.choices) {
+        if (!endingIds.has(choice.nextSceneId)) {
+          context.addIssue({
+            code: "custom",
+            path: ["routes", route.id, "choices"],
+            message: `La decisión "${choice.id}" apunta a un final inexistente.`,
+          });
+        }
+      }
+    }
+
+    const actualSkills = adventure.finalQuestions.map((question) => question.skill);
+    if (actualSkills.some((skill, index) => skill !== skillValues[index])) {
+      context.addIssue({
+        code: "custom",
+        path: ["finalQuestions"],
+        message:
+          "Las habilidades deben aparecer una vez y en el orden canónico.",
+      });
+    }
+  });
+
+export type InteractivePage = z.infer<typeof interactivePageSchema>;
+export type InteractiveChoice = z.infer<typeof interactiveChoiceSchema>;
+export type InteractiveCheckpoint = z.infer<typeof interactiveCheckpointSchema>;
+export type GeneratedInteractiveStory = z.infer<
+  typeof generatedInteractiveStorySchema
+>;
+
+export function parseGeneratedInteractiveStory(
+  value: unknown,
+  maxWordsPerPath: number,
+): GeneratedInteractiveStory {
+  const parsed = generatedInteractiveStorySchema.safeParse(value);
+  if (!parsed.success) {
+    throw new GeneratedStoryValidationError(
+      parsed.error.issues.map(
+        (issue) => `${issue.path.join(".") || "response"}: ${issue.message}`,
+      ),
+    );
+  }
+
+  for (const route of parsed.data.routes) {
+    for (const ending of route.endings) {
+      const words = [
+        ...parsed.data.opening.pages,
+        ...route.pages,
+        ...ending.pages,
+      ].reduce((total, page) => total + countWords(page.text), 0);
+      if (words > maxWordsPerPath) {
+        throw new GeneratedStoryValidationError([
+          `${route.id}/${ending.id}: el recorrido tiene ${words} palabras y el máximo es ${maxWordsPerPath}.`,
+        ]);
+      }
+    }
+  }
+
+  return parsed.data;
+}
+
+export type InteractiveScenePublic = z.infer<typeof interactiveScenePublicSchema>;
+export type InteractiveAdventurePublic = z.infer<
+  typeof interactiveAdventurePublicSchema
+>;
+
+export function toInteractiveAdventurePublic(
+  generated: GeneratedInteractiveStory,
+): InteractiveAdventurePublic {
+  return {
+    title: generated.title,
+    language: generated.language,
+    worldId: generated.worldId,
+    scenes: [
+      {
+        id: "opening",
+        title: generated.opening.title,
+        pages: generated.opening.pages,
+        checkpoint: generated.opening.checkpoint,
+        choices: generated.opening.choices,
+        ending: false,
+      },
+      ...generated.routes.flatMap((route) => [
+        {
+          id: route.id,
+          title: route.title,
+          pages: route.pages,
+          checkpoint: route.checkpoint,
+          choices: route.choices,
+          ending: false,
+        },
+        ...route.endings.map((ending) => ({
+          id: ending.id,
+          title: ending.title,
+          pages: ending.pages,
+          checkpoint: null,
+          choices: [],
+          ending: true,
+        })),
+      ]),
+    ],
+  };
 }
 
 export const skillLabels: Record<Skill, string> = {

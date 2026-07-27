@@ -78,7 +78,7 @@ export function ProfilePage() {
     } catch { setError("Ese look todavía no está disponible."); }
   }
 
-  function exit() { logout(); navigate("/", { replace: true }); }
+  async function exit() { await logout(); navigate("/", { replace: true }); }
 
   return (
     <div className="profile-page profile-studio page-width page-section">
@@ -109,7 +109,6 @@ export function ProfilePage() {
             return <motion.button key={avatar.id} type="button" disabled={!unlocked} className={`${draft.avatarId === avatar.id ? "is-selected" : ""} ${unlocked ? "is-unlocked" : "is-locked"}`} aria-label={unlocked ? avatar.label : `${avatar.label}, bloqueado`} aria-pressed={draft.avatarId === avatar.id} onClick={() => setDraft({ ...draft, avatarId: avatar.id })} whileHover={unlocked ? { y: -5 } : {}} whileTap={unlocked ? { scale: .96 } : {}}><span className="character-picker-art"><CharacterAvatar avatarId={avatar.id} size={88}/>{!unlocked ? <span className="character-lock"><StarFourIcon weight="fill" /> {world?.label} · hito {avatar.milestone}</span> : null}</span><small>{avatar.label}</small>{draft.avatarId === avatar.id ? <CheckCircleIcon weight="fill" /> : null}</motion.button>;
           })}</div></fieldset> : null}
 
-          <fieldset className="profile-theme-picker"><legend>Tu mundo favorito</legend><div>{themes.map((theme) => <button key={theme} type="button" className={draft.favoriteTheme === theme ? "is-selected" : ""} aria-pressed={draft.favoriteTheme === theme} onClick={() => setDraft({ ...draft, favoriteTheme: theme })}>{theme}</button>)}</div></fieldset>
           {error ? <p className="form-error" role="alert">{error}</p> : null}
           <button className="button button--primary profile-save" type="submit">{saved ? <CheckCircleIcon weight="fill"/> : <FloppyDiskIcon weight="bold"/>}{saved ? "¡Tu personaje quedó listo!" : "Guardar mi personaje"}</button>
         </motion.form>

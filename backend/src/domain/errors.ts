@@ -69,3 +69,14 @@ export class GenerationTimeoutError extends ApplicationError {
   }
 }
 
+export class GenerationLimitError extends ApplicationError {
+  constructor(cause?: unknown) {
+    super(
+      "GENERATION_LIMIT",
+      429,
+      "Llegaste al límite de aventuras nuevas por hoy. ¡Mañana seguimos!",
+      cause,
+    );
+  }
+}
+

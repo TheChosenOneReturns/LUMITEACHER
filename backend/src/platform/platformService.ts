@@ -16,7 +16,6 @@ import {
   type CourseDashboard,
   type CourseSummary,
   type CreateDemoProfileInput,
-  type GenerateStoryInput,
   type GameId,
   type Invite,
   type Mission,
@@ -28,7 +27,7 @@ import {
 import { ulid } from "ulid";
 import type { AppConfig } from "../config";
 import { ApplicationError } from "../domain/errors";
-import type { StoredAttempt, StoryApplicationService } from "../domain/models";
+import type { StoredAttempt } from "../domain/models";
 import { coursePartition, userPartition } from "../repositories/dynamoStoryRepository";
 import { emptyRewardState, normalizeRewardState } from "./rewards";
 
@@ -61,7 +60,6 @@ export class PlatformService {
   constructor(
     private readonly client: DynamoDBDocumentClient,
     private readonly config: AppConfig,
-    private readonly stories: StoryApplicationService,
   ) {}
 
   get catalog() {
@@ -70,6 +68,10 @@ export class PlatformService {
 
   async assertCourseMembership(userId: string, courseId: string): Promise<void> {
     await this.requireMembership(userId, courseId);
+  }
+
+  async assertCourseOwner(userId: string, courseId: string): Promise<void> {
+    await this.requireOwner(userId, courseId);
   }
 
   async listDemoProfiles(): Promise<UserProfile[]> {
@@ -92,9 +94,89 @@ export class PlatformService {
     );
     const parsed = userProfileSchema.safeParse(stripDb(response.Item));
     if (!parsed.success) {
+      if (this.config.authMode === "cognito") {
+        throw new ApplicationError(
+          "PROFILE_REQUIRED",
+          409,
+          "Completá tu perfil para empezar.",
+        );
+      }
       throw new ApplicationError("FORBIDDEN", 403, "El perfil de demostración no existe.");
     }
     return parsed.data;
+  }
+
+  async createAuthenticatedProfile(
+    userId: string,
+    input: {
+      role: "student" | "adult";
+      displayName: string;
+      age?: number | undefined;
+      avatarId: string;
+      favoriteTheme: string;
+      adultLabel?: "Profesor/a" | "Familia" | undefined;
+    },
+  ): Promise<UserProfile> {
+    try {
+      return await this.getProfile(userId);
+    } catch (error) {
+      if (
+        !(error instanceof ApplicationError) ||
+        error.code !== "PROFILE_REQUIRED"
+      ) {
+        throw error;
+      }
+    }
+
+    const profile = userProfileSchema.parse({
+      userId,
+      role: input.role,
+      displayName: input.displayName.trim(),
+      age: input.role === "student" ? input.age : null,
+      avatarId: input.avatarId,
+      favoriteTheme: input.favoriteTheme.trim(),
+      adultLabel:
+        input.role === "adult" ? input.adultLabel ?? "Profesor/a" : null,
+      selectedAccessoryId: null,
+    });
+    try {
+      await this.client.send(
+        new TransactWriteCommand({
+          TransactItems: [
+            {
+              Put: {
+                TableName: this.config.tableName,
+                Item: {
+                  ...profile,
+                  PK: userPartition(userId),
+                  SK: "PROFILE",
+                  entityType: "PROFILE",
+                },
+                ConditionExpression: "attribute_not_exists(PK)",
+              },
+            },
+            {
+              Put: {
+                TableName: this.config.tableName,
+                Item: {
+                  ...emptyRewardState(),
+                  PK: userPartition(userId),
+                  SK: "REWARDS",
+                  entityType: "REWARD_STATE",
+                },
+                ConditionExpression: "attribute_not_exists(PK)",
+              },
+            },
+          ],
+        }),
+      );
+      return profile;
+    } catch (error) {
+      if ((error as { name?: string }).name === "TransactionCanceledException") {
+        return this.getProfile(userId);
+      }
+      throw error;
+    }
   }
 
   async createDemoStudent(input: CreateDemoProfileInput): Promise<UserProfile> {
@@ -277,22 +359,35 @@ export class PlatformService {
     return (response.Items as MissionItem[] | undefined ?? []).map((item) => stripDb(item)) as Mission[];
   }
 
-  async createMission(
+  async publishMission(
     userId: string,
     courseId: string,
-    input: GenerateStoryInput,
-    idempotencyKey: string,
+    missionId: string,
+    story: {
+      storyId: string;
+      createdAt: string;
+      title: string;
+      courseId?: string | null | undefined;
+      missionId?: string | null | undefined;
+      source?: "free" | "mission" | undefined;
+      input: { theme: string; educationalObjective: string };
+    },
   ): Promise<Mission> {
     await this.requireOwner(userId, courseId);
-    const missionId = ulid();
-    const story = await this.stories.createStory(userId, input, idempotencyKey, {
-      courseId,
-      missionId,
-      source: "mission",
-    });
+    if (
+      story.source !== "mission" ||
+      story.courseId !== courseId ||
+      story.missionId !== missionId
+    ) {
+      throw new ApplicationError(
+        "VALIDATION_ERROR",
+        409,
+        "La vista previa no pertenece a este curso.",
+      );
+    }
     const mission: MissionItem = {
       PK: coursePartition(courseId),
-      SK: `MISSION#${new Date().toISOString()}#${missionId}`,
+      SK: `MISSION#${story.createdAt}#${missionId}`,
       entityType: "MISSION",
       missionId,
       courseId,
@@ -303,7 +398,42 @@ export class PlatformService {
       createdAt: story.createdAt,
       status: "active",
     };
-    await this.client.send(new PutCommand({ TableName: this.config.tableName, Item: mission }));
+    try {
+      await this.client.send(
+        new PutCommand({
+          TableName: this.config.tableName,
+          Item: mission,
+          ConditionExpression:
+            "attribute_not_exists(PK) AND attribute_not_exists(SK)",
+        }),
+      );
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        error.name !== "ConditionalCheckFailedException"
+      ) {
+        throw error;
+      }
+      const existing = await this.client.send(
+        new GetCommand({
+          TableName: this.config.tableName,
+          Key: { PK: mission.PK, SK: mission.SK },
+        }),
+      );
+      const existingMission = existing.Item as MissionItem | undefined;
+      if (
+        !existingMission ||
+        existingMission.storyId !== story.storyId ||
+        existingMission.missionId !== missionId
+      ) {
+        throw new ApplicationError(
+          "VALIDATION_ERROR",
+          409,
+          "La misión ya fue publicada con otro contenido.",
+        );
+      }
+      return stripDb(existingMission) as Mission;
+    }
     return stripDb(mission) as Mission;
   }
 

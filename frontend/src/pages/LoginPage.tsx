@@ -17,6 +17,8 @@ import { riseItem, staggerContainer } from "../components/MotionPrimitives";
 import { useTransition } from "../components/motion/TransitionContext";
 import { ProfileAvatar } from "../components/VisualIcons";
 import { CreateProfileModal } from "../components/CreateProfileModal";
+import { authMode } from "../auth/config";
+import { CognitoLoginPage } from "./CognitoLoginPage";
 
 function safeNext(value: string | null, role: UserRole): string {
   if (value?.startsWith("/") && !value.startsWith("//")) return value;
@@ -24,6 +26,11 @@ function safeNext(value: string | null, role: UserRole): string {
 }
 
 export function LoginPage() {
+  if (authMode === "cognito") return <CognitoLoginPage />;
+  return <DemoLoginPage />;
+}
+
+function DemoLoginPage() {
   const { login } = useAuth();
   const { startTransition } = useTransition();
   const [searchParams] = useSearchParams();

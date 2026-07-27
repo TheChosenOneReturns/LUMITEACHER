@@ -4,8 +4,10 @@ import type {
 } from "aws-lambda";
 import { ZodError } from "zod";
 import type { ErrorResponse } from "@story-teacher/shared";
+import { getSessionIpGuard } from "../container";
 import { getConfig } from "../config";
 import { ApplicationError } from "../domain/errors";
+import type { AuthenticatedIdentity } from "../domain/models";
 
 export type ApiEvent = APIGatewayProxyEventV2;
 export type ApiResponse = APIGatewayProxyStructuredResultV2;
@@ -18,8 +20,13 @@ export function json(statusCode: number, body: unknown): ApiResponse {
       "content-type": "application/json; charset=utf-8",
       "access-control-allow-origin": config.allowedOrigin,
       "access-control-allow-headers":
-        "Content-Type,X-Demo-User-Id,Idempotency-Key",
+        "Authorization,Content-Type,X-Demo-User-Id,Idempotency-Key",
       "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
+      "cache-control": "no-store",
+      "permissions-policy": "camera=(), geolocation=(), microphone=()",
+      "referrer-policy": "no-referrer",
+      "x-content-type-options": "nosniff",
+      "x-frame-options": "DENY",
       vary: "Origin",
     },
     body: JSON.stringify(body),
@@ -30,16 +37,62 @@ export function getRequestId(event: ApiEvent): string {
   return event.requestContext?.requestId ?? crypto.randomUUID();
 }
 
-export function requireDemoUser(event: ApiEvent): string {
-  const userId = header(event, "x-demo-user-id")?.trim();
-  if (!userId || !/^[a-z0-9][a-z0-9-]{2,63}$/u.test(userId)) {
+export async function requireUser(
+  event: ApiEvent,
+): Promise<AuthenticatedIdentity> {
+  const config = getConfig();
+  if (config.authMode === "demo") {
+    const userId = header(event, "x-demo-user-id")?.trim();
+    if (!userId || !/^[a-z0-9][a-z0-9-]{2,63}$/u.test(userId)) {
+      throw new ApplicationError(
+        "UNAUTHORIZED",
+        401,
+        "Elegí un perfil de demostración para continuar.",
+      );
+    }
+    return { userId };
+  }
+
+  const authorizer = (
+    event.requestContext as unknown as {
+      authorizer?: { jwt?: { claims?: Record<string, unknown> } };
+    }
+  ).authorizer as
+    | { jwt?: { claims?: Record<string, unknown> } }
+    | undefined;
+  const claims = authorizer?.jwt?.claims;
+  const userId = typeof claims?.sub === "string" ? claims.sub : undefined;
+  if (!userId) {
     throw new ApplicationError(
-      "VALIDATION_ERROR",
-      400,
-      "El perfil de demostración no es válido.",
+      "UNAUTHORIZED",
+      401,
+      "La sesión venció o no es válida. Volvé a ingresar.",
     );
   }
-  return userId;
+  const rawExpiration = claims?.exp;
+  const expiresAtEpochSeconds =
+    typeof rawExpiration === "number"
+      ? rawExpiration
+      : typeof rawExpiration === "string"
+        ? Number.parseInt(rawExpiration, 10)
+        : undefined;
+  const sessionIdCandidate = claims?.origin_jti ?? claims?.jti;
+  const identity: AuthenticatedIdentity = {
+    userId,
+    ...(typeof sessionIdCandidate === "string"
+      ? { sessionId: sessionIdCandidate }
+      : {}),
+    ...(typeof expiresAtEpochSeconds === "number" &&
+    Number.isFinite(expiresAtEpochSeconds)
+      ? { expiresAtEpochSeconds }
+      : {}),
+  };
+  const userAgent = header(event, "user-agent");
+  await getSessionIpGuard().assertContext(identity, {
+    sourceIp: event.requestContext.http.sourceIp,
+    ...(userAgent ? { userAgent } : {}),
+  });
+  return identity;
 }
 
 export function requireIdempotencyKey(event: ApiEvent): string {
@@ -82,6 +135,19 @@ export async function handleRequest(
   action: () => Promise<ApiResponse>,
 ): Promise<ApiResponse> {
   const requestId = getRequestId(event);
+  if (event.requestContext.http.method === "OPTIONS") {
+    return {
+      statusCode: 204,
+      headers: {
+        "access-control-allow-origin": getConfig().allowedOrigin,
+        "access-control-allow-headers":
+          "Authorization,Content-Type,X-Demo-User-Id,Idempotency-Key",
+        "access-control-allow-methods": "GET,POST,PATCH,OPTIONS",
+        "access-control-max-age": "600",
+        vary: "Origin",
+      },
+    };
+  }
   try {
     return await action();
   } catch (error) {
@@ -93,6 +159,11 @@ export async function handleRequest(
         requestId,
         code: normalized.code,
         errorName: error instanceof Error ? error.name : "UnknownError",
+        errorMessage:
+          error instanceof Error
+            ? error.message.slice(0, 500)
+            : "Error no serializable",
+        awsRequestId: awsRequestId(error),
       }),
     );
     const response: ErrorResponse = {
@@ -104,6 +175,20 @@ export async function handleRequest(
     };
     return json(normalized.statusCode, response);
   }
+}
+
+function awsRequestId(error: unknown): string | undefined {
+  if (
+    typeof error !== "object" ||
+    error === null ||
+    !("$metadata" in error)
+  ) {
+    return undefined;
+  }
+  const metadata = (error as { $metadata?: { requestId?: unknown } }).$metadata;
+  return typeof metadata?.requestId === "string"
+    ? metadata.requestId
+    : undefined;
 }
 
 function header(event: ApiEvent, name: string): string | undefined {

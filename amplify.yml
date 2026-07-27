@@ -1,4 +1,7 @@
 version: 1
+env:
+  variables:
+    VITE_AUTH_MODE: cognito
 applications:
   - appRoot: frontend
     frontend:
@@ -8,6 +11,9 @@ applications:
             - cd .. && npm ci
         build:
           commands:
+            - test -n "$VITE_API_URL"
+            - test -n "$VITE_COGNITO_USER_POOL_ID"
+            - test -n "$VITE_COGNITO_USER_POOL_CLIENT_ID"
             - npm run build -w @story-teacher/frontend
       artifacts:
         baseDirectory: dist

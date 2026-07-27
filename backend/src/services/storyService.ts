@@ -1,4 +1,5 @@
 import {
+  toInteractiveAdventurePublic,
   type AttemptResult,
   type GenerateStoryInput,
   type StoryPublic,
@@ -9,6 +10,7 @@ import { ulid } from "ulid";
 import type { AppConfig } from "../config";
 import {
   DuplicateStoryError,
+  GenerationLimitError,
   StoryNotFoundError,
 } from "../domain/errors";
 import type {
@@ -44,7 +46,34 @@ export class StoryService implements StoryApplicationService {
       return toPublicStory(existing);
     }
 
-    const generated = await this.generator.generate(input);
+    const dayKey = new Date().toISOString().slice(0, 10);
+    const slotClaimed = await this.storyRepository.claimGenerationSlot(
+      userId,
+      dayKey,
+      this.config.maxGenerationsPerDay,
+    );
+    if (!slotClaimed) {
+      throw new GenerationLimitError();
+    }
+
+    let title: string;
+    let storyText: string;
+    let questions: StoredStory["questions"];
+    let adventure: StoredStory["adventure"];
+
+    if (input.storyMode === "interactive" && this.generator.generateInteractive) {
+      const generated = await this.generator.generateInteractive(input);
+      adventure = toInteractiveAdventurePublic(generated);
+      title = generated.title;
+      storyText = generated.opening.pages.map((page) => page.text).join("\n\n");
+      questions = generated.finalQuestions;
+    } else {
+      const generated = await this.generator.generate(input);
+      title = generated.title;
+      storyText = generated.story;
+      questions = generated.questions;
+    }
+
     const storyId = ulid();
     const createdAt = new Date().toISOString();
     const stored: StoredStory = {
@@ -56,9 +85,10 @@ export class StoryService implements StoryApplicationService {
       createdAt,
       idempotencyKey,
       input,
-      title: generated.title,
-      story: generated.story,
-      questions: generated.questions,
+      title,
+      story: storyText,
+      questions,
+      ...(adventure ? { adventure } : {}),
       modelId: this.generator.modelId,
       promptVersion: this.config.promptVersion,
       source: context.source ?? "free",
@@ -181,5 +211,6 @@ export function toPublicStory(story: StoredStory): StoryPublic {
       options: question.options,
       skill: question.skill,
     })),
+    adventure: story.adventure ?? null,
   };
 }

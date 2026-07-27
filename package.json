@@ -28,10 +28,14 @@
   "engines": {
     "node": ">=22"
   },
+  "dependencies": {
+    "@aws-sdk/client-lambda": "^3.850.0",
+    "@story-teacher/shared": "*",
+    "esbuild": "^0.28.1"
+  },
   "devDependencies": {
     "@playwright/test": "^1.61.1",
-    "concurrently": "^9.2.1",
-    "esbuild": "^0.28.1"
+    "concurrently": "^9.2.1"
   },
   "optionalDependencies": {
     "lightningcss-win32-x64-msvc": "1.32.0"

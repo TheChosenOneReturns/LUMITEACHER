@@ -150,6 +150,45 @@ export class DynamoStoryRepository
     return item ? this.getStory(userId, item.storyId) : null;
   }
 
+  async claimGenerationSlot(
+    userId: string,
+    dayKey: string,
+    maxPerDay: number,
+  ): Promise<boolean> {
+    try {
+      await this.documentClient.send(
+        new UpdateCommand({
+          TableName: this.config.tableName,
+          Key: { PK: userPartition(userId), SK: `GEN#${dayKey}` },
+          UpdateExpression:
+            "ADD #count :one SET #ttl = :ttl, #entityType = :entityType",
+          ConditionExpression:
+            "attribute_not_exists(#count) OR #count < :max",
+          ExpressionAttributeNames: {
+            "#count": "count",
+            "#ttl": "ttl",
+            "#entityType": "entityType",
+          },
+          ExpressionAttributeValues: {
+            ":one": 1,
+            ":max": maxPerDay,
+            ":ttl": Math.floor(Date.now() / 1000) + 2 * 24 * 60 * 60,
+            ":entityType": "GENERATION_COUNTER",
+          },
+        }),
+      );
+      return true;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.name === "ConditionalCheckFailedException"
+      ) {
+        return false;
+      }
+      throw error;
+    }
+  }
+
   async getStory(userId: string, storyId: string): Promise<StoredStory | null> {
     const response = await this.documentClient.send(
       new GetCommand({
@@ -171,7 +210,14 @@ export class DynamoStoryRepository
         },
       }),
     );
-    return membership.Item ? story : null;
+    if (!membership.Item) return null;
+    if (
+      story.source === "mission" &&
+      !(await this.isPublishedMission(story.courseId, story.storyId))
+    ) {
+      return null;
+    }
+    return story;
   }
 
   async listStories(userId: string, limit: number): Promise<StorySummary[]> {
@@ -345,6 +391,28 @@ export class DynamoStoryRepository
         },
       }),
     );
+  }
+
+  private async isPublishedMission(
+    courseId: string,
+    storyId: string,
+  ): Promise<boolean> {
+    const response = await this.documentClient.send(
+      new QueryCommand({
+        TableName: this.config.tableName,
+        KeyConditionExpression: "PK = :pk AND begins_with(SK, :prefix)",
+        FilterExpression: "storyId = :storyId AND #status = :active",
+        ExpressionAttributeNames: { "#status": "status" },
+        ExpressionAttributeValues: {
+          ":pk": coursePartition(courseId),
+          ":prefix": "MISSION#",
+          ":storyId": storyId,
+          ":active": "active",
+        },
+        ProjectionExpression: "storyId",
+      }),
+    );
+    return Boolean(response.Items?.length);
   }
 }
 

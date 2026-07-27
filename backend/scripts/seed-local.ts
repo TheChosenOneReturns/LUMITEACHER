@@ -6,16 +6,23 @@ import { coursePartition, userPartition } from "../src/repositories/dynamoStoryR
 import { emptyRewardState } from "../src/platform/rewards";
 
 process.env.TABLE_NAME ??= "StoryTeacherLocal";
-process.env.DYNAMODB_ENDPOINT ??= "http://127.0.0.1:8000";
+if (process.env.TABLE_NAME === "StoryTeacherLocal") {
+  process.env.DYNAMODB_ENDPOINT ??= "http://127.0.0.1:8000";
+}
 process.env.AWS_REGION ??= "us-east-1";
 process.env.STORY_GENERATOR_MODE ??= "fixture";
 
 const tableName = process.env.TABLE_NAME;
+const dynamoEndpoint = process.env.DYNAMODB_ENDPOINT;
 const client = DynamoDBDocumentClient.from(
   new DynamoDBClient({
     region: process.env.AWS_REGION,
-    endpoint: process.env.DYNAMODB_ENDPOINT,
-    credentials: { accessKeyId: "local", secretAccessKey: "local" },
+    ...(dynamoEndpoint
+      ? {
+          endpoint: dynamoEndpoint,
+          credentials: { accessKeyId: "local", secretAccessKey: "local" },
+        }
+      : {}),
   }),
   { marshallOptions: { removeUndefinedValues: true } },
 );
@@ -143,9 +150,9 @@ for (const [userId, role] of [
 
 const platform = getPlatformService();
 const storyService = getStoryService();
-const mission = await platform.createMission(
+const seedMissionId = "01SEEDMISSION2026STORY000001";
+const missionStory = await storyService.createStory(
   "demo-lucia",
-  courseId,
   {
     age: 8,
     theme: "Espacio",
@@ -155,6 +162,17 @@ const mission = await platform.createMission(
     mainCharacter: "Luna, una gata astronauta",
   },
   "seed-mission-story-2026",
+  {
+    courseId,
+    missionId: seedMissionId,
+    source: "mission",
+  },
+);
+const mission = await platform.publishMission(
+  "demo-lucia",
+  courseId,
+  seedMissionId,
+  missionStory,
 );
 await storyService.submitAttempt("demo-sofia", mission.storyId, {
   attemptId: "01SEEDSOFIA2026ATTEMPT000001",

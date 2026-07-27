@@ -5,14 +5,14 @@ import {
   handleRequest,
   json,
   parseJsonBody,
-  requireDemoUser,
+  requireUser,
   type ApiEvent,
   type ApiResponse,
 } from "../http/api";
 
 export async function handler(event: ApiEvent): Promise<ApiResponse> {
   return handleRequest(event, async () => {
-    const userId = requireDemoUser(event);
+    const { userId } = await requireUser(event);
     const profile = await getPlatformService().getProfile(userId);
     if (profile.role !== "student") {
       throw new ApplicationError("FORBIDDEN", 403, "Sólo un estudiante puede completar desafíos.");

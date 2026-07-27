@@ -522,6 +522,60 @@ function endingText(story: StoryPublic, route: LocalizedWorldScript["routes"][nu
   return [ending.text, depth[0], depth[1], consequences, depth[2], lore.resolution, depth[3], depth[4], reflection, depth[5], close].join("\n\n");
 }
 
+export function adventureFromApi(story: StoryPublic): InteractiveAdventure | null {
+  const apiAdventure = story.adventure ?? null;
+  if (!apiAdventure || apiAdventure.scenes.length === 0) return null;
+  const { language, worldId } = apiAdventure;
+  let endingCount = 0;
+  const scenes: InteractiveScene[] = apiAdventure.scenes.map((scene) => {
+    const eyebrow = scene.ending
+      ? language === "en"
+        ? `Ending ${++endingCount} of 4`
+        : `Final ${++endingCount} de 4`
+      : scene.id === "opening"
+        ? language === "en"
+          ? "Chapter 1 · The discovery"
+          : "Capítulo 1 · El descubrimiento"
+        : language === "en"
+          ? "Chapter 2 · Your route"
+          : "Capítulo 2 · Tu camino";
+    return {
+      id: scene.id,
+      eyebrow,
+      title: cleanStoryTitle(scene.title),
+      text: scene.pages.map((page) => page.text).join("\n\n"),
+      sensoryCue: scene.pages[0]?.sensoryCue ?? "",
+      choices: scene.choices,
+      ending: scene.ending,
+      checkpoint: scene.checkpoint,
+    };
+  });
+  return {
+    id: `${worldId}-${language}-api`,
+    language,
+    worldId,
+    image: sceneImages[worldId],
+    title: cleanStoryTitle(apiAdventure.title),
+    startSceneId: "opening",
+    scenes,
+  };
+}
+
+export function cleanStoryTitle(title: string): string {
+  const withoutFallback = title.split(
+    /\s*[·•]\s*(?:final alternativo|alternative ending)\b/iu,
+  )[0]!;
+  const cleaned = withoutFallback
+    .replace(
+      /^(?:escena\s*\d+|apertura|ruta\s*[ab12]|final\s*[ab0-9-]+)\s*[:\-–—]\s*/iu,
+      "",
+    )
+    .replace(/[<>]/gu, "")
+    .replace(/\s+/gu, " ")
+    .trim();
+  return cleaned || (title.trim() ? title.trim().slice(0, 80) : "Un nuevo capítulo");
+}
+
 export function buildInteractiveAdventure(story: StoryPublic): InteractiveAdventure {
   const language = story.input.language ?? "es";
   const worldId = resolveStoryWorld(story.input.theme);

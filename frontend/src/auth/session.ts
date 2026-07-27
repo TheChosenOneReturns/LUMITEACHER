@@ -1,10 +1,46 @@
+import { fetchAuthSession } from "aws-amplify/auth";
+import { authMode } from "./config";
+
 export const sessionUserKey = "story-teacher:demo-user-id";
 
 export function getSessionUserId(): string | null {
+  if (authMode === "cognito") return null;
   return localStorage.getItem(sessionUserKey);
 }
 
 export function setSessionUserId(userId: string | null): void {
+  if (authMode === "cognito") return;
   if (userId) localStorage.setItem(sessionUserKey, userId);
   else localStorage.removeItem(sessionUserKey);
+}
+
+export async function getAuthorizationHeader(): Promise<string | null> {
+  if (authMode !== "cognito") return null;
+  try {
+    const session = await fetchAuthSession();
+    const token = session.tokens?.accessToken;
+    return token ? `Bearer ${token.toString()}` : null;
+  } catch {
+    return null;
+  }
+}
+
+const justLoggedOutKey = "story-teacher:just-logged-out";
+
+export function markJustLoggedOut(): void {
+  try {
+    sessionStorage.setItem(justLoggedOutKey, "1");
+  } catch {
+    // El flag es una mejora de UX; sin storage no pasa nada.
+  }
+}
+
+export function consumeJustLoggedOut(): boolean {
+  try {
+    const flagged = sessionStorage.getItem(justLoggedOutKey) === "1";
+    if (flagged) sessionStorage.removeItem(justLoggedOutKey);
+    return flagged;
+  } catch {
+    return false;
+  }
 }

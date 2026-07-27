@@ -21,6 +21,7 @@ import { ErrorState, LoadingState } from "../components/PageState";
 import { StoryCard } from "../components/StoryCard";
 import { StoryThemeIcon } from "../components/VisualIcons";
 import { StudentOnboarding } from "../components/StudentOnboarding";
+import { getStorySceneImage } from "../story/interactiveStory";
 
 interface MissionWithCourse extends Mission {
   courseName: string;
@@ -119,10 +120,14 @@ export function HomePage() {
         <motion.section className="mission-grid" variants={staggerContainer} initial="hidden" animate="visible">
           {missions.map((mission) => (
             <motion.article className="mission-card" key={mission.missionId} whileHover={{ y: -6, rotate: -0.4 }}>
-              <span className="mission-card__art"><StoryThemeIcon theme={mission.theme} size={54} /></span>
+              <div className="mission-card__art" aria-hidden="true">
+                <img src={getStorySceneImage(mission.theme)} alt="" loading="lazy" decoding="async" />
+                <span className="mission-card__badge"><StoryThemeIcon theme={mission.theme} size={26} /></span>
+              </div>
               <span className="pill">{mission.courseName}</span>
+              <span className="eyebrow"><StoryThemeIcon theme={mission.theme} size={16} /> Misión en {mission.theme}</span>
               <h3>{mission.title}</h3>
-              <p>{mission.educationalObjective}</p>
+              <p><strong>Tu desafío:</strong> {mission.educationalObjective}</p>
               <Link className="button button--green" to={`/historias/${mission.storyId}`}>Comenzar misión <ArrowRightIcon /></Link>
             </motion.article>
           ))}

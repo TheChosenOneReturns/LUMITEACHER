@@ -2,6 +2,12 @@
 
 Investigación realizada el **21/07/2026** sobre documentación oficial de AWS. Los precios, elegibilidad, regiones y modelos pueden cambiar; la consola de Billing de la cuenta del hackathon es la fuente definitiva.
 
+> Estado operativo actualizado el **26/07/2026**. La arquitectura real está en
+> `us-east-2`, usa DynamoDB `PAY_PER_REQUEST` con point-in-time recovery y
+> Claude Sonnet 4.5 mediante un perfil de inferencia. Las decisiones históricas
+> de 5 RCU/5 WCU, `us-east-1`, Nova y ausencia de PITR ya no describen el stack
+> desplegado.
+
 ## 1. Respuesta corta
 
 El stack puede operar con costo muy bajo durante el hackathon, pero **no debe prometerse costo cero**:
@@ -37,11 +43,11 @@ No se suman automáticamente todos los beneficios publicados. Antes de desplegar
 | AWS SAM/CloudFormation | SAM no agrega cargo; recursos subyacentes sí | usar SAM |
 | Lambda | la página de precios incluye 1 millón de requests y 400.000 GB-seg por mes | dentro del límite con holgura |
 | API Gateway | elegible para créditos; la página también publica 1 millón de llamadas HTTP/REST mensuales para ofertas de nuevos clientes | usar HTTP API y verificar elegibilidad en Billing |
-| DynamoDB Standard | 25 GB, 25 RCU y 25 WCU provisionadas al mes, además de límites de Streams | usar provisionado 5/5, sin extras |
-| Amazon Bedrock | pago por tokens según proveedor/modelo; créditos pueden aplicarse | fijar límite de generaciones y modelo económico |
+| DynamoDB Standard | el costo depende del modo, almacenamiento y protecciones activadas | `PAY_PER_REQUEST`, TTL, cifrado y PITR |
+| Amazon Bedrock | pago por tokens según proveedor/modelo; créditos pueden aplicarse | Claude Sonnet 4.5 on-demand, máximo 20 generaciones por usuario/día |
 | Bedrock Guardrails | pago por unidades de texto para filtros; word filters y regex figuran sin cargo | usar filtros necesarios y medir |
 | Amplify Hosting | elegible para créditos; su página lista hasta 1.000 min de build, 5 GB almacenados y 15 GB de salida/mes en la oferta | hosting recomendado |
-| CloudWatch | puede facturar por logs/métricas fuera de sus franquicias | logs breves, sin payload y retención 7 días |
+| CloudWatch y X-Ray | pueden facturar por ingestión, almacenamiento y trazas | access logs de API 30 días; falta fijar retención de logs Lambda |
 
 Fuentes:
 
@@ -81,7 +87,10 @@ La oferta gratuita publicada para Standard provisionado incluye por región y cu
 - 25 GB de almacenamiento;
 - 2,5 millones de lecturas de DynamoDB Streams.
 
-El MVP usa 5 WCU/5 RCU y no habilita Streams, PITR, DAX, exportaciones ni tablas globales.
+El stack actual no usa capacidad provisionada. Utiliza `PAY_PER_REQUEST`,
+habilita TTL y point-in-time recovery, y no habilita Streams, DAX ni tablas
+globales. PITR agrega protección ante borrados o escrituras accidentales, pero
+también es un componente facturable según el tamaño de la tabla.
 
 ### Amplify Hosting
 
@@ -98,12 +107,17 @@ El sitio será SPA estática, sin SSR, para evitar request/duration de SSR.
 
 Bedrock cobra por tokens de entrada y salida y el valor depende del modelo, modalidad, región y tier. Para este caso:
 
-- usar un modelo Amazon Nova de bajo costo;
+- el despliegue actual usa
+  `us.anthropic.claude-sonnet-4-5-20250929-v1:0`;
 - usar on-demand estándar;
 - no usar Provisioned Throughput;
 - no usar imágenes, Knowledge Bases, Agents, Flows ni evaluación automática;
-- limitar el cuento a 500 palabras y `maxTokens`;
+- limitar palabras, tokens y generaciones por usuario;
 - registrar contadores de uso, nunca el contenido completo.
+
+Una salida inválida puede provocar un único intento de reparación. Por eso una
+acción de usuario puede generar hasta dos invocaciones de modelo y dos
+aplicaciones del Guardrail.
 
 Fórmula de estimación:
 
@@ -149,7 +163,8 @@ Presupuesto operativo recomendado, aunque existan créditos:
 Configurar AWS Budgets con alertas por correo y revisar Cost Explorer cada día. Un budget alerta; no corta gasto automáticamente. El corte real del MVP se implementa con:
 
 - `MAX_GENERATIONS_PER_USER_PER_DAY=20`;
-- deshabilitar el endpoint mediante variable/configuración si se alcanza el tope;
+- cambiar temporalmente `StoryGeneratorMode=fixture` para detener Bedrock sin
+  retirar el resto de la aplicación;
 - reservar tres historias precargadas para la demo;
 - no publicar el endpoint sin CORS y límites lógicos.
 
@@ -172,19 +187,27 @@ En ese escenario, el costo variable dominante será Bedrock/Guardrails, no Lambd
 
 - [ ] Billing Alerts activadas en la cuenta root.
 - [ ] Budget de USD 1/5/10 configurado.
-- [ ] Región única `us-east-1`.
+- [x] Región única `us-east-2`.
 - [ ] Sin NAT Gateway ni VPC para Lambdas.
 - [ ] Sin Provisioned Concurrency.
-- [ ] DynamoDB provisionado 5/5.
-- [ ] Sin PITR, DAX, Streams ni Global Tables.
-- [ ] Bedrock on-demand.
-- [ ] Sin generación de imágenes.
-- [ ] Amplify SPA, no SSR.
-- [ ] Logs sin payload y retención de 7 días.
-- [ ] Recursos etiquetados `Project=StoryTeacher`, `Environment=hackathon`.
-- [ ] `sam delete` documentado para después del evento.
+- [x] DynamoDB `PAY_PER_REQUEST`.
+- [x] Sin DAX, Streams ni Global Tables.
+- [ ] Revisar si PITR debe continuar activo después del evento.
+- [x] Bedrock on-demand, sin Provisioned Throughput.
+- [x] Sin generación de imágenes.
+- [x] Amplify SPA, no SSR.
+- [x] Logs sin payload completo.
+- [ ] Fijar retención para los grupos automáticos de Lambda.
+- [x] Recursos principales etiquetados `Project=StoryTeacher`,
+  `Environment=hackathon`.
+- [x] Procedimiento de pausa y `sam delete` documentado en
+  [Runbook AWS](15_AWS_RUNBOOK_OPERACIONES.md).
 
 ## 10. Conclusión
 
 Sí, AWS ofrece suficientes créditos y franquicias para que el prototipo sea viable a costo muy bajo. No, toda la solución no pertenece a una capa gratuita permanente: Bedrock y Guardrails son los componentes facturables que deben medirse y limitarse.
 
+El segundo grupo de costos a vigilar en el estado actual es DynamoDB PITR,
+CloudWatch Logs sin retención para Lambda y trazas X-Ray. Consultar el
+[runbook de operación AWS](15_AWS_RUNBOOK_OPERACIONES.md) antes de pausar o
+eliminar recursos.

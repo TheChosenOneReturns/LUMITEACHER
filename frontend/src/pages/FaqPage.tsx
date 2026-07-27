@@ -1,41 +1,15 @@
 import { motion } from "motion/react";
 import {
   ArrowRightIcon,
-  CaretDownIcon,
   ChatCircleDotsIcon,
   GraduationCapIcon,
   MagicWandIcon,
 } from "../components/icons";
+import { AnimatedFaqItems } from "../components/AnimatedFaqItems";
 import { Lumi } from "../components/Lumi";
-import { riseItem, staggerContainer } from "../components/MotionPrimitives";
+import { staggerContainer } from "../components/MotionPrimitives";
 import TransitionLink from "../components/motion/TransitionLink";
-
-const frequentlyAskedQuestions = [
-  {
-    question: "¿Para qué edades está pensado Story Teacher?",
-    answer: "Está diseñado para niñas y niños de 6 a 12 años. La edad del perfil adapta la extensión, el vocabulario y la complejidad de las pistas de cada aventura.",
-  },
-  {
-    question: "¿Los cuentos son siempre iguales?",
-    answer: "No. Cada lector puede elegir el mundo, el protagonista, la dificultad y lo que quiere aprender. En las historias interactivas, además, sus decisiones cambian el recorrido y el final.",
-  },
-  {
-    question: "¿Qué habilidades se practican?",
-    answer: "Las actividades trabajan comprensión literal, inferencias, vocabulario, secuencias y causa–efecto. Las devoluciones explican cada respuesta sin usar mensajes punitivos.",
-  },
-  {
-    question: "¿Qué pueden hacer docentes y familias?",
-    answer: "Pueden organizar cursos, proponer misiones de lectura, consultar avances por habilidad y enviar postales de reconocimiento para acompañar el proceso.",
-  },
-  {
-    question: "¿La experiencia tiene publicidad o desafíos por velocidad?",
-    answer: "No. Story Teacher no incluye publicidad y sus recompensas no dependen de responder rápido. El foco está puesto en leer, pensar y animarse a volver a intentar.",
-  },
-  {
-    question: "¿Necesito crear una cuenta para probar la demo?",
-    answer: "No. La demo ofrece perfiles de estudiante y adulto listos para explorar, y también permite crear un perfil infantil local sin contraseña.",
-  },
-];
+import { frequentlyAskedQuestions } from "./faqContent";
 
 export function FaqPage() {
   return (
@@ -60,16 +34,7 @@ export function FaqPage() {
             initial="hidden"
             animate="visible"
           >
-            {frequentlyAskedQuestions.map(({ question, answer }, index) => (
-              <motion.details className="landing-faq__item" key={question} variants={riseItem}>
-                <summary>
-                  <span>{String(index + 1).padStart(2, "0")}</span>
-                  <strong>{question}</strong>
-                  <CaretDownIcon className="landing-faq__caret" weight="bold" aria-hidden="true" />
-                </summary>
-                <div><p>{answer}</p></div>
-              </motion.details>
-            ))}
+            <AnimatedFaqItems items={frequentlyAskedQuestions} />
           </motion.div>
 
           <motion.aside className="faq-next" initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
@@ -79,10 +44,10 @@ export function FaqPage() {
               <p>Podés crear tu primera aventura o conocer el espacio para docentes y familias.</p>
             </div>
             <div>
-              <TransitionLink href="/login?next=%2Fcrear" className="button button--yellow">
+              <TransitionLink href="/login?role=student&next=%2Fcrear" className="button button--yellow">
                 <MagicWandIcon weight="duotone" /> Crear una aventura <ArrowRightIcon weight="bold" />
               </TransitionLink>
-              <TransitionLink href="/login?next=%2Fadulto" className="button button--outline">
+              <TransitionLink href="/login?role=adult&next=%2Fadulto" className="button button--outline">
                 <GraduationCapIcon weight="duotone" /> Espacio de adultos
               </TransitionLink>
             </div>
