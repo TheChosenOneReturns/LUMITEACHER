@@ -78,7 +78,7 @@ export function ProfilePage() {
     } catch { setError("Ese look todavía no está disponible."); }
   }
 
-  function exit() { logout(); navigate("/", { replace: true }); }
+  async function exit() { await logout(); navigate("/", { replace: true }); }
 
   return (
     <div className="profile-page profile-studio page-width page-section">

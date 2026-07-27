@@ -11,6 +11,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useSearchParams } from "react-router-dom";
 import { api, ApiClientError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { consumeJustLoggedOut } from "../auth/session";
 import {
   ArrowRightIcon,
   CheckCircleIcon,
@@ -58,6 +59,7 @@ export function CognitoLoginPage() {
     };
 
     async function restoreAuthenticatedSession() {
+      if (consumeJustLoggedOut()) return;
       try {
         await getCurrentUser();
       } catch {

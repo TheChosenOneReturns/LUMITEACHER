@@ -24,3 +24,23 @@ export async function getAuthorizationHeader(): Promise<string | null> {
     return null;
   }
 }
+
+const justLoggedOutKey = "story-teacher:just-logged-out";
+
+export function markJustLoggedOut(): void {
+  try {
+    sessionStorage.setItem(justLoggedOutKey, "1");
+  } catch {
+    // El flag es una mejora de UX; sin storage no pasa nada.
+  }
+}
+
+export function consumeJustLoggedOut(): boolean {
+  try {
+    const flagged = sessionStorage.getItem(justLoggedOutKey) === "1";
+    if (flagged) sessionStorage.removeItem(justLoggedOutKey);
+    return flagged;
+  } catch {
+    return false;
+  }
+}
