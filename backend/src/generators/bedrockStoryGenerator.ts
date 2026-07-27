@@ -31,7 +31,10 @@ import {
 
 const CLASSIC_MAX_TOKENS = 2_500;
 const INTERACTIVE_MAX_TOKENS = 8_000;
-const CLASSIC_TIMEOUT_MS = 11_000;
+// La generación clásica corre en el worker asíncrono (300s de Lambda): el
+// intento inicial más una reparación deben caber dentro de ese límite.
+// 2.500 tokens de salida en Sonnet 4.5 suelen demorar entre 30 y 60 segundos.
+const CLASSIC_TIMEOUT_MS = 120_000;
 const INTERACTIVE_TIMEOUT_MS = 270_000;
 const INTERACTIVE_TOOL_NAME = "submit_interactive_story";
 const flatPageSchema = z

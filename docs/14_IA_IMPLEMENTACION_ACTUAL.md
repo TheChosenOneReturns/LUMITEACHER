@@ -296,13 +296,24 @@ todo el árbol interactivo real de Bedrock; puede caer al formato clásico.
 - rol de autor infantil y pedagógico;
 - idioma y adecuación a edad;
 - reglas de seguridad;
+- sección `NIVEL DEL LECTOR` con bandas etarias 6-7, 8-9 y 10-12 calibradas
+  con el marco pedagógico (Piaget para el techo cognitivo, Chall para la
+  etapa lectora): longitud de oración, vocabulario, recursos narrativos
+  permitidos y nivel de exigencia de cada habilidad del quiz;
+- modulación por dificultad (piso, centro o techo de la banda) y un
+  recordatorio de zona de desarrollo próximo (1 o 2 elementos de
+  estiramiento andamiables);
 - límite total de palabras;
-- dificultad y objetivo educativo;
+- objetivo educativo integrado en la acción;
 - cinco habilidades obligatorias y ordenadas;
-- cuatro opciones por pregunta;
-- una única respuesta correcta;
+- cuatro opciones por pregunta con distractores plausibles y homogéneos;
+- una única respuesta correcta, no deducible por longitud ni posición;
 - prohibición de Markdown y texto fuera del JSON;
 - delimitación de la entrada como datos no confiables.
+
+La misma sección `NIVEL DEL LECTOR` se inyecta en los prompts interactivos
+(`buildFlatInteractiveStoryPrompt` y `buildInteractiveStoryPrompt`), más una
+regla de calibración de las decisiones ramificadas según la banda.
 
 ### 8.2 Solicitud a Bedrock
 
@@ -310,7 +321,8 @@ todo el árbol interactivo real de Bedrock; puede caer al formato clásico.
 API: Bedrock Runtime Converse
 maxTokens: 2500
 temperature inicial: 0.2
-timeout del cliente: 11 segundos
+timeout del cliente: 120 segundos (intento + reparación caben en los 300 s
+del worker; los 11 s originales pertenecían al flujo síncrono de API Gateway)
 Guardrail: configurado en la solicitud, si existe ID y versión
 ```
 

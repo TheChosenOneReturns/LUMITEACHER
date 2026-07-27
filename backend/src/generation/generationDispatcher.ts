@@ -15,7 +15,11 @@ export class GenerationDispatcher {
 
   async dispatch(event: GenerationWorkerEvent): Promise<void> {
     if (!this.config.generationWorkerFunctionName) {
-      throw new Error("GENERATION_WORKER_FUNCTION_NAME no está configurado.");
+      // Entorno local (dev-server / SAM local): no hay función Lambda que
+      // invocar, así que el worker se ejecuta en línea con el fixture.
+      const { handler } = await import("../handlers/generationWorker");
+      await handler(event);
+      return;
     }
     const response = await this.client.send(
       new InvokeCommand({

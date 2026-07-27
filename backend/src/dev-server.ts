@@ -6,6 +6,7 @@ import { handler as health } from "./handlers/health";
 import { handler as listStories } from "./handlers/listStories";
 import { handler as submitAttempt } from "./handlers/submitAttempt";
 import { handler as getAttempt } from "./handlers/getAttempt";
+import { handler as getGeneration } from "./handlers/getGeneration";
 import { handler as platform } from "./handlers/platform";
 
 process.env.TABLE_NAME ??= "StoryTeacherLocal";
@@ -31,10 +32,12 @@ const server = createServer(async (request, response) => {
     /^\/stories\/([^/]+)\/attempts$/u,
   );
   const getAttemptMatch = url.pathname.match(/^\/attempts\/([^/]+)$/u);
+  const generationMatch = url.pathname.match(/^\/generations\/([^/]+)$/u);
   const event = makeEvent(request, url, body, {
     ...(storyMatch?.[1] ? { storyId: storyMatch[1] } : {}),
     ...(attemptMatch?.[1] ? { storyId: attemptMatch[1] } : {}),
     ...(getAttemptMatch?.[1] ? { attemptId: getAttemptMatch[1] } : {}),
+    ...(generationMatch?.[1] ? { generationId: generationMatch[1] } : {}),
   });
 
   let result: ApiResponse;
@@ -50,6 +53,8 @@ const server = createServer(async (request, response) => {
     result = await submitAttempt(event);
   } else if (request.method === "GET" && getAttemptMatch) {
     result = await getAttempt(event);
+  } else if (request.method === "GET" && generationMatch) {
+    result = await getGeneration(event);
   } else {
     result = await platform(event);
   }
