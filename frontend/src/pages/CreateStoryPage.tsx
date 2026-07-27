@@ -32,7 +32,7 @@ import {
   type StoryMode,
 } from "@story-teacher/shared";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { api, ApiClientError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
@@ -121,10 +121,15 @@ export function CreateStoryPage() {
   const generationSparkPosition = 9 + currentGeneration.progress * 0.82;
   const currentStepIndex = storySteps.findIndex(({ id }) => id === step);
   const isAdventureStep = step === "adventure";
+  const adventureUnlockAtRef = useRef(0);
 
   function goToNextStep() {
     const nextStep = storySteps[currentStepIndex + 1];
-    if (nextStep) setStep(nextStep.id);
+    if (!nextStep) return;
+    setStep(nextStep.id);
+    // Evita que un doble clic sobre "Continuar" active el botón "Crear aventura"
+    // que aparece en la misma posición al llegar al paso Aventura.
+    if (nextStep.id === "adventure") adventureUnlockAtRef.current = Date.now() + 600;
   }
 
   function goToPreviousStep() {
@@ -172,6 +177,7 @@ export function CreateStoryPage() {
       goToNextStep();
       return;
     }
+    if (loading || Date.now() < adventureUnlockAtRef.current) return;
     setError(null);
     const candidate: GenerateStoryInput = {
       age,
@@ -381,7 +387,7 @@ export function CreateStoryPage() {
             {error ? <motion.p className="form-error" role="alert" initial={{ opacity: 0, y: -6 }} animate={{ opacity: 1, y: 0 }}>{error}</motion.p> : null}
             <div className="studio-navigation">
               <motion.button className="button button--outline studio-back" type="button" disabled={currentStepIndex === 0} onClick={goToPreviousStep} whileTap={{ scale: .96 }}><ArrowLeftIcon /> <span>Atrás</span></motion.button>
-              {!isAdventureStep ? <motion.button className="button button--yellow" type="button" onClick={goToNextStep} whileHover={{ y: -2 }} whileTap={{ scale: .97 }}>Continuar <ArrowRightIcon /></motion.button> : <motion.button aria-label={storyMode === "interactive" ? "Crear aventura interactiva" : "Crear cuento"} className="button button--yellow studio-create-button" type="submit" whileHover={{ y: -4, boxShadow: "0 11px 0 var(--yellow-dark)" }} whileTap={{ y: 2, scale: .98 }}><RocketLaunchIcon size={24} /> Crear aventura</motion.button>}
+              {!isAdventureStep ? <motion.button key="continue-step" className="button button--yellow" type="button" onClick={goToNextStep} whileHover={{ y: -2 }} whileTap={{ scale: .97 }}>Continuar <ArrowRightIcon /></motion.button> : <motion.button key="create-story" aria-label={storyMode === "interactive" ? "Crear aventura interactiva" : "Crear cuento"} className="button button--yellow studio-create-button" type="submit" whileHover={{ y: -4, boxShadow: "0 11px 0 var(--yellow-dark)" }} whileTap={{ y: 2, scale: .98 }}><RocketLaunchIcon size={24} /> Crear aventura</motion.button>}
             </div>
           </div>
 
