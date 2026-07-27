@@ -16,8 +16,9 @@ import { useAuth } from "../auth/AuthContext";
 import { Lumi } from "../components/Lumi";
 import { ErrorState, LoadingState } from "../components/PageState";
 import { SkillBadge } from "../components/SkillBadge";
+import { StoryThemeIcon } from "../components/VisualIcons";
 import { loadAttemptResult } from "../state/attemptStorage";
-import { loadJourney } from "../story/interactiveStory";
+import { getStorySceneImage, loadJourney } from "../story/interactiveStory";
 
 export function ResultsPage() {
   const { storyId = "", attemptId = "" } = useParams();
@@ -59,24 +60,32 @@ export function ResultsPage() {
 
   return (
     <div className="results-page page-width page-section">
-      <section className="celebration">
-        <div className="celebration__confetti" aria-hidden="true">
-          {[0, 1, 2, 3, 4, 5].map((index) => (
-            <motion.span key={index} initial={{ opacity: 0, y: 10, scale: 0 }} animate={{ opacity: [0, 1, 0.65], y: [-10, -55 - index * 6], x: (index - 2.5) * 55, rotate: index * 65, scale: 1 }} transition={{ duration: 1.4, delay: index * 0.07 }}>
-              {index % 2 === 0 ? <SparkleIcon weight="fill" /> : <StarFourIcon weight="duotone" />}
-            </motion.span>
-          ))}
+      <motion.section className="celebration-card" initial={{ opacity: 0, y: 28, rotateX: 4 }} animate={{ opacity: 1, y: 0, rotateX: 0 }} transition={{ type: "spring", stiffness: 120, damping: 21 }}>
+        <div className="celebration-card__scene" aria-hidden="true">
+          <motion.img src={getStorySceneImage(story.input.theme)} alt="" initial={{ scale: 1.12, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.9, ease: "easeOut" }} />
+          <motion.div initial={{ scale: 0, rotate: -16 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 210, damping: 13, delay: 0.35 }}>
+            <StoryThemeIcon theme={story.input.theme} size={64} />
+          </motion.div>
         </div>
-        <motion.span className="pill" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}><CheckCircleIcon weight="fill" /> Desafío completado</motion.span>
-        <motion.h1 initial={{ opacity: 0, scale: 0.82 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 180, damping: 16, delay: 0.1 }}>
-          Increíble trabajo, {profile!.displayName}
-        </motion.h1>
-        <p>{message}</p>
-        <motion.div className="score-orb" aria-label={`${result.correctCount} de 5 correctas`} initial={{ scale: 0, rotate: -40 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 170, damping: 13, delay: 0.24 }}>
-          <svg viewBox="0 0 120 120" aria-hidden="true"><motion.circle cx="60" cy="60" r="52" pathLength="100" initial={{ pathLength: 0 }} animate={{ pathLength: result.scorePercent / 100 }} transition={{ duration: 1.1, delay: 0.4, ease: "easeOut" }} /></svg>
-          <div><strong>{result.correctCount}/5</strong><small>{result.scorePercent}%</small></div>
-        </motion.div>
-      </section>
+        <section className="celebration">
+          <div className="celebration__confetti" aria-hidden="true">
+            {[0, 1, 2, 3, 4, 5].map((index) => (
+              <motion.span key={index} initial={{ opacity: 0, y: 10, scale: 0 }} animate={{ opacity: [0, 1, 0.65], y: [-10, -55 - index * 6], x: (index - 2.5) * 55, rotate: index * 65, scale: 1 }} transition={{ duration: 1.4, delay: index * 0.07 }}>
+                {index % 2 === 0 ? <SparkleIcon weight="fill" /> : <StarFourIcon weight="duotone" />}
+              </motion.span>
+            ))}
+          </div>
+          <motion.span className="pill" initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}><CheckCircleIcon weight="fill" /> Desafío completado</motion.span>
+          <motion.h1 initial={{ opacity: 0, scale: 0.82 }} animate={{ opacity: 1, scale: 1 }} transition={{ type: "spring", stiffness: 180, damping: 16, delay: 0.1 }}>
+            Increíble trabajo, {profile!.displayName}
+          </motion.h1>
+          <p>{message}</p>
+          <motion.div className="score-orb" aria-label={`${result.correctCount} de 5 correctas`} initial={{ scale: 0, rotate: -40 }} animate={{ scale: 1, rotate: 0 }} transition={{ type: "spring", stiffness: 170, damping: 13, delay: 0.24 }}>
+            <svg viewBox="0 0 120 120" aria-hidden="true"><motion.circle cx="60" cy="60" r="52" pathLength="100" initial={{ pathLength: 0 }} animate={{ pathLength: result.scorePercent / 100 }} transition={{ duration: 1.1, delay: 0.4, ease: "easeOut" }} /></svg>
+            <div><strong>{result.correctCount}/5</strong><small>{result.scorePercent}%</small></div>
+          </motion.div>
+        </section>
+      </motion.section>
 
       {result.rewardGrant ? <motion.section className="reward-unlock" initial={{ opacity: 0, y: 18, scale: .96 }} animate={{ opacity: 1, y: 0, scale: 1 }}>
         <StarFourIcon size={38} weight="fill" />
@@ -84,7 +93,7 @@ export function ResultsPage() {
         <Link className="button button--yellow" to="/recompensas">Ver recompensas</Link>
       </motion.section> : null}
 
-      {journey ? <motion.section className="result-journey" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}><div><span className="eyebrow">El camino que creaste</span><h2>{journey.endingTitle}</h2><p>{journey.endingText}</p></div><ol>{journey.decisions.map((decision) => <li key={decision.choiceId}><CheckCircleIcon weight="fill" /><span><strong>{decision.choiceLabel}</strong><small>{decision.consequence}</small></span></li>)}</ol></motion.section> : null}
+      {journey ? <motion.section className="result-journey" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}><div><span className="eyebrow">El camino que creaste</span><h2>{journey.endingTitle}</h2><p>{journey.endingText}</p></div><div className="result-journey__media"><img className="result-journey__image" src={getStorySceneImage(story.input.theme)} alt={`Ilustración de ${story.input.theme}`} /><ol>{journey.decisions.map((decision) => <li key={decision.choiceId}><CheckCircleIcon weight="fill" /><span><strong>{decision.choiceLabel}</strong><small>{decision.consequence}</small></span></li>)}</ol></div></motion.section> : null}
 
       <motion.section className="skills-result" initial={{ opacity: 0, y: 26 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}>
         <div className="section-heading">
