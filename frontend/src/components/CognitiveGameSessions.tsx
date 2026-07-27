@@ -104,13 +104,133 @@ const memoryPairs: Array<{ pair:string; object:string; meaning:string; Icon:Icon
   {pair:"compass",object:"Brújula",meaning:"Ayuda a orientarse",Icon:CompassIcon},{pair:"book",object:"Libro",meaning:"Guarda historias",Icon:BooksIcon},{pair:"idea",object:"Idea",meaning:"Nace al buscar soluciones",Icon:LightbulbFilamentIcon},{pair:"seed",object:"Semilla",meaning:"Puede convertirse en una planta",Icon:SparkleIcon},{pair:"clock",object:"Reloj",meaning:"Permite organizar el tiempo",Icon:ArrowClockwiseIcon},{pair:"gear",object:"Engranaje",meaning:"Transmite movimiento a otra pieza",Icon:GearSixIcon},{pair:"path",object:"Sendero",meaning:"Conecta un lugar con otro",Icon:PathIcon},
 ];
 
-function MemoryGame({ power,difficulty,seed,onReplay }:GameProps){
-  const cards=useMemo(()=>{const pairs=sample(memoryPairs,countFor(difficulty,[3,4,5]),`${seed}-pairs`);return shuffled(pairs.flatMap(item=>[{id:`${item.pair}-object`,pair:item.pair,label:item.object,Icon:item.Icon},{id:`${item.pair}-meaning`,pair:item.pair,label:item.meaning,Icon:null}]),`${seed}-cards`);},[difficulty,seed]);
-  const [open,setOpen]=useState<number[]>([]);const [matched,setMatched]=useState<number[]>([]);const [powerReveal,setPowerReveal]=useState<number[]>([]);const [remembered,setRemembered]=useState<number[]>([]);const [attempts,setAttempts]=useState(0);
-  useEffect(()=>{if(!power)return;const unmatched=cards.map((_,i)=>i).filter(i=>!matched.includes(i));const first=unmatched[0];if(first===undefined)return;const second=unmatched.find(i=>i!==first&&cards[i]!.pair===cards[first]!.pair);if((power==="mirror-match"||power==="lumi-adapt")&&second!==undefined)setMatched(v=>Array.from(new Set([...v,first,second])));else if(power==="orbit-preview"){setPowerReveal([first]);const timeout=window.setTimeout(()=>setPowerReveal([]),2200);return()=>window.clearTimeout(timeout);}},[power]);
-  useEffect(()=>{if(open.length!==2)return;const[first,second]=open;if(first===undefined||second===undefined)return;setAttempts(v=>v+1);if(cards[first]!.pair===cards[second]!.pair){setMatched(v=>Array.from(new Set([...v,first,second])));setOpen([]);setRemembered([]);return;}if(power==="seed-recall")setRemembered([first,second]);const timeout=window.setTimeout(()=>setOpen([]),750);return()=>window.clearTimeout(timeout);},[open,power]);
-  if(matched.length===cards.length)return <GameWon title="¡Red de memoria completa!" copy={`Uniste ${cards.length/2} conceptos en ${attempts} intentos. La próxima red tendrá otra disposición.`} onReplay={onReplay}/>;
-  return <div className="memory-game cognitive-session"><div className="session-instruction"><BrainIcon/><p>Relacioná objetos con sus funciones. En Maestro aparecen cinco parejas y más asociaciones simultáneas.</p><b>{matched.length/2}/{cards.length/2}</b></div>{remembered.length?<p className="power-hint"><SparkleIcon/> La Semilla recuerda las posiciones {remembered.map(item=>item+1).join(" y ")}.</p>:null}<div className={`memory-grid memory-grid--semantic memory-grid--${cards.length}`}>{cards.map((card,index)=>{const visible=open.includes(index)||matched.includes(index)||powerReveal.includes(index)||remembered.includes(index);const CardIcon=card.Icon;return <motion.button key={card.id} type="button" aria-label={visible?card.label:`Carta oculta ${index+1}`} className={`${visible?"is-visible":""} ${matched.includes(index)?"is-matched":""} ${powerReveal.includes(index)?"is-scanned":""} ${remembered.includes(index)?"is-remembered":""}`} disabled={matched.includes(index)||open.length===2||powerReveal.length>0} onClick={()=>setOpen(v=>[...v,index])} animate={{rotateY:visible?180:0}} whileTap={{scale:.94}}><span><SparkleIcon weight="fill"/></span><b>{CardIcon?<CardIcon size={31}/>:null}<small>{card.label}</small></b></motion.button>})}</div><p className="attempt-counter">{attempts} intentos · el tablero cambia en cada partida</p></div>;
+function MemoryGame({ power, difficulty, seed, onReplay }: GameProps) {
+  const cards = useMemo(() => {
+    const pairs = sample(memoryPairs, countFor(difficulty, [3, 4, 5]), `${seed}-pairs`);
+    return shuffled(
+      pairs.flatMap((item) => [
+        { id: `${item.pair}-object`, pair: item.pair, label: item.object, Icon: item.Icon, kind: "object" as const },
+        { id: `${item.pair}-meaning`, pair: item.pair, label: item.meaning, Icon: null, kind: "meaning" as const },
+      ]),
+      `${seed}-cards`,
+    );
+  }, [difficulty, seed]);
+
+  const [open, setOpen] = useState<number[]>([]);
+  const [matched, setMatched] = useState<number[]>([]);
+  const [powerReveal, setPowerReveal] = useState<number[]>([]);
+  const [remembered, setRemembered] = useState<number[]>([]);
+  const [wrong, setWrong] = useState<number[]>([]);
+  const [attempts, setAttempts] = useState(0);
+
+  useEffect(() => {
+    if (!power) return;
+    const unmatched = cards.map((_, i) => i).filter((i) => !matched.includes(i));
+    const first = unmatched[0];
+    if (first === undefined) return;
+    const second = unmatched.find((i) => i !== first && cards[i]!.pair === cards[first]!.pair);
+    if ((power === "mirror-match" || power === "lumi-adapt") && second !== undefined)
+      setMatched((v) => Array.from(new Set([...v, first, second])));
+    else if (power === "orbit-preview") {
+      setPowerReveal([first]);
+      const t = window.setTimeout(() => setPowerReveal([]), 2200);
+      return () => window.clearTimeout(t);
+    }
+  }, [power]);
+
+  useEffect(() => {
+    if (open.length !== 2) return;
+    const [first, second] = open;
+    if (first === undefined || second === undefined) return;
+    setAttempts((v) => v + 1);
+    if (cards[first]!.pair === cards[second]!.pair) {
+      setMatched((v) => Array.from(new Set([...v, first, second])));
+      setOpen([]);
+      setRemembered([]);
+      return;
+    }
+    setWrong([first, second]);
+    if (power === "seed-recall") setRemembered([first, second]);
+    const t = window.setTimeout(() => { setOpen([]); setWrong([]); }, 1100);
+    return () => window.clearTimeout(t);
+  }, [open, power]);
+
+  if (matched.length === cards.length)
+    return <GameWon title="¡Red de memoria completa!" copy={`Uniste ${cards.length / 2} conceptos en ${attempts} intentos. La próxima red tendrá otra disposición.`} onReplay={onReplay} />;
+
+  const total = cards.length / 2;
+  const found = matched.length / 2;
+
+  function pick(index: number) {
+    if (matched.includes(index) || open.length === 2 || powerReveal.length > 0) return;
+    setOpen((v) => [...v, index]);
+  }
+
+  function renderCard(card: typeof cards[number], index: number) {
+    const isOpen = open.includes(index) || matched.includes(index) || powerReveal.includes(index) || remembered.includes(index);
+    const isWrong = wrong.includes(index);
+    const isMatched = matched.includes(index);
+    const CardIcon = card.Icon;
+    return (
+      <motion.button
+        key={card.id}
+        type="button"
+        aria-label={isOpen ? card.label : `Carta oculta ${index + 1}`}
+        className={[
+          isMatched ? "is-matched" : "",
+          isWrong ? "is-wrong" : "",
+          powerReveal.includes(index) ? "is-scanned" : "",
+          remembered.includes(index) ? "is-remembered" : "",
+          card.kind,
+        ].filter(Boolean).join(" ")}
+        disabled={false}
+        aria-disabled={isMatched || open.length >= 2 || powerReveal.length > 0}
+        onClick={() => pick(index)}
+        animate={{ rotateY: isOpen ? 180 : 0 }}
+        whileHover={!isOpen && !isMatched ? { scale: 1.04 } : {}}
+        transition={{ type: "spring", stiffness: 300, damping: 22 }}
+      >
+        <span className="mg-card__back"><SparkleIcon weight="fill" /></span>
+        <span className="mg-card__front">
+          {CardIcon ? <CardIcon size={28} weight="duotone" /> : null}
+          <small>{card.label}</small>
+        </span>
+      </motion.button>
+    );
+  }
+
+  const splitAt = cards.length === 8 ? 6 : cards.length;
+  const mainCards = cards.slice(0, splitAt);
+  const sideCards = cards.slice(splitAt);
+  const mainIndices = mainCards.map((_, i) => i);
+  const sideIndices = sideCards.map((_, i) => i + splitAt);
+
+  return (
+    <div className="memory-game cognitive-session">
+      <div className="session-instruction">
+        <BrainIcon />
+        <p>Relacioná objetos con sus funciones. En Maestro aparecen cinco parejas y más asociaciones simultáneas.</p>
+        <b>{found}/{total}</b>
+      </div>
+      {remembered.length ? (
+        <p className="power-hint"><SparkleIcon /> La Semilla recuerda las posiciones {remembered.map((item) => item + 1).join(" y ")}.</p>
+      ) : null}
+      <div className="mg-progress"><div className="mg-progress__bar"><motion.i initial={{ scaleX: 0 }} animate={{ scaleX: found / total }} transition={{ type: "spring", stiffness: 120, damping: 18 }} /></div></div>
+      <div className={`mg-board${sideCards.length ? " mg-board--split" : ""}`}>
+        <div className={`memory-grid memory-grid--semantic memory-grid--${mainCards.length}`}>
+          {mainCards.map((card, i) => renderCard(card, mainIndices[i]!))}
+        </div>
+        {sideCards.length ? (
+          <div className="mg-side">
+            <div className="memory-grid memory-grid--side">
+              {sideCards.map((card, i) => renderCard(card, sideIndices[i]!))}
+            </div>
+          </div>
+        ) : null}
+      </div>
+      <p className="attempt-counter">{attempts} intentos · el tablero cambia en cada partida</p>
+    </div>
+  );
 }
 
 const sequenceStories = [
