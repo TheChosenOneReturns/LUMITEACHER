@@ -34,6 +34,10 @@ mecanismo de autenticación de producción.
 - El backend usa únicamente el claim estable `sub` como identificador de
   cuenta.
 - El perfil educativo se crea en DynamoDB después del primer ingreso.
+- Los correos de verificación y de recuperación de contraseña usan la plantilla
+  `VerificationMessageTemplate` del `template.yaml`: asunto y cuerpo HTML en
+  español con la marca LUMI. La imagen del encabezado se sirve desde el hosting
+  de Amplify (`/email/lumi-mail.png`, archivo en `frontend/public/email/`).
 
 Una dirección IP no identifica de forma confiable a una persona. Puede cambiar
 al alternar Wi-Fi/datos móviles y puede compartirse mediante NAT. Por eso la IP
