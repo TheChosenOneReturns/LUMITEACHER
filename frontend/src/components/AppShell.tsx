@@ -1,6 +1,7 @@
 import {
   ArrowLeftIcon,
   BookOpenTextIcon,
+  BooksIcon,
   ChartLineUpIcon,
   GiftIcon,
   GraduationCapIcon,
@@ -29,6 +30,12 @@ const studentNav = [
   { to: "/perfil", icon: UserCircleIcon, label: "Perfil", end: false },
 ];
 
+const studentMobileNav = [
+  { to: "/inicio", icon: HouseIcon, label: "Inicio", end: true },
+  { to: "/crear", icon: MagicWandIcon, label: "Crear", end: false },
+  { to: "/inicio#biblioteca", icon: BooksIcon, label: "Biblioteca", end: true, hash: "#biblioteca" },
+];
+
 const adultNav = [
   { to: "/adulto", icon: ChartLineUpIcon, label: "Panel", end: true },
   { to: "/adulto/cursos", icon: UsersThreeIcon, label: "Cursos", end: false },
@@ -41,7 +48,39 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
   const { profile } = useAuth();
   const isPublic = !protectedOutlet;
   const navItems = profile?.role === "adult" ? adultNav : studentNav;
+  const mobileNavItems = profile?.role === "adult" ? adultNav : studentMobileNav;
   const homePath = profile?.role === "adult" ? "/adulto" : "/inicio";
+
+  function isMobileNavItemActive(item: (typeof mobileNavItems)[number]) {
+    if ("hash" in item && item.hash) return location.pathname === "/inicio" && location.hash === item.hash;
+    if (item.to === "/inicio") return location.pathname === "/inicio" && location.hash !== "#biblioteca";
+    return item.end ? location.pathname === item.to : location.pathname === item.to || location.pathname.startsWith(`${item.to}/`);
+  }
+
+  function focusHome() {
+    const target = document.getElementById("inicio");
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" });
+    target?.focus({ preventScroll: true });
+  }
+
+  function focusLibrary() {
+    const target = document.getElementById("biblioteca");
+    if (!target) return;
+    const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+    target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    target.focus({ preventScroll: true });
+  }
+
+  function handleMobileNavigation(event: MouseEvent<HTMLAnchorElement>, item: (typeof mobileNavItems)[number]) {
+    if (item.to === "/inicio" && location.pathname === "/inicio" && location.hash) {
+      window.requestAnimationFrame(focusHome);
+      return;
+    }
+    if (!("hash" in item) || !item.hash || location.pathname !== "/inicio") return;
+    if (location.hash === item.hash) event.preventDefault();
+    window.requestAnimationFrame(focusLibrary);
+  }
 
   function animateInternalNavigation(event: MouseEvent<HTMLDivElement>) {
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
@@ -58,7 +97,7 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
   }
 
   return (
-    <div className={`app-shell ${profile?.role === "adult" ? "app-shell--adult" : ""}`} onClickCapture={animateInternalNavigation}>
+    <div className={`app-shell ${protectedOutlet ? "app-shell--protected" : ""} ${profile?.role === "adult" ? "app-shell--adult" : ""}`} onClickCapture={animateInternalNavigation}>
       <header className="topbar">
         <NavLink className="brand" to={profile ? homePath : "/"} aria-label="Story Teacher, inicio">
           <motion.span className="brand__mark" aria-hidden="true" whileHover={{ rotate: -8, scale: 1.08 }}>
@@ -74,6 +113,12 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
               return <NavLink key={`${item.to}-${item.label}`} to={item.to} end={item.end}><Icon /> {item.label}</NavLink>;
             })}
           </nav>
+        ) : null}
+
+        {!isPublic && profile?.role === "student" ? (
+          <NavLink className="mobile-header-action" to="/recompensas" aria-label="Premios y juegos" title="Premios y juegos">
+            <GiftIcon size={23} weight={location.pathname === "/recompensas" ? "fill" : "duotone"} />
+          </NavLink>
         ) : null}
 
         {profile ? (
@@ -99,12 +144,34 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
 
       {!isPublic && profile ? (
         <nav className={`mobile-nav ${profile.role === "adult" ? "mobile-nav--adult" : ""}`} aria-label="Navegación móvil">
-          {navItems.map((item) => {
+          {mobileNavItems.map((item) => {
             const Icon = item.icon;
+            const active = isMobileNavItemActive(item);
             return (
-              <NavLink key={`${item.to}-${item.label}`} to={item.to} end={item.end} className={item.label === "Crear" ? "mobile-nav__create" : ""}>
-                <Icon size={24} weight="duotone" aria-hidden="true" /><small>{item.label}</small>
-              </NavLink>
+              <Link
+                key={`${item.to}-${item.label}`}
+                to={item.to}
+                onClick={(event) => handleMobileNavigation(event, item)}
+                aria-current={active ? ("hash" in item && item.hash ? "location" : "page") : undefined}
+                className={`${item.label === "Crear" ? "mobile-nav__create " : ""}${active ? "active" : ""}`.trim()}
+              >
+                <motion.span
+                  className="mobile-nav__icon"
+                  animate={active ? { y: -3, scale: 1.08 } : { y: 0, scale: 1 }}
+                  transition={{ type: "spring", stiffness: 430, damping: 24 }}
+                >
+                  <Icon size={25} weight={active ? "fill" : "duotone"} aria-hidden="true" />
+                </motion.span>
+                <small>{item.label}</small>
+                {active ? (
+                  <motion.span
+                    className="mobile-nav__active-indicator"
+                    layoutId={`mobile-nav-active-${profile.role}`}
+                    transition={{ type: "spring", stiffness: 430, damping: 31 }}
+                    aria-hidden="true"
+                  />
+                ) : null}
+              </Link>
             );
           })}
         </nav>
