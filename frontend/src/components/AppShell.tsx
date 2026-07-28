@@ -102,7 +102,7 @@ export function AppShell({ protectedOutlet = false }: { protectedOutlet?: boolea
           {navItems.map((item) => {
             const Icon = item.icon;
             return (
-              <NavLink key={`${item.to}-${item.label}`} to={item.to} end={item.end} className={item.label === "Crear" ? "mobile-nav__create" : ""}>
+              <NavLink key={`${item.to}-${item.label}`} to={item.to} end={item.end}>
                 <Icon size={24} weight="duotone" aria-hidden="true" /><small>{item.label}</small>
               </NavLink>
             );

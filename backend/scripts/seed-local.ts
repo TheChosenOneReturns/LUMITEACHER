@@ -74,6 +74,24 @@ const profiles: UserProfile[] = [
     selectedAccessoryId: "cosmic-backpack",
     profileBadge: "Todo desbloqueado",
   },
+  {
+    userId: "demo-emilio",
+    role: "student",
+    displayName: "Emilio",
+    age: 11,
+    avatarId: "animal-fox",
+    favoriteTheme: "Selva",
+    selectedAccessoryId: null,
+  },
+  {
+    userId: "demo-carlos",
+    role: "adult",
+    displayName: "Carlos",
+    avatarId: "mentor",
+    favoriteTheme: "Inventos",
+    adultLabel: "Familia",
+    selectedAccessoryId: null,
+  },
 ];
 
 for (const profile of profiles) {
