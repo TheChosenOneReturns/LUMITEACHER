@@ -1,7 +1,7 @@
 import type { Congratulation, CourseSummary, Mission, RewardState, StorySummary } from "@story-teacher/shared";
 import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api, ApiClientError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 import {
@@ -30,6 +30,7 @@ interface MissionWithCourse extends Mission {
 export function HomePage() {
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [stories, setStories] = useState<StorySummary[]>([]);
   const [courses, setCourses] = useState<CourseSummary[]>([]);
   const [missions, setMissions] = useState<MissionWithCourse[]>([]);
@@ -79,6 +80,17 @@ export function HomePage() {
   }, []);
 
   useEffect(() => { void load(); }, [load]);
+  useEffect(() => {
+    if (loading || showOnboarding || location.hash !== "#biblioteca") return;
+    const frame = window.requestAnimationFrame(() => {
+      const target = document.getElementById("biblioteca");
+      if (!target) return;
+      const reduceMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+      target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      target.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [loading, location.hash, location.key, showOnboarding]);
   if (loading) return <LoadingState message="Buscando tus misiones y aventuras…" />;
   if (error) return <ErrorState message={error} onRetry={load} />;
 
@@ -96,7 +108,7 @@ export function HomePage() {
       <motion.section className="welcome-banner" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }}>
         <div className="welcome-banner__copy">
           <span className="eyebrow"><SparkleIcon weight="fill" /> Tu mundo lector</span>
-          <h1>Hola, {profile!.displayName}</h1>
+          <h1 id="inicio" tabIndex={-1}><span>Hola,</span>{" "}<span className="welcome-banner__name">{profile!.displayName}</span></h1>
           <p>Tenés {missions.length} {missions.length === 1 ? "misión" : "misiones"} y un mapa esperando nuevas estrellas.</p>
         </div>
         <div className="welcome-banner__lumi"><Lumi compact mood="reading" /></div>
@@ -137,7 +149,7 @@ export function HomePage() {
       )}
 
       <div className="section-heading library-heading">
-        <div><span className="eyebrow">Mis cuentos</span><h2>Historias creadas por vos</h2></div>
+        <div><span className="eyebrow">Mis cuentos</span><h2 id="biblioteca" tabIndex={-1}>Historias creadas por vos</h2></div>
         <span className="count-badge"><BooksIcon size={18} weight="duotone" /> {stories.length}</span>
       </div>
       {stories.length ? (
